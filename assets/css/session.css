@@ -245,6 +245,14 @@
 .lab-step-body p:last-child { margin-bottom: 0; }
 .lab-step-body ul, .lab-step-body ol { margin: 0.5rem 0 0.75rem 1.25rem; color: var(--text-light); font-size: 0.9rem; }
 .lab-step-body li { margin-bottom: 0.35rem; }
+/* Handle content directly in .lab-step (no .lab-step-body wrapper) */
+.lab-step > p, .lab-step > ul, .lab-step > ol { padding: 0 1.25rem; margin-left: 1.25rem; margin-right: 1.25rem; color: var(--text-light); font-size: 0.9rem; line-height: 1.65; }
+.lab-step > p:first-of-type { margin-top: 1rem; }
+.lab-step > p:last-of-type, .lab-step > ul:last-child, .lab-step > ol:last-child { margin-bottom: 1.25rem; }
+.lab-step > pre { margin: 0.75rem 1.25rem 1.25rem; border-radius: 8px; }
+.lab-step > .tip-box, .lab-step > .warning-box, .lab-step > .info-box, .lab-step > .callout, .lab-step > .callout-success, .lab-step > .callout-warning { margin: 0.75rem 1.25rem 1.25rem; }
+.lab-step > h3 { padding: 0 1.25rem; margin-top: 1rem; }
+.lab-step > ul li, .lab-step > ol li { margin-bottom: 0.35rem; }
 
 /* Colab button */
 .colab-btn {
@@ -289,11 +297,40 @@
 .badge-advanced     { background: #fff7ed; color: #b45309; border: 1px solid #fed7aa; }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .session-layout { flex-direction: column; }
+  .session-sidebar { display: none; }
+  .session-main { padding: 1.5rem; }
+}
+@media (max-width: 768px) {
+  .session-main { padding: 1.25rem 1rem; }
+  .session-title { font-size: 1.6rem; }
+  .session-meta { flex-wrap: wrap; gap: 0.5rem; }
+  .tab-nav { gap: 0; overflow-x: auto; }
+  .tab-btn { padding: 0.75rem 1rem; font-size: 0.85rem; white-space: nowrap; flex: 1; justify-content: center; }
+  .concept-section { padding: 1.25rem; }
+  .concept-section h2 { font-size: 1.15rem; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .table-wrap { font-size: 0.8rem; }
+  .data-table th, .data-table td { padding: 0.6rem 0.75rem; }
+  .flow-diagram { flex-wrap: wrap; gap: 0.5rem; }
+}
 @media (max-width: 640px) {
-  .session-title { font-size: 1.5rem; }
+  .session-title { font-size: 1.35rem; }
   .flow-diagram { flex-direction: column; align-items: flex-start; }
   .flow-arrow { transform: rotate(90deg); }
   .compare-grid { grid-template-columns: 1fr; }
   .session-nav-buttons { flex-direction: column; }
   .session-nav-btn { max-width: 100%; }
+  .lab-steps { gap: 0.75rem; }
+  .lab-step-header { padding: 0.75rem 1rem; font-size: 0.875rem; }
+  .lab-step-num { min-width: 24px; height: 24px; font-size: 0.75rem; }
+  .lab-step-body { padding: 1rem; }
+  .lab-step > p, .lab-step > ul, .lab-step > ol { padding: 0 1rem; margin-left: 1rem; margin-right: 1rem; }
+  .lab-step > pre { margin: 0.75rem 1rem 1rem; }
+  .quiz-question { padding: 1.25rem; }
+  .quiz-option { padding: 0.6rem 0.9rem; font-size: 0.875rem; }
+  pre[class*="language-"] { font-size: 0.78rem; }
+  .highlight-step { padding: 0.875rem 1rem; }
+  .tip-box, .warning-box, .info-box { padding: 0.875rem 1rem; }
 }
