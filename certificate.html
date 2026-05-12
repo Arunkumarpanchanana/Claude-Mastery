@@ -86,7 +86,7 @@
 
   <div class="cert-actions" id="cert-actions" style="display:none">
     <button class="cert-action-btn primary" onclick="window.print()"><i class="fas fa-download"></i> Download PDF</button>
-    <button class="cert-action-btn" onclick="copyLink()"><i class="fas fa-link"></i> Copy Share Link</button>
+    <button class="cert-action-btn" onclick="copyLink(this)"><i class="fas fa-link"></i> Copy Share Link</button>
     <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Farunkumarpanchanana.github.io%2FClaude-Mastery%2Fcertificate.html" target="_blank" class="cert-action-btn" style="background:#0a66c2;color:#fff;border-color:#0a66c2;"><i class="fab fa-linkedin"></i> Share on LinkedIn</a>
   </div>
 
@@ -182,11 +182,23 @@
     document.getElementById('certificate').scrollIntoView({ behavior:'smooth', block:'center' });
   }
 
-  function copyLink() {
+  function copyLink(btn) {
     const name = document.getElementById('name-input').value.trim();
+    if (!name) { alert('Please generate your certificate first.'); return; }
     const url = `${location.origin}/Claude-Mastery/certificate.html?name=${encodeURIComponent(name)}`;
     navigator.clipboard.writeText(url).then(() => {
-      const btn = event.target.closest('button');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => btn.innerHTML = orig, 2000);
+    }).catch(() => {
+      // Fallback for browsers that block clipboard API
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
       const orig = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
       setTimeout(() => btn.innerHTML = orig, 2000);
