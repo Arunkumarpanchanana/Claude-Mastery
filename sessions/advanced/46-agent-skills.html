@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 46: Agent Skills — Create, Configure &amp; Share — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 46</span></div>
+      <h1 class="session-title">Agent Skills — Create, Configure &amp; Share</h1>
+      <p class="session-tagline">Build reusable Claude Code skills that encapsulate workflows, share them with your team, and understand how skills differ from hooks and MCP tools.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What Are Agent Skills?</h2>
+      <p>Skills are reusable, packaged Claude Code workflows that can be invoked with a slash command. They're the Claude Code equivalent of shell aliases or npm scripts — instead of typing a long instruction every time, you type <code>/skill-name</code> and Claude Code runs the pre-defined workflow.</p>
+
+      <p>Skills live in <code>.claude/skills/</code> (project) or <code>~/.claude/skills/</code> (global). A skill is a Markdown file that contains the workflow prompt Claude Code should execute when invoked.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Quick example:</strong> Instead of typing "Review the last commit for security issues, check all changed files, and provide a structured report" every time, you create a skill and type <code>/security-review</code>. The skill contains the full instruction set.</div>
+      </div>
+
+      <h2>Skills vs Hooks vs MCP</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-star"></i> Skills</h4>
+          <ul>
+            <li>Invoked manually with /slash-command</li>
+            <li>Reusable workflow instructions</li>
+            <li>Stored as Markdown files</li>
+            <li>Can use all of Claude Code's tools</li>
+            <li>Shareable via Git repository</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-bolt"></i> Hooks</h4>
+          <ul>
+            <li>Triggered automatically by events</li>
+            <li>Run on every matching tool use</li>
+            <li>Shell scripts (Python, bash, etc.)</li>
+            <li>Can intercept and block actions</li>
+            <li>Not invoked by user directly</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-plug"></i> MCP Tools</h4>
+          <ul>
+            <li>External capabilities Claude can call</li>
+            <li>Defined by MCP server protocol</li>
+            <li>Can be remote services (APIs, databases)</li>
+            <li>Available as tools in all sessions</li>
+            <li>More complex to implement</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Creating a Single-File Skill</h2>
+      <p>The simplest skill is a single Markdown file. The filename becomes the slash command (with <code>/</code> prefix).</p>
+
+      <pre><code class="language-python"># File: .claude/skills/security-review.md
+# Invoked with: /security-review</code></pre>
+
+      <pre><code class="language-python">---
+description: Review the current branch's changes for security vulnerabilities
+author: Your Team
+version: 1.0.0
+---
+
+# Security Review
+
+You are performing an automated security review of this branch's changes.
+
+## Process
+
+1. Get the list of changed files: `git diff --name-only main...HEAD`
+2. For each changed file, read its content
+3. Check for these security issues:
+   - SQL injection (f-strings in queries, string concatenation in SQL)
+   - Hardcoded secrets (passwords, API keys, tokens in source)
+   - Insecure deserialization (pickle.loads, yaml.load without Loader)
+   - Path traversal (user input used in file paths without sanitization)
+   - Command injection (user input in os.system, subprocess, eval)
+   - Insecure direct object references (user IDs used without authorization check)
+
+## Output Format
+
+For each issue found:
+**[SEVERITY]** `file.py:line` — Description
+
+Severity levels: CRITICAL, HIGH, MEDIUM, LOW
+
+## Final Summary
+
+End with:
+```
+Security Review Summary
+-----------------------
+Files reviewed: N
+Issues found: N (CRITICAL: N, HIGH: N, MEDIUM: N, LOW: N)
+PR Status: [PASS | REVIEW REQUIRED | BLOCKED]
+```
+</code></pre>
+
+      <h2>Creating a Multi-File Skill</h2>
+      <p>For complex workflows, create a directory with a <code>main.md</code> entry point and supporting files:</p>
+
+      <pre><code class="language-python"># .claude/skills/code-review/
+# ├── main.md          ← Entry point (invoked with /code-review)
+# ├── security.md      ← Included by main.md
+# ├── performance.md   ← Included by main.md
+# └── README.md        ← Documentation for skill users</code></pre>
+
+      <pre><code class="language-python"># .claude/skills/code-review/main.md
+---
+description: Comprehensive code review covering security, performance, and style
+includes: [security.md, performance.md]
+---
+
+# Comprehensive Code Review
+
+Run the following review checklist on all changed files.
+
+## Security Check
+{{include: security.md}}
+
+## Performance Check
+{{include: performance.md}}
+
+## Synthesis
+After completing all checks, write a single unified report prioritizing the
+most impactful issues. Group by severity.</code></pre>
+
+      <h2>Skill Configuration</h2>
+      <p>The YAML frontmatter configures how the skill behaves:</p>
+
+      <pre><code class="language-python">---
+description: Generate unit tests for all new functions    # Shown in /help
+author: engineering-team
+version: 2.1.0
+model: claude-opus-4-5                # Override default model
+max_turns: 15                         # Allow more iterations for complex tasks
+allowed_tools: [Read, Write, Bash]    # Restrict to only needed tools
+args:                                 # Declare arguments the skill accepts
+  - name: coverage_target
+    description: Target test coverage percentage
+    default: "80"
+  - name: test_framework
+    description: Testing framework to use
+    default: "pytest"
+---
+
+# Generate Tests
+
+Generate unit tests for all new functions in this PR.
+Target coverage: {{args.coverage_target}}%
+Framework: {{args.test_framework}}</code></pre>
+
+      <h2>Sharing Skills with Your Team</h2>
+      <p>The simplest way to share skills is via your Git repository:</p>
+
+      <pre><code class="language-python"># 1. Commit skills to your repo
+git add .claude/skills/
+git commit -m "Add team skills: security-review, generate-tests, release-notes"
+
+# 2. Team members who clone the repo automatically get the skills
+git clone https://github.com/org/project
+cd project
+claude  # /security-review now available!
+
+# 3. For global skills (personal, not project-specific), use:
+# ~/.claude/skills/my-personal-skill.md
+# These aren't shared but available in all your projects</code></pre>
+
+      <h2>Troubleshooting Skills</h2>
+      <ul>
+        <li><strong>Skill not appearing in /help:</strong> Check the file is in <code>.claude/skills/</code> and has a <code>.md</code> extension. Restart Claude Code.</li>
+        <li><strong>Skill running but ignoring instructions:</strong> The YAML frontmatter may be malformed. Check indentation and that frontmatter starts and ends with <code>---</code>.</li>
+        <li><strong>Args not being substituted:</strong> Use <code>{{args.name}}</code> syntax exactly. Declare all args in frontmatter.</li>
+        <li><strong>Skill exits immediately:</strong> If max_turns is too low for the task, the skill will stop early. Increase max_turns.</li>
+      </ul>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Create, Configure, and Share a Custom Skill</h2>
+        <p>Build a complete "generate-changelog" skill that reads git log, analyzes commits, and writes a formatted CHANGELOG.md entry.</p>
+      </div>
+
+      <h3>Step 1: Create the Skill File</h3>
+      <pre><code class="language-python"># Create the directory
+import os
+os.makedirs(".claude/skills", exist_ok=True)
+
+# Write the skill
+skill_content = '''---
+description: Generate a formatted CHANGELOG.md entry from recent git commits
+author: your-name
+version: 1.0.0
+max_turns: 8
+allowed_tools: [Bash, Read, Write]
+args:
+  - name: since
+    description: "Git ref to generate log from (e.g., v1.2.0 or HEAD~10)"
+    default: "HEAD~10"
+  - name: version
+    description: "Version number for this changelog entry"
+    default: "Unreleased"
+---
+
+# Generate Changelog
+
+Generate a formatted CHANGELOG.md entry following the Keep a Changelog format.
+
+## Steps
+
+1. Get the commit log since {{args.since}}:
+   ```bash
+   git log {{args.since}}..HEAD --oneline --no-merges
+   ```
+
+2. Read the current CHANGELOG.md if it exists (to understand the format and prepend the new entry)
+
+3. Categorize commits into:
+   - **Added** — new features (feat:, add:, new:)
+   - **Changed** — changes to existing functionality (change:, update:, refactor:)
+   - **Fixed** — bug fixes (fix:, bug:)
+   - **Security** — security fixes (security:, cve:)
+   - **Removed** — removed features (remove:, delete:)
+   - **Deprecated** — soon-to-be removed (deprecate:)
+
+4. Write a new CHANGELOG entry at the top of CHANGELOG.md in this format:
+
+```markdown
+## [{{args.version}}] - YYYY-MM-DD
+
+### Added
+- Description of new feature
+
+### Fixed
+- Description of bug fix
+
+### Changed
+- Description of change
+```
+
+5. Confirm the file was written and show a preview of the first 30 lines.
+'''
+
+with open(".claude/skills/generate-changelog.md", "w") as f:
+    f.write(skill_content)
+
+print("Skill created at .claude/skills/generate-changelog.md")
+print("Use with: /generate-changelog")
+print("Or with args: /generate-changelog --since v1.0.0 --version 1.1.0")</code></pre>
+
+      <h3>Step 2: Simulate Skill Execution with the Anthropic API</h3>
+      <pre><code class="language-python">import anthropic
+import subprocess
+import datetime
+
+client = anthropic.Anthropic()
+
+def simulate_generate_changelog(since="HEAD~5", version="Unreleased"):
+    """Simulate what the /generate-changelog skill would do."""
+
+    # Get git log (the Bash tool would do this in real Claude Code)
+    try:
+        git_log = subprocess.check_output(
+            ["git", "log", f"{since}..HEAD", "--oneline", "--no-merges"],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except subprocess.CalledProcessError:
+        git_log = """a1b2c3d feat: Add RAG pipeline with FAISS support
+b2c3d4e fix: Fix SQL injection vulnerability in auth module
+c3d4e5f refactor: Simplify BM25 search implementation
+d4e5f6g feat: Add contextual retrieval with prompt caching
+e5f6g7h security: Update cryptography library to fix CVE-2024-1234
+f6g7h8i docs: Update README with SDK examples"""
+
+    if not git_log:
+        git_log = "No commits found in range"
+
+    today = datetime.date.today().isoformat()
+
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=800,
+        system="""You are a release manager writing a CHANGELOG.md entry.
+Follow the Keep a Changelog format exactly.
+Categorize commits into: Added, Changed, Fixed, Security, Removed, Deprecated.
+Write clear, user-facing descriptions (not just commit messages).""",
+        messages=[{
+            "role": "user",
+            "content": f"""Generate a CHANGELOG.md entry for version {version}.
+
+Recent commits:
+{git_log}
+
+Today's date: {today}
+
+Write the complete CHANGELOG entry in markdown format."""
+        }]
+    )
+
+    changelog_entry = response.content[0].text
+
+    # Write to file
+    try:
+        try:
+            existing = open("CHANGELOG.md").read()
+        except FileNotFoundError:
+            existing = "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n"
+
+        with open("CHANGELOG.md", "w") as f:
+            # Insert new entry after the first two lines (title + description)
+            lines = existing.split('\n')
+            header = '\n'.join(lines[:3])
+            rest = '\n'.join(lines[3:])
+            f.write(header + '\n\n' + changelog_entry + '\n' + rest)
+
+        print("CHANGELOG.md updated!")
+    except Exception as e:
+        print(f"Note: Could not write file ({e}), showing output:")
+
+    print("\n" + "="*50)
+    print("GENERATED CHANGELOG ENTRY:")
+    print("="*50)
+    print(changelog_entry)
+
+simulate_generate_changelog(since="HEAD~5", version="1.1.0")</code></pre>
+
+      <h3>Step 3: Verify Skill Registration</h3>
+      <pre><code class="language-python">import os
+from pathlib import Path
+
+# Check skill files
+skills_dir = Path(".claude/skills")
+if skills_dir.exists():
+    skills = list(skills_dir.glob("*.md")) + list(skills_dir.glob("*/main.md"))
+    print(f"Registered skills ({len(skills)}):")
+    for skill_file in skills:
+        # Read frontmatter description
+        content = skill_file.read_text()
+        desc_line = [l for l in content.split('\n') if l.startswith('description:')]
+        desc = desc_line[0].replace('description:', '').strip() if desc_line else "No description"
+
+        skill_name = skill_file.stem if skill_file.name != "main.md" else skill_file.parent.name
+        print(f"  /{skill_name} — {desc}")
+else:
+    print("No .claude/skills directory found")
+    print("Run: mkdir -p .claude/skills")</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>Skill created and tested!</strong> Your /generate-changelog skill is ready to use. Commit .claude/skills/ to Git and everyone on the team can use it immediately. Skills are the highest-leverage way to standardize Claude Code workflows across your organization.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/45-claude-code-sdk.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">The Claude Code SDK</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/47-mcp-advanced.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">MCP Advanced — Sampling &amp; Notifications</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 46,
+  slug: '46-agent-skills',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/47-mcp-advanced.html',
+  quizData: [
+    {
+      question: "How do you invoke an agent skill named 'security-review.md' in Claude Code?",
+      options: [
+        "claude run security-review",
+        "/security-review",
+        "skill: security-review",
+        "@security-review"
+      ],
+      correct: 1,
+      explanation: "Skills are invoked with the slash command syntax: /filename (without the .md extension). A skill at .claude/skills/security-review.md is invoked with /security-review."
+    },
+    {
+      question: "What is the main difference between skills and hooks?",
+      options: [
+        "Skills use Python; hooks use Markdown",
+        "Skills are invoked manually by the user; hooks are triggered automatically by events",
+        "Skills can only read files; hooks can read and write",
+        "Skills are global; hooks are always project-specific"
+      ],
+      correct: 1,
+      explanation: "Skills are user-invoked workflows — you type /skill-name to run them. Hooks are event-driven automations — they run automatically when Claude Code performs matching actions (tool use, stop, etc.)."
+    },
+    {
+      question: "How do you make a skill available to your entire engineering team?",
+      options: [
+        "Upload it to the Anthropic marketplace",
+        "Email the .md file to each team member",
+        "Commit .claude/skills/ to your Git repository — team members get it on clone/pull",
+        "Register it in the team's shared API key settings"
+      ],
+      correct: 2,
+      explanation: "Skills in .claude/skills/ are part of your project. When you commit and push them, every team member who pulls the repo has access to the same skills automatically when they use Claude Code in that project."
+    },
+    {
+      question: "In a skill's YAML frontmatter, what does the 'max_turns' field control?",
+      options: [
+        "The maximum length of each Claude response",
+        "How many times the skill can be invoked per day",
+        "The maximum number of agent iterations the skill is allowed to run",
+        "The timeout in seconds before the skill is terminated"
+      ],
+      correct: 2,
+      explanation: "max_turns limits how many back-and-forth iterations the skill's agentic loop can perform. A complex skill that needs to read many files, make decisions, and write outputs needs a higher max_turns than a simple single-action skill."
+    },
+    {
+      question: "What is the correct syntax to reference a skill argument in the skill's Markdown body?",
+      options: [
+        "${args.version}",
+        "$(args.version)",
+        "{{args.version}}",
+        "[[args.version]]"
+      ],
+      correct: 2,
+      explanation: "Arguments declared in the frontmatter are referenced in the skill body with {{args.argument_name}} syntax. For example, if you declare an arg named 'version', you use {{args.version}} where you want it substituted."
+    }
+  ]
+};
+</script>
+</body>
+</html>

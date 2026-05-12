@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 26: Extended Thinking, Vision & PDF Support — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 26</span></div>
+      <h1 class="session-title">Extended Thinking, Vision & PDF Support</h1>
+      <p class="session-tagline">Unlock Claude's most powerful modes — deep reasoning, image understanding, and native PDF analysis — all in a single API call.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="extended-thinking">Extended Thinking</h2>
+      <p>Extended thinking gives Claude a scratchpad to reason through complex problems before producing its final answer. It's Claude's version of "showing its work" — except the thinking happens in a private block you can optionally inspect.</p>
+
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",  # Extended thinking requires a capable model
+    max_tokens=16000,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 10000  # How many tokens Claude can use for thinking
+    },
+    messages=[{
+        "role": "user",
+        "content": "A farmer has 17 sheep. All but 9 die. How many sheep are left? Explain your reasoning."
+    }]
+)
+
+# Response has multiple content blocks
+for block in response.content:
+    if block.type == "thinking":
+        print(f"[THINKING]\n{block.thinking}\n")
+    elif block.type == "text":
+        print(f"[ANSWER]\n{block.text}")
+</code></pre>
+
+      <h2 id="when-to-use-thinking">When to Use Extended Thinking</h2>
+      <ul>
+        <li>Mathematical or logical proofs that require many steps</li>
+        <li>Complex code architecture decisions</li>
+        <li>Analyzing trade-offs with multiple competing factors</li>
+        <li>Tasks where you've noticed reasoning errors in standard mode</li>
+      </ul>
+
+      <div class="warning-box">
+        <strong>Cost note:</strong> Thinking tokens count toward your token usage. Set budget_tokens conservatively (1000-4000 for most tasks; 10000+ only for genuinely hard problems). The thinking content itself is not billed at the same rate as output — check current pricing.
+      </div>
+
+      <h2 id="image-input">Image Input</h2>
+      <p>Claude can process images sent as base64-encoded data or as public URLs:</p>
+
+      <pre><code class="language-python">import base64
+
+# Option 1: URL (simpler, for publicly accessible images)
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=512,
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "source": {
+                    "type": "url",
+                    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png"
+                }
+            },
+            {"type": "text", "text": "Describe what you see in this image."}
+        ]
+    }]
+)
+
+# Option 2: Base64 (for local files or private images)
+with open("chart.png", "rb") as f:
+    image_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/png",  # image/jpeg, image/gif, image/webp
+                    "data": image_data
+                }
+            },
+            {"type": "text", "text": "What trend does this chart show?"}
+        ]
+    }]
+)
+print(response.content[0].text)
+</code></pre>
+
+      <h2 id="pdf-support">PDF Support via Files API</h2>
+      <p>Claude can read PDFs natively. Upload a PDF once via the Files API and reference it in multiple requests:</p>
+
+      <pre><code class="language-python"># Step 1: Upload the PDF
+with open("annual_report.pdf", "rb") as f:
+    file_response = client.beta.files.upload(
+        file=("annual_report.pdf", f, "application/pdf"),
+    )
+file_id = file_response.id
+
+# Step 2: Reference the file in a message
+response = client.beta.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=2048,
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "document",
+                "source": {
+                    "type": "file",
+                    "file_id": file_id
+                }
+            },
+            {"type": "text", "text": "What are the three main risks mentioned in this report?"}
+        ]
+    }],
+    betas=["files-api-2025-04-14"]
+)
+print(response.content[0].text)
+
+# Step 3: Delete the file when done
+client.beta.files.delete(file_id)
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Files API benefit:</strong> Uploading a PDF once and reusing the file_id for multiple questions saves you from resending the same large document repeatedly, reducing cost and latency.
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Vision, PDFs, and Extended Thinking</h2>
+      <p>Three standalone code snippets you can run independently to explore each capability.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/multimodal/getting_started_with_vision.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+multimodal_lab.py — Extended Thinking, Vision, and PDF demos
+"""
+import anthropic
+import base64
+import httpx
+
+client = anthropic.Anthropic()
+
+
+# ── Lab 1: Extended Thinking ──────────────────────────────────────────────────
+def demo_extended_thinking():
+    print("\n=== Extended Thinking Demo ===")
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=8000,
+        thinking={
+            "type": "enabled",
+            "budget_tokens": 3000
+        },
+        messages=[{
+            "role": "user",
+            "content": (
+                "You have a 3-gallon jug and a 5-gallon jug. "
+                "Measure exactly 4 gallons of water. Show your work."
+            )
+        }]
+    )
+
+    for block in response.content:
+        if block.type == "thinking":
+            # Show first 300 chars of thinking
+            print(f"Thinking preview: {block.thinking[:300]}...")
+        elif block.type == "text":
+            print(f"Answer: {block.text}")
+
+
+# ── Lab 2: Image Understanding ────────────────────────────────────────────────
+def demo_image_url():
+    print("\n=== Image URL Demo ===")
+    # Use a well-known public image
+    image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Python_logo_and_wordmark.svg/800px-Python_logo_and_wordmark.svg.png"
+
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {"type": "url", "url": image_url}
+                },
+                {
+                    "type": "text",
+                    "text": "What programming language logo is this? Describe its colors and design."
+                }
+            ]
+        }]
+    )
+    print(response.content[0].text)
+
+
+def demo_image_base64():
+    print("\n=== Image Base64 Demo ===")
+    # Download an image and convert to base64
+    image_data = base64.standard_b64encode(
+        httpx.get("https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Python_logo_and_wordmark.svg/800px-Python_logo_and_wordmark.svg.png").content
+    ).decode("utf-8")
+
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/png",
+                        "data": image_data
+                    }
+                },
+                {"type": "text", "text": "In 2 sentences, describe this image."}
+            ]
+        }]
+    )
+    print(response.content[0].text)
+
+
+# ── Lab 3: Multiple images in one message ────────────────────────────────────
+def demo_image_comparison():
+    print("\n=== Multi-Image Comparison Demo ===")
+    urls = [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Python_logo_and_wordmark.svg/800px-Python_logo_and_wordmark.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/ISO_C%2B%2B_Logo.svg/640px-ISO_C%2B%2B_Logo.svg.png",
+    ]
+
+    content = []
+    for i, url in enumerate(urls, 1):
+        content.append({"type": "image", "source": {"type": "url", "url": url}})
+        content.append({"type": "text", "text": f"Image {i} above."})
+
+    content.append({"type": "text", "text": "Compare these two programming language logos. What is different about their design philosophies?"})
+
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        messages=[{"role": "user", "content": content}]
+    )
+    print(response.content[0].text)
+
+
+if __name__ == "__main__":
+    demo_extended_thinking()
+    demo_image_url()
+    demo_image_base64()
+    demo_image_comparison()
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/25-prompt-evaluation.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Prompt Evaluation & Eval Workflows</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/27-prompt-caching.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Prompt Caching — Rules & Implementation</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 26,
+  slug: '26-extended-thinking',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/27-prompt-caching.html',
+  quizData: [
+    {
+      question: "What does the 'budget_tokens' parameter in extended thinking control?",
+      options: ["The maximum output tokens for the final answer", "The maximum tokens Claude can spend reasoning before producing its answer", "The cost budget in USD", "The maximum context window size"],
+      correct: 1,
+      explanation: "budget_tokens sets the maximum number of tokens Claude can use for its internal thinking/reasoning scratchpad before writing the final response."
+    },
+    {
+      question: "When sending an image in a message, what are the two supported source types?",
+      options: ["file and stream", "url and base64", "path and uri", "upload and inline"],
+      correct: 1,
+      explanation: "Images can be sent as a public URL (source.type='url') or as base64-encoded data (source.type='base64'). Both are supported in the content array."
+    },
+    {
+      question: "What is the key advantage of using the Files API for PDFs instead of sending the PDF in every request?",
+      options: ["PDFs require the Files API — there's no alternative", "The file can be reused across multiple requests without re-uploading, saving cost and latency", "It bypasses the context window limit", "It automatically extracts text from the PDF"],
+      correct: 1,
+      explanation: "Uploading once and referencing the file_id means large documents don't need to be resent with every question, reducing cost and network overhead."
+    },
+    {
+      question: "Which content block type appears in the response when extended thinking is enabled?",
+      options: ["reasoning", "thinking", "chain_of_thought", "scratchpad"],
+      correct: 1,
+      explanation: "When extended thinking is enabled, the response content array includes a block with type='thinking' containing Claude's reasoning, followed by type='text' for the final answer."
+    },
+    {
+      question: "Which tasks are most suitable for extended thinking?",
+      options: ["Simple FAQ lookups", "Real-time chat responses", "Complex multi-step reasoning, proofs, and architectural decisions", "Short text summarization"],
+      correct: 2,
+      explanation: "Extended thinking is best for complex reasoning tasks — math proofs, logic puzzles, difficult trade-off analysis — where standard generation makes reasoning errors."
+    }
+  ]
+};
+</script>
+</body>
+</html>

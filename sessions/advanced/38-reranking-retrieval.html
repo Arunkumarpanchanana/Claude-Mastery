@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 38: Reranking &amp; Contextual Retrieval — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 38</span></div>
+      <h1 class="session-title">Reranking &amp; Contextual Retrieval</h1>
+      <p class="session-tagline">Dramatically improve RAG accuracy with cross-encoder reranking and Anthropic's contextual retrieval technique that prepends chunk context using Claude.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>The Retrieval Accuracy Problem</h2>
+      <p>Even with hybrid search, initial retrieval is imprecise. A retriever must search millions of documents in milliseconds — it optimizes for speed over accuracy. This means your top-5 retrieved chunks might rank a moderately relevant chunk above a highly relevant one.</p>
+
+      <p>The solution is a two-stage pipeline: retrieve broadly (top-50), then <strong>rerank</strong> precisely (select top-5). Reranking uses more expensive but accurate models that deeply compare query and document.</p>
+
+      <h2>Bi-Encoders vs Cross-Encoders</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-arrows-alt-h"></i> Bi-Encoder (for retrieval)</h4>
+          <ul>
+            <li>Encodes query and doc independently</li>
+            <li>Produces separate vectors, compared by dot product</li>
+            <li>Very fast — pre-compute doc embeddings</li>
+            <li>Less accurate — no direct query-doc interaction</li>
+            <li>Used for first-stage retrieval at scale</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-exchange-alt"></i> Cross-Encoder (for reranking)</h4>
+          <ul>
+            <li>Encodes query AND doc together as a pair</li>
+            <li>Full attention across both — sees all interactions</li>
+            <li>Slower — can't pre-compute, must run per query</li>
+            <li>Much more accurate relevance scoring</li>
+            <li>Used on small candidate sets (top-20 to top-50)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Cross-Encoder Reranking with sentence-transformers</h3>
+      <pre><code class="language-python">from sentence_transformers import CrossEncoder
+
+# Load a cross-encoder trained for relevance scoring
+# ms-marco is trained on 500K query-passage relevance pairs
+reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+query = "How does attention mechanism work in transformers?"
+candidates = [
+    "Attention computes weighted sums of value vectors based on query-key dot products.",
+    "Transformers were introduced in 2017 by Vaswani et al.",
+    "The self-attention mechanism allows each token to attend to all other tokens in the sequence.",
+    "BERT uses bidirectional attention while GPT uses causal attention.",
+    "RAG pipelines combine retrieval with generation for knowledge-grounded answers.",
+]
+
+# Score all candidates against the query
+pairs = [[query, doc] for doc in candidates]
+scores = reranker.predict(pairs)
+
+# Rerank
+ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
+for doc, score in ranked:
+    print(f"{score:+.3f} | {doc[:70]}")</code></pre>
+
+      <div class="callout callout-info">
+        <i class="fas fa-info-circle"></i>
+        <div><strong>Output interpretation:</strong> The cross-encoder will score the attention-specific passages highest (~9.0+) and the unrelated RAG passage lowest (~-10). The scores are not probabilities — only the ranking matters.</div>
+      </div>
+
+      <h2>Cohere Rerank API</h2>
+      <p>For production systems, Cohere's Rerank API is a managed cross-encoder that handles the infrastructure. It supports multilingual reranking and returns relevance scores with just one API call.</p>
+
+      <pre><code class="language-python">import cohere
+
+co = cohere.Client()  # uses COHERE_API_KEY
+
+results = co.rerank(
+    model="rerank-english-v3.0",
+    query="How does self-attention work?",
+    documents=candidates,
+    top_n=3,
+    return_documents=True
+)
+
+for r in results.results:
+    print(f"Rank {r.index}: score={r.relevance_score:.4f}")
+    print(f"  {r.document.text[:100]}")
+    print()</code></pre>
+
+      <h2>Anthropic's Contextual Retrieval</h2>
+      <p>Contextual Retrieval is a technique Anthropic published that dramatically improves retrieval accuracy by solving the <strong>chunk context problem</strong>: when a chunk is extracted from a document, it often loses the context that makes it meaningful.</p>
+
+      <p>Consider this chunk from a financial report:</p>
+      <blockquote>"The company's revenue grew 23% year-over-year to $4.2 billion."</blockquote>
+      <p>Without context, you don't know which company, which year, or which product line. A RAG query about "Apple's 2023 iPhone revenue" would likely miss this chunk.</p>
+
+      <p>Contextual Retrieval fixes this by having <strong>Claude prepend a short situating sentence to each chunk before embedding it</strong>:</p>
+      <blockquote>"This chunk is from Apple's Q4 2023 earnings report discussing iPhone revenue growth. The company's revenue grew 23% year-over-year to $4.2 billion."</blockquote>
+
+      <h3>Implementing Contextual Retrieval</h3>
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+CONTEXT_PROMPT = """&lt;document&gt;
+{full_document}
+&lt;/document&gt;
+
+Here is a chunk from this document:
+&lt;chunk&gt;
+{chunk}
+&lt;/chunk&gt;
+
+Write a short (1-2 sentence) context that situates this chunk within the overall document.
+This context will be prepended to the chunk for retrieval purposes.
+Respond only with the context — no preamble or explanation."""
+
+def add_context_to_chunk(full_document: str, chunk: str) -> str:
+    """Use Claude to prepend situating context to a chunk."""
+    response = client.messages.create(
+        model="claude-haiku-4-5",  # Use Haiku for cost efficiency at scale
+        max_tokens=100,
+        messages=[{
+            "role": "user",
+            "content": CONTEXT_PROMPT.format(
+                full_document=full_document[:5000],  # Truncate if needed
+                chunk=chunk
+            )
+        }]
+    )
+    context = response.content[0].text.strip()
+    # Prepend context to original chunk
+    return f"{context}\n\n{chunk}"
+
+# Example usage
+document = """
+Apple Inc. Q4 2023 Earnings Report
+
+iPhone: The company's revenue grew 23% year-over-year to $4.2 billion
+from the iPhone product line, driven by strong iPhone 15 Pro demand.
+
+Mac: Mac revenue declined 3% to $1.8 billion amid a challenging PC market.
+Services revenue reached a record $21.2 billion, up 16% year-over-year.
+"""
+
+chunk = "The company's revenue grew 23% year-over-year to $4.2 billion."
+contextualized = add_context_to_chunk(document, chunk)
+print(contextualized)
+# Output:
+# This chunk is from Apple's Q4 2023 earnings report, discussing iPhone revenue performance.
+#
+# The company's revenue grew 23% year-over-year to $4.2 billion.</code></pre>
+
+      <h2>Batch Processing with Prompt Caching</h2>
+      <p>Running Claude on every chunk is expensive. Anthropic's recommended approach uses <strong>prompt caching</strong> to cache the full document in the system prompt, dramatically reducing costs when adding context to many chunks from the same document.</p>
+
+      <pre><code class="language-python">def contextualize_chunks_with_caching(
+    full_document: str,
+    chunks: list[str]
+) -> list[str]:
+    """
+    Add context to all chunks efficiently using prompt caching.
+    The full document is cached after the first chunk — subsequent chunks
+    only send the new chunk content.
+    """
+    contextualized = []
+
+    for i, chunk in enumerate(chunks):
+        response = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=100,
+            system=[
+                {
+                    "type": "text",
+                    "text": f"You are a document context assistant. Here is the full document:\n\n{full_document}",
+                    "cache_control": {"type": "ephemeral"}  # Cache the document!
+                }
+            ],
+            messages=[{
+                "role": "user",
+                "content": f"Provide 1-2 sentences of context for this chunk:\n\n{chunk}"
+            }]
+        )
+        context = response.content[0].text.strip()
+        contextualized.append(f"{context}\n\n{chunk}")
+
+        if i == 0:
+            print(f"First chunk — document sent and cached")
+        else:
+            print(f"Chunk {i+1} — using cached document")
+
+    return contextualized</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-chart-line"></i>
+        <div><strong>Anthropic's results:</strong> Contextual retrieval reduced retrieval failures by 49% compared to basic RAG. Combined with reranking, failures dropped by 67%. For production RAG, this is one of the highest-ROI improvements you can make.</div>
+      </div>
+
+      <h2>When to Rerank</h2>
+      <p>Reranking adds latency (50-200ms) and cost. Use it when:</p>
+      <ul>
+        <li>Retrieval precision is critical (medical, legal, financial queries)</li>
+        <li>Your initial retrieval pool is 20+ candidates and top-5 quality matters</li>
+        <li>You're seeing "I don't know" answers from Claude despite relevant docs existing</li>
+        <li>Query complexity is high (multi-part questions, hypotheticals)</li>
+      </ul>
+      <p>Skip reranking when: queries are simple, latency is critical (&lt;100ms), or your corpus is small enough that initial retrieval is already precise.</p>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Add Contextual Retrieval to a RAG Pipeline</h2>
+        <p>Take a basic RAG pipeline and upgrade it with both contextual chunk enrichment and cross-encoder reranking.</p>
+      </div>
+
+      <div class="lab-prereqs">
+        <h3>Prerequisites</h3>
+        <pre><code class="language-python">pip install anthropic sentence-transformers faiss-cpu numpy</code></pre>
+      </div>
+
+      <h3>Step 1: Baseline RAG (without contextual retrieval)</h3>
+      <pre><code class="language-python">import anthropic
+import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer, CrossEncoder
+
+client = anthropic.Anthropic()
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+DOCUMENT = """
+Anthropic Model Card — Claude claude-opus-4-5
+
+Training Approach:
+Claude was trained using Constitutional AI (CAI), a technique where a set of
+principles guides the model's behavior during RLHF training. The model learns
+to critique and revise its own outputs according to these principles.
+
+Context Window:
+Claude claude-opus-4-5 supports up to 200,000 tokens in its context window.
+This is equivalent to approximately 150,000 words or about 500 pages of text.
+
+Tool Use:
+Claude can use tools via function calling. Tools are defined in the API request
+and Claude decides when and how to invoke them based on the user's request.
+Results are returned to Claude in tool_result messages.
+
+Safety Features:
+Claude refuses requests that could enable mass casualties, CSAM, or cyberattacks.
+It is designed to be honest even when honesty is uncomfortable for the user.
+The model acknowledges uncertainty rather than confabulating answers.
+"""
+
+# Basic chunking
+raw_chunks = [p.strip() for p in DOCUMENT.split('\n\n') if len(p.strip()) > 50]
+print(f"Raw chunks: {len(raw_chunks)}")
+for i, c in enumerate(raw_chunks):
+    print(f"\nChunk {i}: {c[:80]}...")</code></pre>
+
+      <h3>Step 2: Add Contextual Retrieval</h3>
+      <pre><code class="language-python">CONTEXT_PROMPT = """Document: {document}
+
+Chunk: {chunk}
+
+Write 1-2 sentences situating this chunk within the document. Be specific about what section this comes from and what topic it addresses. Reply with only the context."""
+
+def contextualize(document, chunk):
+    r = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=80,
+        system=[{
+            "type": "text",
+            "text": f"You contextualize document chunks. Full document:\n{document}",
+            "cache_control": {"type": "ephemeral"}
+        }],
+        messages=[{"role": "user", "content": f"Contextualize this chunk:\n\n{chunk}"}]
+    )
+    ctx = r.content[0].text.strip()
+    return f"{ctx}\n\n{chunk}"
+
+# Build contextual chunks
+print("\nBuilding contextual chunks (uses Claude Haiku with prompt caching)...")
+contextual_chunks = [contextualize(DOCUMENT, c) for c in raw_chunks]
+
+print(f"\nContextual chunk example:")
+print(contextual_chunks[0][:300])</code></pre>
+
+      <h3>Step 3: Build Indexes for Both Versions</h3>
+      <pre><code class="language-python">def build_index(chunks):
+    embs = embedder.encode(chunks, normalize_embeddings=True).astype('float32')
+    idx = faiss.IndexFlatIP(embs.shape[1])
+    idx.add(embs)
+    return idx
+
+baseline_index = build_index(raw_chunks)
+contextual_index = build_index(contextual_chunks)
+print("Both indexes built!")</code></pre>
+
+      <h3>Step 4: Compare With and Without Reranking</h3>
+      <pre><code class="language-python">def retrieve(query, index, chunks, top_k=5):
+    q = embedder.encode([query], normalize_embeddings=True).astype('float32')
+    _, ids = index.search(q, top_k)
+    return [chunks[i] for i in ids[0] if i >= 0]
+
+def retrieve_and_rerank(query, index, chunks, top_k_retrieve=10, top_k_final=3):
+    # Stage 1: broad retrieval
+    candidates = retrieve(query, index, chunks, top_k=top_k_retrieve)
+    # Stage 2: rerank
+    pairs = [[query, c] for c in candidates]
+    scores = reranker.predict(pairs)
+    ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
+    return [c for c, _ in ranked[:top_k_final]]
+
+query = "What safety features does Claude have?"
+
+print("=== BASELINE (no context, no reranking) ===")
+for c in retrieve(query, baseline_index, raw_chunks, top_k=3):
+    print(f"• {c[:100]}")
+
+print("\n=== CONTEXTUAL (with context, no reranking) ===")
+for c in retrieve(query, contextual_index, contextual_chunks, top_k=3):
+    print(f"• {c[:120]}")
+
+print("\n=== CONTEXTUAL + RERANKED (best quality) ===")
+for c in retrieve_and_rerank(query, contextual_index, contextual_chunks):
+    print(f"• {c[:120]}")
+
+# Final answer
+best_chunks = retrieve_and_rerank(query, contextual_index, contextual_chunks)
+context = "\n\n---\n\n".join(best_chunks)
+answer = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=300,
+    system="Answer using only the context provided.",
+    messages=[{"role": "user", "content": f"Context:\n{context}\n\nQ: {query}"}]
+)
+print(f"\nFinal Answer:\n{answer.content[0].text}")</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>You've implemented a production-grade RAG pipeline!</strong> Contextual retrieval + reranking is the gold standard for RAG accuracy. The additional cost of Haiku calls for contextualization is typically offset by fewer incorrect answers requiring user follow-ups.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/37-bm25-multi-index.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">BM25 &amp; Multi-Index RAG</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/39-agents-workflows.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Agents &amp; Workflows</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 38,
+  slug: '38-reranking-retrieval',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/39-agents-workflows.html',
+  quizData: [
+    {
+      question: "What is the fundamental difference between a bi-encoder and a cross-encoder?",
+      options: [
+        "Bi-encoders are slower but more accurate",
+        "Cross-encoders encode query and document separately and compare vectors",
+        "Cross-encoders encode query and document together, seeing all interactions",
+        "Bi-encoders require more GPU memory than cross-encoders"
+      ],
+      correct: 2,
+      explanation: "A cross-encoder takes the query and document concatenated as a single input, allowing full attention across both. This enables much more nuanced relevance scoring than comparing separate vectors."
+    },
+    {
+      question: "Why does Anthropic recommend using Claude Haiku (not Opus) for contextual retrieval?",
+      options: [
+        "Haiku produces better context sentences than Opus",
+        "Haiku is much cheaper — you run it on every chunk, so cost scales with corpus size",
+        "Haiku has a larger context window needed for long documents",
+        "Haiku supports batch processing while Opus does not"
+      ],
+      correct: 1,
+      explanation: "Contextual retrieval requires calling Claude for every chunk in your corpus. With millions of chunks, using Opus would be prohibitively expensive. Haiku provides sufficient quality for 1-2 sentence context at a fraction of the cost."
+    },
+    {
+      question: "What is the 'chunk context problem' that contextual retrieval solves?",
+      options: [
+        "Chunks are too long to fit in the embedding model's context",
+        "Chunks lose the surrounding document context when extracted, making them ambiguous",
+        "Chunks from different documents get mixed up in the vector store",
+        "The embedding model can't handle chunks with special characters"
+      ],
+      correct: 1,
+      explanation: "A chunk like 'revenue grew 23%' loses information about which company, which year, and which product. Contextual retrieval adds this situating information so the chunk embeds more precisely."
+    },
+    {
+      question: "How does prompt caching help when adding context to many chunks?",
+      options: [
+        "It stores the chunks in Redis to avoid re-processing",
+        "It caches the full document in the system prompt so subsequent chunk requests don't re-send it",
+        "It reuses embedding vectors across similar chunks",
+        "It enables parallel processing of all chunks simultaneously"
+      ],
+      correct: 1,
+      explanation: "By marking the full document with cache_control: ephemeral, subsequent API calls for chunks from the same document reuse the cached document tokens, reducing both cost and latency significantly."
+    },
+    {
+      question: "In a two-stage retrieval pipeline, why retrieve 50 candidates then rerank to 5?",
+      options: [
+        "The reranker can only process 50 documents at a time",
+        "Retrieving only 5 directly risks missing the most relevant document; reranking 50 captures relevant docs while reranker selects the best",
+        "It's a regulatory requirement for enterprise RAG systems",
+        "FAISS is more accurate when returning 50 results than 5"
+      ],
+      correct: 1,
+      explanation: "Fast retrievers (bi-encoders, BM25) optimize for speed and may misrank items in the top-5. By retrieving 50 candidates with high recall, we ensure the truly relevant documents are in the pool, then use the slower but more accurate reranker to select the final 5."
+    }
+  ]
+};
+</script>
+</body>
+</html>

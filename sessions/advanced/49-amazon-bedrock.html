@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 49: Claude on Amazon Bedrock — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 49</span></div>
+      <h1 class="session-title">Claude on Amazon Bedrock</h1>
+      <p class="session-tagline">Access Claude through Amazon Bedrock with boto3 — understand IAM setup, cross-region inference, Bedrock-specific features, and how it differs from the Anthropic SDK.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What is Amazon Bedrock?</h2>
+      <p>Amazon Bedrock is AWS's fully managed foundation model service. It provides access to Claude (Anthropic), Titan (Amazon), Llama (Meta), Mistral, and other models through a unified AWS API. Instead of calling Anthropic's API directly, enterprise AWS customers can access Claude through their existing AWS infrastructure, IAM permissions, VPC, and billing.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-building"></i>
+        <div><strong>Who uses Bedrock?</strong> Companies already deep in AWS who want: (1) data to stay within their AWS account, (2) IAM-based access control instead of API keys, (3) unified billing through AWS, (4) compliance with AWS enterprise agreements, or (5) integration with other AWS services like S3, Lambda, and SageMaker.</div>
+      </div>
+
+      <h2>IAM Setup</h2>
+      <p>Unlike the Anthropic SDK which uses API keys, Bedrock uses IAM roles and policies:</p>
+
+      <pre><code class="language-python"># IAM policy needed to call Claude via Bedrock:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream"
+            ],
+            "Resource": [
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-opus-4-5-*",
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-*"
+            ]
+        }
+    ]
+}
+
+# Attach this policy to your IAM user, role, or service account.
+# Configure credentials with:
+# aws configure  (sets ~/.aws/credentials)
+# or use environment variables:
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN</code></pre>
+
+      <h2>Making Your First Bedrock Call</h2>
+      <pre><code class="language-python">import boto3
+import json
+
+# Create Bedrock client — uses ~/.aws/credentials or env vars automatically
+bedrock = boto3.client(
+    service_name="bedrock-runtime",
+    region_name="us-east-1"  # Claude is available in us-east-1, us-west-2, eu-central-1, etc.
+)
+
+# Model IDs follow Bedrock's convention (different from Anthropic SDK)
+MODEL_ID = "anthropic.claude-opus-4-5-20251101-v1:0"
+# Format: anthropic.{model-family}-{version}:0
+
+# Bedrock uses the Messages API format, but wrapped in Bedrock's invoke_model
+request_body = {
+    "anthropic_version": "bedrock-2023-05-31",  # Required for all Bedrock Claude calls
+    "max_tokens": 1024,
+    "messages": [
+        {
+            "role": "user",
+            "content": "Explain the difference between Bedrock and the Anthropic API in one paragraph."
+        }
+    ]
+}
+
+response = bedrock.invoke_model(
+    modelId=MODEL_ID,
+    body=json.dumps(request_body),
+    contentType="application/json",
+    accept="application/json"
+)
+
+# Parse response
+response_body = json.loads(response["body"].read())
+print(response_body["content"][0]["text"])
+print(f"\nInput tokens: {response_body['usage']['input_tokens']}")
+print(f"Output tokens: {response_body['usage']['output_tokens']}")</code></pre>
+
+      <h2>Bedrock vs Anthropic SDK Differences</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-code"></i> Anthropic SDK</h4>
+          <pre><code class="language-python">import anthropic
+client = anthropic.Anthropic()
+response = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[...]
+)
+text = response.content[0].text</code></pre>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fab fa-aws"></i> Bedrock boto3</h4>
+          <pre><code class="language-python">import boto3, json
+client = boto3.client("bedrock-runtime")
+resp = client.invoke_model(
+    modelId="anthropic.claude-opus-4-5-...",
+    body=json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1024,
+        "messages": [...]
+    })
+)
+body = json.loads(resp["body"].read())
+text = body["content"][0]["text"]</code></pre>
+        </div>
+      </div>
+
+      <h2>Streaming with Bedrock</h2>
+      <pre><code class="language-python">import boto3
+import json
+
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+
+# Streaming uses invoke_model_with_response_stream
+response = bedrock.invoke_model_with_response_stream(
+    modelId="anthropic.claude-opus-4-5-20251101-v1:0",
+    body=json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1024,
+        "stream": True,
+        "messages": [{"role": "user", "content": "Write a haiku about cloud computing."}]
+    })
+)
+
+# Stream events
+for event in response["body"]:
+    chunk = json.loads(event["chunk"]["bytes"])
+    if chunk.get("type") == "content_block_delta":
+        print(chunk["delta"].get("text", ""), end="", flush=True)
+    elif chunk.get("type") == "message_stop":
+        print(f"\n\nStop reason: {chunk.get('amazon-bedrock-invocationMetrics', {})}")</code></pre>
+
+      <h2>Cross-Region Inference</h2>
+      <p>When a region's Claude capacity is exhausted, cross-region inference automatically routes requests to another AWS region with available capacity — reducing throttling for high-volume applications:</p>
+
+      <pre><code class="language-python">import boto3, json
+
+# Use the cross-region inference profile instead of a region-specific model ID
+# Format: {region-prefix}.{model-id}
+CROSS_REGION_MODEL_ID = "us.anthropic.claude-opus-4-5-20251101-v1:0"
+# "us." prefix = can use any US region (us-east-1, us-west-2)
+# "eu." prefix = can use any EU region
+
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+
+response = bedrock.invoke_model(
+    modelId=CROSS_REGION_MODEL_ID,  # Will auto-route if us-east-1 is busy
+    body=json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 512,
+        "messages": [{"role": "user", "content": "Hello!"}]
+    })
+)
+
+print(json.loads(response["body"].read())["content"][0]["text"])</code></pre>
+
+      <h2>Bedrock-Specific Features</h2>
+      <ul>
+        <li><strong>Guardrails:</strong> Apply content filtering, PII redaction, and topic blocking at the infrastructure level — bypasses Claude's direct API, applies to any model on Bedrock.</li>
+        <li><strong>Knowledge Bases:</strong> Bedrock's managed RAG service — upload documents to S3, Bedrock handles chunking, embedding, and retrieval.</li>
+        <li><strong>Agents for Bedrock:</strong> AWS-native agent framework that works with Lambda functions as tools.</li>
+        <li><strong>Model Evaluation:</strong> Run automated evaluations of Claude responses using Bedrock's eval framework.</li>
+        <li><strong>VPC endpoints:</strong> Keep all traffic within your VPC — never touches the public internet.</li>
+      </ul>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Bedrock API Call vs Anthropic SDK — Side by Side</h2>
+        <p>Call Claude with identical prompts using both the Anthropic SDK and the Bedrock boto3 client. Compare the APIs, response structure, and latency.</p>
+      </div>
+
+      <pre><code class="language-python">import time
+import json
+
+# ── Part 1: Anthropic SDK Call ─────────────────────────────────────────────────
+import anthropic
+
+def call_anthropic_sdk(prompt: str) -> dict:
+    """Call Claude via the Anthropic SDK."""
+    client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY
+
+    start = time.time()
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=300,
+        system="You are a helpful assistant. Be concise.",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    elapsed = time.time() - start
+
+    return {
+        "source": "Anthropic SDK",
+        "text": response.content[0].text,
+        "input_tokens": response.usage.input_tokens,
+        "output_tokens": response.usage.output_tokens,
+        "latency_ms": round(elapsed * 1000),
+        "model": response.model,
+        "stop_reason": response.stop_reason
+    }
+
+# ── Part 2: Bedrock boto3 Call ─────────────────────────────────────────────────
+import boto3
+
+def call_bedrock(prompt: str) -> dict:
+    """Call Claude via Amazon Bedrock (boto3)."""
+    # Requires AWS credentials configured:
+    # aws configure OR AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY env vars
+    try:
+        bedrock = boto3.client(
+            service_name="bedrock-runtime",
+            region_name="us-east-1"
+        )
+
+        request_body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 300,
+            "system": "You are a helpful assistant. Be concise.",
+            "messages": [{"role": "user", "content": prompt}]
+        }
+
+        start = time.time()
+        response = bedrock.invoke_model(
+            modelId="anthropic.claude-opus-4-5-20251101-v1:0",
+            body=json.dumps(request_body),
+            contentType="application/json",
+            accept="application/json"
+        )
+        elapsed = time.time() - start
+
+        body = json.loads(response["body"].read())
+        return {
+            "source": "Amazon Bedrock",
+            "text": body["content"][0]["text"],
+            "input_tokens": body["usage"]["input_tokens"],
+            "output_tokens": body["usage"]["output_tokens"],
+            "latency_ms": round(elapsed * 1000),
+            "model": body.get("model", "bedrock-model"),
+            "stop_reason": body.get("stop_reason")
+        }
+
+    except Exception as e:
+        return {
+            "source": "Amazon Bedrock",
+            "text": f"[Error - AWS credentials needed: {str(e)[:100]}]",
+            "input_tokens": 0, "output_tokens": 0, "latency_ms": 0,
+            "model": "N/A", "stop_reason": "error"
+        }
+
+# ── Run Comparison ─────────────────────────────────────────────────────────────
+def compare_providers(prompt: str):
+    print(f"\nPrompt: {prompt}")
+    print("="*60)
+
+    sdk_result = call_anthropic_sdk(prompt)
+    bedrock_result = call_bedrock(prompt)
+
+    for result in [sdk_result, bedrock_result]:
+        print(f"\n[{result['source']}]")
+        print(f"  Model:         {result['model']}")
+        print(f"  Input tokens:  {result['input_tokens']}")
+        print(f"  Output tokens: {result['output_tokens']}")
+        print(f"  Latency:       {result['latency_ms']}ms")
+        print(f"  Stop reason:   {result['stop_reason']}")
+        print(f"  Response:      {result['text'][:200]}")
+
+compare_providers("What are the three most important considerations when designing a RAG pipeline?")
+compare_providers("Write a Python one-liner that reverses a list.")</code></pre>
+
+      <h3>Bedrock with Tool Use (Function Calling)</h3>
+      <pre><code class="language-python">import boto3, json
+
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+
+# Tool use works identically to the Anthropic SDK — same JSON structure
+request_body = {
+    "anthropic_version": "bedrock-2023-05-31",
+    "max_tokens": 500,
+    "tools": [
+        {
+            "name": "get_weather",
+            "description": "Get the current weather for a location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City name"},
+                    "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+                },
+                "required": ["location"]
+            }
+        }
+    ],
+    "messages": [{"role": "user", "content": "What's the weather in Seattle?"}]
+}
+
+try:
+    response = bedrock.invoke_model(
+        modelId="anthropic.claude-opus-4-5-20251101-v1:0",
+        body=json.dumps(request_body)
+    )
+    body = json.loads(response["body"].read())
+    print(f"Stop reason: {body['stop_reason']}")
+    for block in body.get("content", []):
+        if block["type"] == "tool_use":
+            print(f"Tool call: {block['name']}")
+            print(f"Input: {json.dumps(block['input'], indent=2)}")
+except Exception as e:
+    print(f"[Needs AWS credentials]: {e}")</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>API parity:</strong> Claude's tool use, vision, streaming, and system prompts work identically on Bedrock — only the client initialization and model ID format differ. Migration from Anthropic SDK to Bedrock (or back) is a small refactor, not a rewrite.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/48-mcp-transports.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">MCP Transports</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/50-google-vertex.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Claude on Google Vertex AI</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 49,
+  slug: '49-amazon-bedrock',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/50-google-vertex.html',
+  quizData: [
+    {
+      question: "What is the required field in every Bedrock Claude request that the Anthropic SDK doesn't need?",
+      options: [
+        "region_name",
+        "anthropic_version: 'bedrock-2023-05-31'",
+        "aws_account_id",
+        "model_provider: 'anthropic'"
+      ],
+      correct: 1,
+      explanation: "Every Bedrock request to Claude must include 'anthropic_version': 'bedrock-2023-05-31' in the request body. The Anthropic SDK handles versioning internally; Bedrock requires explicit versioning."
+    },
+    {
+      question: "How does authentication work differently on Bedrock vs the Anthropic SDK?",
+      options: [
+        "Bedrock uses ANTHROPIC_API_KEY; the SDK uses AWS credentials",
+        "Both use the same API key format",
+        "Bedrock uses IAM roles/policies; the SDK uses ANTHROPIC_API_KEY",
+        "Bedrock requires OAuth; the SDK uses simple API keys"
+      ],
+      correct: 2,
+      explanation: "The Anthropic SDK authenticates with ANTHROPIC_API_KEY. Bedrock uses AWS IAM — you need IAM credentials (access key + secret, or an IAM role for EC2/Lambda) with bedrock:InvokeModel permission on the Claude model ARN."
+    },
+    {
+      question: "What does the 'us.' prefix in a Bedrock cross-region inference model ID do?",
+      options: [
+        "Restricts the model to only run in us-east-1",
+        "Indicates the model was trained in the United States",
+        "Enables automatic routing to any US region when the primary region is at capacity",
+        "Activates USD billing instead of the default EUR"
+      ],
+      correct: 2,
+      explanation: "Cross-region inference profiles (us.anthropic.claude-...) allow Bedrock to route your request to any eligible AWS US region (us-east-1, us-west-2) when one region is at capacity. This reduces throttling for high-volume applications."
+    },
+    {
+      question: "Which Bedrock feature is NOT available when using the Anthropic SDK directly?",
+      options: [
+        "Tool use (function calling)",
+        "Streaming responses",
+        "VPC endpoints to keep traffic within your AWS network",
+        "System prompts"
+      ],
+      correct: 2,
+      explanation: "Bedrock VPC endpoints allow all Claude API traffic to stay within your AWS VPC — it never touches the public internet. This is an AWS-specific infrastructure feature unavailable when calling Anthropic's API directly."
+    },
+    {
+      question: "The Bedrock model ID format is 'anthropic.claude-opus-4-5-20251101-v1:0'. What does the ':0' at the end represent?",
+      options: [
+        "The model is version 0 (experimental)",
+        "The model's throughput tier (0 = standard)",
+        "The model variant/alias number — Bedrock uses this for model versioning",
+        "It means the model has zero warmup time"
+      ],
+      correct: 2,
+      explanation: "In Bedrock's model ID format, ':0' is a version suffix that identifies a specific deployed model variant. When Anthropic updates a model, Bedrock may assign ':1', ':2', etc. ':0' is the standard first deployment."
+    }
+  ]
+};
+</script>
+</body>
+</html>

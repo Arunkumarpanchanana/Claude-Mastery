@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 42: Introduction to Subagents — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 42</span></div>
+      <h1 class="session-title">Introduction to Subagents</h1>
+      <p class="session-tagline">Understand what subagents are in Claude Code, how they differ from regular Claude, and when to use them for parallel tasks and specialized roles.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What Are Subagents in Claude Code?</h2>
+      <p>Claude Code has a built-in concept called <strong>subagents</strong> — separate Claude instances that a parent (orchestrator) agent can spawn to handle specific subtasks. Think of them like worker processes: the main agent delegates work to specialized workers, each with their own context, tools, and instructions.</p>
+
+      <p>When you use Claude Code and ask it to "work on multiple parts of this codebase simultaneously", it may spawn subagents. You can also explicitly create subagents using the <code>Task</code> tool or via <code>claude --spawn</code> in Claude Code SDK contexts.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Key mental model:</strong> Subagents are to Claude Code what threads are to programs. The orchestrator spawns them, gives them a task and context, and waits for results. Each subagent has its own clean context window — they don't share memory with each other.</div>
+      </div>
+
+      <h2>Subagents vs Regular Claude Code</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-user"></i> Regular Claude Code</h4>
+          <ul>
+            <li>Single conversation context</li>
+            <li>Sequential task execution</li>
+            <li>One set of tools and permissions</li>
+            <li>Context grows with every action</li>
+            <li>Simple, predictable</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-users"></i> Subagents</h4>
+          <ul>
+            <li>Each subagent has its own fresh context</li>
+            <li>Parallel execution of independent tasks</li>
+            <li>Each can have different tools/permissions</li>
+            <li>Orchestrator only sees subagent outputs</li>
+            <li>More complex but far more powerful</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>How Subagents Are Spawned</h2>
+      <p>In Claude Code, subagents are spawned via the built-in <strong>Task tool</strong>. The orchestrator calls <code>Task</code> with a description and prompt, and Claude Code creates a new agent instance to complete that task.</p>
+
+      <pre><code class="language-python"># This is how Claude Code internally handles subagent spawning.
+# In Claude Code SDK, you can trigger this via the Task tool:
+
+# Orchestrator calls:
+# Task(description="Analyze the authentication module",
+#      prompt="Read /src/auth/*.py and identify security issues")
+
+# Claude Code spawns a new agent with:
+# - Fresh context window
+# - The same tools as the parent (or a subset)
+# - The specific prompt and files the orchestrator provided
+# - Returns a text summary to the orchestrator when done</code></pre>
+
+      <h2>Use Cases for Subagents</h2>
+
+      <h3>1. Parallel Independent Tasks</h3>
+      <p>When tasks don't depend on each other, spawn them in parallel for faster completion:</p>
+
+      <pre><code class="language-python"># Orchestrator prompt (what you'd write in Claude Code):
+"""
+I need to review this codebase. Please:
+1. Spawn a subagent to analyze the /src/auth/ directory for security issues
+2. Spawn a subagent to check /src/api/ for performance bottlenecks
+3. Spawn a subagent to review /tests/ for test coverage gaps
+4. Once all three complete, synthesize their findings into a report.
+"""
+
+# Claude Code will internally use the Task tool 3 times in parallel,
+# wait for all results, then write the synthesis.</code></pre>
+
+      <h3>2. Specialized Roles</h3>
+      <p>Give each subagent a specific persona and focus area:</p>
+
+      <pre><code class="language-python"># Orchestrator instruction:
+"""
+Review this PR. Spawn three specialized reviewers:
+- Security reviewer: focus only on security vulnerabilities
+- Performance reviewer: focus only on algorithmic complexity and N+1 queries
+- Style reviewer: focus only on code style and naming conventions
+Combine their reviews into a final summary.
+"""</code></pre>
+
+      <h3>3. Map-Reduce Pattern</h3>
+      <p>Process a large dataset by splitting it across subagents (map), then aggregate (reduce):</p>
+
+      <pre><code class="language-python"># For a 100-file codebase:
+# Map: spawn 10 subagents, each processes 10 files
+# Reduce: orchestrator combines all findings
+
+# This is exactly how Claude Code handles large codebase analysis —
+# it doesn't read all 100 files in one context window!</code></pre>
+
+      <h2>Subagent Communication</h2>
+      <p>Subagents communicate with their parent through their final output. The parent sees only the return value — not the subagent's internal reasoning or intermediate tool calls. This is important: design subagents to produce structured, useful outputs.</p>
+
+      <pre><code class="language-python"># Poor subagent output:
+"I looked at the files and found some stuff."
+
+# Good subagent output (structured and actionable):
+"""
+Security Analysis of /src/auth/:
+- CRITICAL: SQL injection risk in auth.py:47 (unsanitized user input)
+- MEDIUM: JWT secret stored in source code at config.py:12
+- LOW: Password comparison not using constant-time comparison
+Total files reviewed: 4
+Files with issues: 2
+"""</code></pre>
+
+      <h2>Context and Memory Isolation</h2>
+      <p>Each subagent starts with a clean context. This is both a feature and a constraint:</p>
+      <ul>
+        <li><strong>Feature:</strong> Subagents don't pollute each other's context. They stay focused.</li>
+        <li><strong>Constraint:</strong> Subagents can't "remember" what other subagents did. The orchestrator must explicitly share relevant context when spawning each subagent.</li>
+      </ul>
+
+      <pre><code class="language-python"># WRONG: Assuming subagent knows what another did
+Task(prompt="Now fix the issues you found earlier")  # Subagent has no memory of "earlier"
+
+# RIGHT: Explicitly provide context
+Task(prompt=f"""Fix these specific issues:
+{previous_subagent_findings}
+
+In these files: /src/auth/auth.py, /src/config.py
+""")</code></pre>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Create Your First Claude Code Subagent</h2>
+        <p>Simulate a subagent orchestration pattern using the Anthropic SDK to understand how orchestrators delegate to and communicate with subagents.</p>
+      </div>
+
+      <pre><code class="language-python">import anthropic
+import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+client = anthropic.Anthropic()
+
+# Simulate the subagent mechanism using the Anthropic SDK
+# In Claude Code, this is done via the Task tool built into the environment
+
+def run_subagent(task_description: str, prompt: str, context: str = "") -> dict:
+    """
+    Simulate a subagent: a fresh Claude instance with a specific task.
+
+    Args:
+        task_description: Brief name for this subagent's role
+        prompt: The specific task prompt
+        context: Any context the orchestrator shares with this subagent
+
+    Returns:
+        dict with subagent results
+    """
+    full_prompt = f"{context}\n\n{prompt}" if context else prompt
+
+    response = client.messages.create(
+        model="claude-haiku-4-5",  # Subagents often use faster models
+        max_tokens=500,
+        system=f"You are a specialized assistant focused on: {task_description}. Be concise and structured in your output.",
+        messages=[{"role": "user", "content": full_prompt}]
+    )
+
+    return {
+        "subagent": task_description,
+        "output": response.content[0].text,
+        "tokens_used": response.usage.input_tokens + response.usage.output_tokens
+    }
+
+def orchestrate_code_review(code: str) -> str:
+    """
+    Orchestrator: spawns 3 specialized subagents to review code in parallel,
+    then synthesizes their findings.
+    """
+    print("Orchestrator: Spawning 3 specialized review subagents in parallel...")
+
+    # Define subagent tasks
+    subagent_tasks = [
+        (
+            "Security Reviewer",
+            f"Review this Python code for security vulnerabilities only. List issues as: [SEVERITY] description:\n\n{code}"
+        ),
+        (
+            "Performance Reviewer",
+            f"Review this Python code for performance issues only (complexity, N+1 queries, inefficient patterns). List issues:\n\n{code}"
+        ),
+        (
+            "Style Reviewer",
+            f"Review this Python code for style and readability issues only (naming, documentation, structure). List issues:\n\n{code}"
+        )
+    ]
+
+    # Fan-out: spawn all subagents in parallel
+    results = []
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(run_subagent, desc, prompt): desc
+            for desc, prompt in subagent_tasks
+        }
+        for future in as_completed(futures):
+            result = future.result()
+            results.append(result)
+            print(f"  Subagent '{result['subagent']}' completed ({result['tokens_used']} tokens)")
+
+    # Fan-in: orchestrator synthesizes all subagent outputs
+    print("\nOrchestrator: All subagents done. Synthesizing results...")
+
+    findings_text = "\n\n".join([
+        f"=== {r['subagent']} ===\n{r['output']}"
+        for r in results
+    ])
+
+    synthesis = client.messages.create(
+        model="claude-opus-4-5",  # Orchestrator uses more capable model for synthesis
+        max_tokens=600,
+        system="You are a senior code review coordinator. Synthesize specialist reviews into an actionable final report.",
+        messages=[{
+            "role": "user",
+            "content": f"""Three specialized code reviewers have analyzed the code.
+Synthesize their findings into a prioritized action plan.
+
+{findings_text}
+
+Write a final report with:
+1. Top 3 most critical issues to fix immediately
+2. Medium priority improvements
+3. Quick wins / style fixes"""
+        }]
+    )
+
+    return synthesis.content[0].text
+
+# Test with sample code
+SAMPLE_CODE = """
+import sqlite3
+import hashlib
+
+def get_user(username, password):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    # Get user from database
+    query = f"SELECT * FROM users WHERE username = '{username}'"
+    cursor.execute(query)
+    user = cursor.fetchone()
+    if user and user[2] == password:  # Compare plaintext passwords
+        return user
+    return None
+
+def process_items(user_id):
+    conn = sqlite3.connect('items.db')
+    items = conn.execute(f"SELECT * FROM items WHERE owner={user_id}").fetchall()
+    results = []
+    for item in items:
+        # Load details for each item
+        detail = conn.execute(f"SELECT * FROM details WHERE item_id={item[0]}").fetchone()
+        results.append((item, detail))
+    return results
+"""
+
+print("Starting multi-subagent code review...\n")
+report = orchestrate_code_review(SAMPLE_CODE)
+print("\n" + "="*60)
+print("FINAL CODE REVIEW REPORT")
+print("="*60)
+print(report)</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>The subagent pattern in action:</strong> Each specialist subagent had a fresh context focused only on its domain (security/performance/style). The orchestrator never showed each subagent the others' findings — isolation is key. The synthesis step is where the orchestrator adds value by combining perspectives.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/41-agents-tools.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Agents with Tools</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/43-designing-subagents.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Designing Effective Subagents</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 42,
+  slug: '42-subagents-intro',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/43-designing-subagents.html',
+  quizData: [
+    {
+      question: "What tool does Claude Code use internally to spawn subagents?",
+      options: ["spawn_agent", "Task", "SubAgent", "fork"],
+      correct: 1,
+      explanation: "Claude Code uses the built-in 'Task' tool to spawn subagents. When the orchestrator calls Task with a description and prompt, Claude Code creates a new agent instance."
+    },
+    {
+      question: "Can two sibling subagents (spawned by the same orchestrator) see each other's work?",
+      options: [
+        "Yes, they share a common context window",
+        "Yes, but only if they use the same model",
+        "No, each subagent has its own isolated context",
+        "No, unless the orchestrator explicitly passes information between them"
+      ],
+      correct: 2,
+      explanation: "Each subagent starts with a completely fresh, isolated context. Sibling subagents have no knowledge of each other's work. Only the orchestrator receives both their outputs and can pass information between them."
+    },
+    {
+      question: "Why is context isolation between subagents considered a feature?",
+      options: [
+        "It reduces the total cost of API calls",
+        "Subagents stay focused on their task without being distracted by other agents' work",
+        "It allows subagents to run on different servers",
+        "It enables subagents to use different API keys"
+      ],
+      correct: 1,
+      explanation: "When a security reviewer subagent has a clean context focused only on security, it won't be distracted by performance issues or style concerns. Isolation enforces specialization and prevents context pollution."
+    },
+    {
+      question: "What is the correct way to give a subagent context from a previous subagent's findings?",
+      options: [
+        "Subagents automatically share state — no action needed",
+        "Use a shared database that all subagents read from",
+        "The orchestrator explicitly includes the previous findings in the new subagent's prompt",
+        "Set a shared environment variable before spawning"
+      ],
+      correct: 2,
+      explanation: "The orchestrator must explicitly pass relevant context in each subagent's prompt. There is no automatic sharing. The orchestrator is the only entity with visibility into all subagents' outputs."
+    },
+    {
+      question: "Which task is BEST suited for subagents vs a single Claude Code session?",
+      options: [
+        "Writing a single function based on a specification",
+        "Reviewing 5 completely independent modules simultaneously",
+        "Having a back-and-forth conversation to refine a design",
+        "Reading one file and summarizing it"
+      ],
+      correct: 1,
+      explanation: "Reviewing 5 independent modules is a perfect subagent use case: the tasks don't depend on each other, they can run in parallel, and each benefits from focused context. Conversation and single-file tasks work fine in a single session."
+    }
+  ]
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 27: Prompt Caching — Rules & Implementation — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 27</span></div>
+      <h1 class="session-title">Prompt Caching — Rules & Implementation</h1>
+      <p class="session-tagline">Cut costs by up to 90% and reduce latency by caching your large system prompts and shared context — once set up, it's automatic.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 35 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="what-is-caching">What Is Prompt Caching?</h2>
+      <p>Prompt caching lets you mark part of your prompt as "cacheable". The first time that content is processed, Anthropic stores the KV cache for those tokens server-side. Subsequent requests that begin with the same cached prefix get a cache hit — those tokens are processed at a significantly lower cost (typically ~90% discount) and with lower latency.</p>
+
+      <div class="info-box">
+        <strong>When caching saves you money:</strong> You have a large system prompt (1,000+ tokens of instructions, documents, or tools) that you send with every request. Without caching, you pay full price for those tokens each time. With caching, you pay once per 5-minute window.
+      </div>
+
+      <h2 id="cache-control">The cache_control Parameter</h2>
+      <p>Add <code>"cache_control": {"type": "ephemeral"}</code> to the content block you want to cache:</p>
+
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+# Large system prompt (must be ≥ 1024 tokens to be cacheable)
+LARGE_SYSTEM_PROMPT = """You are an expert Python developer assistant.
+[... imagine 2000+ tokens of detailed instructions, coding standards,
+     API documentation, and project context here ...]
+"""
+
+response = client.messages.create(
+    model="claude-haiku-4-5",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": LARGE_SYSTEM_PROMPT,
+            "cache_control": {"type": "ephemeral"}  # Cache this!
+        }
+    ],
+    messages=[
+        {"role": "user", "content": "How do I write a context manager in Python?"}
+    ]
+)
+
+# Check if the cache was used
+usage = response.usage
+print(f"Input tokens           : {usage.input_tokens}")
+print(f"Cache creation tokens  : {usage.cache_creation_input_tokens}")
+print(f"Cache read tokens      : {usage.cache_read_input_tokens}")
+# On cache hit: cache_read_input_tokens > 0, cache_creation = 0
+</code></pre>
+
+      <h2 id="caching-rules">The Rules of Prompt Caching</h2>
+      <ul>
+        <li><strong>Minimum 1024 tokens</strong> to be eligible for caching — short content cannot be cached</li>
+        <li><strong>5-minute TTL</strong> — cache expires 5 minutes after the last request that used it. Each cache hit resets the timer.</li>
+        <li><strong>Prefix matching</strong> — the cached content must appear at the start of the prompt, unchanged</li>
+        <li><strong>Up to 4 cache breakpoints</strong> per request</li>
+        <li><strong>Writing costs slightly more</strong> — the first request to create the cache has a small surcharge (~25%). Every subsequent cache hit saves ~90%.</li>
+      </ul>
+
+      <h2 id="what-to-cache">What to Cache</h2>
+      <ul>
+        <li>Long system prompts with instructions, company context, or domain knowledge</li>
+        <li>Tool definitions that don't change between requests</li>
+        <li>Large documents that many user questions will reference</li>
+        <li>Few-shot examples that precede the actual user input</li>
+      </ul>
+
+      <h2 id="cache-with-messages">Caching in the Messages Array</h2>
+      <p>You can also cache content within the messages array — useful for a long document at the start of the conversation:</p>
+
+      <pre><code class="language-python">long_document = "..." * 500  # A long document text
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": f"Here is the document to analyze:\n\n{long_document}",
+                    "cache_control": {"type": "ephemeral"}
+                },
+                {
+                    "type": "text",
+                    "text": "What are the key themes in this document?"
+                }
+            ]
+        }
+    ]
+)
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Cache hit strategy:</strong> Keep cached content at the beginning of your prompt and never-changing. Put dynamic, per-user content (their specific question) after the cached section. The cache prefix must match exactly — any modification breaks the cache.
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Implement Prompt Caching for a Long System Prompt</h2>
+      <p>Measure the cost and latency difference between cached and uncached requests.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/prompt_caching.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+prompt_caching_lab.py — Measure caching benefits
+"""
+import anthropic
+import time
+
+client = anthropic.Anthropic()
+
+# Generate a large system prompt (~1500 tokens)
+SYSTEM_PROMPT_BASE = """
+You are an expert software architect specializing in distributed systems.
+You have deep expertise in: microservices, event-driven architecture, CAP theorem,
+distributed transactions, message queues, API design, database sharding, caching
+strategies, load balancing, service discovery, circuit breakers, and observability.
+
+You follow these principles:
+1. Always consider failure modes before designing happy paths
+2. Prefer simple solutions over clever ones
+3. Design for the reader, not the writer — code is read 10x more than written
+4. Measure before optimizing — use data, not intuition
+5. Explicit is better than implicit
+
+When reviewing code or designs, always check for:
+- Security vulnerabilities (OWASP Top 10)
+- Performance bottlenecks (N+1 queries, missing indexes, unnecessary round trips)
+- Error handling completeness
+- Observability (logging, metrics, tracing)
+- Scalability limits
+
+Your response format:
+- Be direct and specific — no filler phrases
+- Use bullet points for lists of issues
+- Provide concrete examples when suggesting improvements
+- Rate severity: Critical > High > Medium > Low
+
+Project context:
+- Tech stack: Python/FastAPI, PostgreSQL, Redis, RabbitMQ, Kubernetes
+- Team size: 8 engineers
+- Uptime requirement: 99.9% (8.7 hours downtime/year max)
+- Traffic: 10k req/min at peak, expected to 10x in 18 months
+- Compliance: SOC 2 Type II, GDPR
+
+{additional_context}
+"""
+
+# Make it long enough to cache (>1024 tokens)
+ADDITIONAL_CONTEXT = """
+Current architecture decisions:
+- All services communicate via REST (moving to gRPC for internal)
+- Database per service pattern (no shared DBs)
+- Eventual consistency preferred over strong consistency where possible
+- All secrets managed via HashiCorp Vault
+- Observability stack: Datadog APM, structured JSON logging, OpenTelemetry
+- Deployment: GitOps via ArgoCD, blue/green deployments
+- All changes go through code review + automated tests before production
+""" * 3  # Repeat to ensure we exceed 1024 tokens
+
+SYSTEM_PROMPT = SYSTEM_PROMPT_BASE.format(additional_context=ADDITIONAL_CONTEXT)
+print(f"System prompt length: ~{len(SYSTEM_PROMPT.split())} words")
+
+
+def make_request(question: str, use_cache: bool) -> dict:
+    """Make a request with or without caching."""
+    system_content = {"type": "text", "text": SYSTEM_PROMPT}
+    if use_cache:
+        system_content["cache_control"] = {"type": "ephemeral"}
+
+    start = time.time()
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        system=[system_content],
+        messages=[{"role": "user", "content": question}]
+    )
+    latency = (time.time() - start) * 1000
+
+    return {
+        "latency_ms": latency,
+        "input_tokens": response.usage.input_tokens,
+        "cache_creation": getattr(response.usage, "cache_creation_input_tokens", 0),
+        "cache_read": getattr(response.usage, "cache_read_input_tokens", 0),
+        "output_tokens": response.usage.output_tokens,
+        "text": response.content[0].text[:100]
+    }
+
+
+QUESTIONS = [
+    "What's the biggest risk in our current architecture?",
+    "How should we handle database migrations in our microservices?",
+    "What observability metrics should we track for our API gateway?",
+]
+
+print("\n=== WITHOUT CACHING ===")
+for q in QUESTIONS:
+    result = make_request(q, use_cache=False)
+    print(f"Q: {q[:50]}...")
+    print(f"  Latency: {result['latency_ms']:.0f}ms | Tokens: {result['input_tokens']} in")
+    print()
+
+print("\n=== WITH CACHING (first request creates cache) ===")
+for i, q in enumerate(QUESTIONS):
+    result = make_request(q, use_cache=True)
+    print(f"Q: {q[:50]}...")
+    print(f"  Latency   : {result['latency_ms']:.0f}ms")
+    print(f"  Cache miss: {result['cache_creation']} tokens created")
+    print(f"  Cache hit : {result['cache_read']} tokens read from cache")
+    print()
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/26-extended-thinking.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Extended Thinking, Vision & PDF Support</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/28-tool-use.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Tool Use & Function Calling</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 27,
+  slug: '27-prompt-caching',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/28-tool-use.html',
+  quizData: [
+    {
+      question: "What is the minimum token count required for a content block to be eligible for prompt caching?",
+      options: ["256 tokens", "512 tokens", "1024 tokens", "2048 tokens"],
+      correct: 2,
+      explanation: "Prompt caching requires a minimum of 1024 tokens in the cacheable content block. Content below this threshold cannot be cached."
+    },
+    {
+      question: "How long does the prompt cache TTL last?",
+      options: ["1 minute", "5 minutes", "1 hour", "24 hours"],
+      correct: 1,
+      explanation: "The cache TTL is 5 minutes. Each cache hit resets the timer. If no requests use the cache for 5 minutes, it expires."
+    },
+    {
+      question: "How do you mark content for prompt caching in the Python SDK?",
+      options: ["Set cache=True in messages.create()", "Add cache_control={'type': 'ephemeral'} to the content block", "Set temperature=0 to enable caching", "Add Cache-Control header to the request"],
+      correct: 1,
+      explanation: "Add cache_control={'type': 'ephemeral'} directly to the content block dictionary to mark it for caching."
+    },
+    {
+      question: "What does cache_read_input_tokens > 0 in response.usage indicate?",
+      options: ["The cache was created for the first time", "The request got a cache hit and those tokens were served from cache", "The request failed to connect to the cache", "The response was cached for the next call"],
+      correct: 1,
+      explanation: "cache_read_input_tokens > 0 confirms a cache hit — those tokens were retrieved from the prompt cache rather than processed fresh, saving cost."
+    },
+    {
+      question: "Which content is BEST suited for prompt caching?",
+      options: ["The user's specific question in each request", "A long system prompt with instructions that doesn't change between users", "The conversation history that grows with each turn", "The model name and temperature setting"],
+      correct: 1,
+      explanation: "Long, static content like system prompts or tool definitions is ideal for caching — it's large enough to meet the 1024-token minimum and identical across many requests."
+    }
+  ]
+};
+</script>
+</body>
+</html>

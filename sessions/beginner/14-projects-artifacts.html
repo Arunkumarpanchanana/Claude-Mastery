@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 14: Projects, Artifacts &amp; Organization — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 14</span></div>
+      <h1 class="session-title">Projects, Artifacts &amp; Organization</h1>
+      <p class="session-tagline">Unlock persistent context, organized workflows, and reusable knowledge by mastering Claude Projects and the Artifacts feature.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Setup &amp; Workflow Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Claude Projects: Solving the Memory Problem</h2>
+      <p>We covered in Session 7 that Claude has no persistent memory by default. Every conversation starts fresh. Claude Projects is Anthropic's solution for ongoing work that spans multiple sessions.</p>
+
+      <p>A Project is a dedicated workspace within Claude.ai that:</p>
+      <ul>
+        <li>Maintains a set of <strong>knowledge documents</strong> that are loaded into every conversation's context</li>
+        <li>Preserves a <strong>persistent instruction set</strong> (custom system prompt) for all conversations in the project</li>
+        <li>Keeps a <strong>conversation history</strong> within the project so you can return to previous sessions</li>
+        <li>Allows you to <strong>upload and reference files</strong> that Claude can access across sessions</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>The practical effect:</strong> With Projects, Claude effectively "knows" your role, preferences, ongoing goals, and key background without you re-stating it every session. It's the difference between working with a new contractor each day and working with a dedicated team member who knows your context.</div>
+      </div>
+
+      <h2>Setting Up a Useful Project</h2>
+      <p>A well-configured project has three key components:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Project Instructions (Persistent System Prompt)</h4>
+            <p>This is the most powerful component. Write a detailed instruction set that tells Claude who you are, what the project is for, what style you prefer, and any standing rules or constraints. This appears at the top of every conversation's context.</p>
+            <p><strong>Good instruction includes:</strong> your role and background, preferred response style, the project's purpose and goals, key terminology or conventions, what Claude should and shouldn't assume.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Knowledge Documents</h4>
+            <p>Upload documents that Claude should have access to — style guides, company information, reference materials, past work examples. Claude will have this context in every project conversation without you pasting it each time.</p>
+            <p><strong>Great knowledge docs:</strong> brand voice guidelines, technical reference docs, project briefs, persona documents, previous decisions you want Claude to know about.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Conversation Organization</h4>
+            <p>Use separate conversations within the project for different sub-tasks or phases. Don't try to do everything in one mega-conversation — each conversation starts fresh with your persistent context, which keeps them focused.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Artifacts: Creating Reusable Outputs</h2>
+      <p>When Claude generates a substantial self-contained piece of work — a document, a code file, a spreadsheet, an SVG image — it may render it as an <em>Artifact</em>: a side panel that displays the output separately from the conversation.</p>
+
+      <p>Artifacts have several advantages:</p>
+      <ul>
+        <li><strong>They're easier to read</strong> — rendered as the document itself, not as text in a chat bubble</li>
+        <li><strong>They're editable in-place</strong> — you can ask Claude to modify specific parts without regenerating everything</li>
+        <li><strong>They can be shared</strong> — some types of artifacts can be published or exported</li>
+        <li><strong>Code artifacts run</strong> — for supported languages, you can execute code directly in the artifact panel</li>
+      </ul>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-file-code"></i> Code Artifacts</h4>
+          <p>HTML, CSS, JavaScript, React components render and run in the artifact panel. You can see the output live and ask Claude to modify specific elements.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-file-lines"></i> Document Artifacts</h4>
+          <p>Markdown documents, reports, letters render as formatted text. You can iterate on specific sections without regenerating the whole document.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-table"></i> Data Artifacts</h4>
+          <p>Tables and structured data render as proper tables. For CSV-style data, Claude can produce cleanly formatted tabular output you can copy directly into spreadsheet tools.</p>
+        </div>
+      </div>
+
+      <h2>Organizing Knowledge with Claude</h2>
+      <p>Beyond Projects, you can use Claude as a knowledge organization tool — helping you structure, tag, and synthesize information from various sources into reusable formats.</p>
+
+      <p>Useful knowledge organization workflows:</p>
+      <ul>
+        <li><strong>Meeting notes → Action items:</strong> Paste raw notes, ask Claude to extract decisions, owners, and deadlines</li>
+        <li><strong>Research synthesis:</strong> Paste multiple sources, ask Claude to find common themes and contradictions</li>
+        <li><strong>Decision logging:</strong> After important decisions, have Claude document the decision, rationale, and alternatives considered</li>
+        <li><strong>Knowledge base creation:</strong> Ask Claude to convert your informal notes into structured FAQ or wiki-style articles</li>
+      </ul>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Power workflow: the project knowledge loop.</strong> As you work in a project, periodically ask Claude to summarize the key decisions, learnings, and context from that project. Add this summary as a knowledge document. Over time, the project's knowledge base grows and Claude gets better at supporting your specific work.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Set Up Your First Claude Project</h2>
+        <p>Create a real working project in Claude.ai with proper instructions and knowledge documents. This project will serve you for the rest of the course and beyond.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Choose a real project</h3></div>
+          <p>Think of an ongoing project or area of work where you'd benefit from Claude having persistent context. Examples:</p>
+          <ul>
+            <li>A work project (product launch, research, content creation)</li>
+            <li>A learning goal (studying for a certification, learning a new skill)</li>
+            <li>A creative project (writing a book, building an app)</li>
+            <li>A personal goal (job search, business idea, health journey)</li>
+          </ul>
+          <p>Open Claude.ai, go to the sidebar, and create a new Project.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Write your project instructions</h3></div>
+          <p>Ask Claude (in a regular conversation) to help you write project instructions:</p>
+          <pre><code class="language-text">Help me write project instructions for a Claude Project. The project is: [your project]. I am: [your role/background]. My preferred response style: [direct/detailed/etc]. Key context Claude should always have: [key facts]. What Claude should and shouldn't do: [any standing rules].
+
+Format it as a ready-to-paste instruction block.</code></pre>
+          <p>Review, edit, and paste this into your Project's instruction field.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Create and upload a knowledge document</h3></div>
+          <p>Create one knowledge document for your project. This could be:</p>
+          <ul>
+            <li>A reference document (style guide, key definitions, relevant facts)</li>
+            <li>A project brief (goals, timeline, constraints, stakeholders)</li>
+            <li>Previous work examples Claude should match</li>
+          </ul>
+          <p>Ask Claude to help you write it: "Help me create a [type] knowledge document for a project about [topic]. It should include [key sections]."</p>
+          <p>Upload it to your project.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Test your project context</h3></div>
+          <p>Start a new conversation within the project. Without adding any context, ask Claude something that would only make sense if it had your project instructions and knowledge document.</p>
+          <p>For example, if your project is about a specific work domain: ask Claude a domain-specific question and see if it responds with the context from your setup.</p>
+          <p>Does it "know" who you are and what you're working on?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Create an Artifact</h3></div>
+          <p>In your project conversation, ask Claude to produce a substantial output — a document, a plan, a template — that would benefit from the Artifact rendering. Try:</p>
+          <pre><code class="language-text">Create a project status dashboard template as a formatted markdown document that I can reuse weekly. Include sections for: key metrics, decisions made, blockers, next week priorities.</code></pre>
+          <p>Claude should render this as a Document Artifact. Explore how you can iterate on it — "make the metrics section more detailed" — without regenerating the whole document.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/13-diligence.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Diligence &amp; Responsible AI Use</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/15-desktop-app.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Claude Desktop App Deep Dive</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 14,
+  slug: '14-projects-artifacts',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/15-desktop-app.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What problem does Claude Projects primarily solve?',
+      options: [
+        { text: 'Claude\'s inability to write code', correct: false },
+        { text: 'The lack of persistent context and memory across conversations', correct: true },
+        { text: 'Slow response times for long queries', correct: false },
+        { text: 'The training cutoff date limitation', correct: false }
+      ],
+      explanation: 'Claude Projects solves the memory problem — by maintaining persistent instructions and knowledge documents that load into every project conversation, Claude "knows" your context without you re-stating it each time.'
+    },
+    {
+      id: 'q2',
+      type: 'multi',
+      points: 2,
+      question: 'Which of these are good candidates for a project\'s knowledge documents? (Select all that apply)',
+      options: [
+        { text: 'Brand voice guidelines', correct: true },
+        { text: 'Technical reference documentation', correct: true },
+        { text: 'Your current conversation transcript', correct: false },
+        { text: 'A project brief with goals and constraints', correct: true },
+        { text: 'Past work examples you want Claude to match', correct: true }
+      ],
+      explanation: 'Good knowledge documents: style guides, technical references, project briefs, and examples. The current conversation transcript doesn\'t need to be a knowledge document — it\'s already in context as your conversation history.'
+    },
+    {
+      id: 'q3',
+      type: 'mcq',
+      points: 1,
+      question: 'What is an "Artifact" in Claude.ai?',
+      options: [
+        { text: 'A historical document from Claude\'s training data', correct: false },
+        { text: 'A substantial self-contained output (document, code, etc.) rendered in a side panel', correct: true },
+        { text: 'An error in Claude\'s response', correct: false },
+        { text: 'A file you upload to Claude', correct: false }
+      ],
+      explanation: 'Artifacts are substantial, self-contained outputs rendered in a side panel — separate from the conversation. They can be documents, code, tables, or SVG graphics. They\'re easier to read, editable in-place, and in some cases executable.'
+    },
+    {
+      id: 'q4',
+      type: 'truefalse',
+      points: 1,
+      question: 'All conversations within a Claude Project share the same persistent instructions and knowledge documents.',
+      correctAnswer: true,
+      explanation: 'Yes — that\'s the core feature of Projects. Every conversation you start within a project has access to the project\'s instructions and knowledge documents. This gives Claude persistent context across sessions without you re-pasting background each time.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the "project knowledge loop" technique?',
+      options: [
+        { text: 'Importing external knowledge bases into Claude', correct: false },
+        { text: 'Periodically asking Claude to summarize project learnings and adding that summary as a knowledge document', correct: true },
+        { text: 'Connecting Claude to Google Drive for automatic syncing', correct: false },
+        { text: 'Creating a new project for each separate topic', correct: false }
+      ],
+      explanation: 'The project knowledge loop: as you work, periodically ask Claude to summarize key decisions, learnings, and context, then add that summary as a knowledge document. This grows the project\'s knowledge base and improves Claude\'s support over time.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

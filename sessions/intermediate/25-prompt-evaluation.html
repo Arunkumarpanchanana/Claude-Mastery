@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 25: Prompt Evaluation & Eval Workflows — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 25</span></div>
+      <h1 class="session-title">Prompt Evaluation & Eval Workflows</h1>
+      <p class="session-tagline">Stop guessing whether your prompts are good — build a test harness that measures quality automatically and catches regressions before they ship.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="why-evals">Why Evals Matter</h2>
+      <p>Without evals, prompt changes are a black box. You think you improved the prompt — but did you? Evals give you:</p>
+      <ul>
+        <li><strong>Measurable baselines</strong> — what's the current accuracy before changes?</li>
+        <li><strong>Regression detection</strong> — did a model update break something?</li>
+        <li><strong>A/B comparison</strong> — which of two prompts is objectively better?</li>
+        <li><strong>Confidence to ship</strong> — proof that your change improved things</li>
+      </ul>
+
+      <h2 id="test-dataset">Building a Test Dataset</h2>
+      <p>A test dataset is a set of (input, expected_output) pairs that cover your task's range:</p>
+
+      <pre><code class="language-python">TEST_CASES = [
+    {
+        "input": "The quick brown fox jumps over the lazy dog.",
+        "expected_category": "sentence",
+        "notes": "Standard pangram"
+    },
+    {
+        "input": "2+2",
+        "expected_category": "math",
+        "notes": "Simple arithmetic"
+    },
+    {
+        "input": "def hello(): print('hi')",
+        "expected_category": "code",
+        "notes": "Python snippet"
+    },
+]
+</code></pre>
+
+      <p>Dataset tips:</p>
+      <ul>
+        <li>Include 20-100 cases minimum for meaningful statistics</li>
+        <li>Include hard cases and edge cases, not just easy ones</li>
+        <li>Include cases where you know the model tends to fail</li>
+        <li>Label the expected output as precisely as possible</li>
+      </ul>
+
+      <h2 id="code-based-grading">Code-Based Grading</h2>
+      <p>The simplest eval: write a Python function that checks the output programmatically:</p>
+
+      <pre><code class="language-python">def grade_exact_match(response: str, expected: str) -> bool:
+    return response.strip().lower() == expected.strip().lower()
+
+def grade_contains(response: str, expected: str) -> bool:
+    return expected.lower() in response.lower()
+
+def grade_json_schema(response: str, required_keys: list) -> bool:
+    import json
+    try:
+        data = json.loads(response)
+        return all(k in data for k in required_keys)
+    except json.JSONDecodeError:
+        return False
+</code></pre>
+
+      <h2 id="model-based-grading">Model-Based Grading (LLM-as-Judge)</h2>
+      <p>For subjective tasks (quality, helpfulness, tone), use Claude itself as the evaluator:</p>
+
+      <pre><code class="language-python">def grade_with_llm(prompt: str, response: str, criteria: str) -> dict:
+    """Use Claude to grade a response on a given criteria."""
+    grader_prompt = f"""&lt;criteria&gt;
+{criteria}
+&lt;/criteria&gt;
+
+&lt;prompt&gt;
+{prompt}
+&lt;/prompt&gt;
+
+&lt;response&gt;
+{response}
+&lt;/response&gt;
+
+Grade the response on the criteria above.
+Return JSON: {{"score": 1-5, "reasoning": "...", "pass": true/false}}
+"""
+    result = client.messages.create(
+        model="claude-haiku-4-5",  # Cheap model for grading
+        max_tokens=256,
+        temperature=0,
+        messages=[{"role": "user", "content": grader_prompt}]
+    )
+    import json
+    return json.loads(result.content[0].text)
+</code></pre>
+
+      <h2 id="eval-metrics">Eval Metrics</h2>
+      <ul>
+        <li><strong>Accuracy</strong> — % of test cases that passed</li>
+        <li><strong>Pass@k</strong> — does at least one of k tries pass?</li>
+        <li><strong>Average score</strong> — mean score from LLM grader (1-5)</li>
+        <li><strong>Latency</strong> — P50 / P95 response time</li>
+        <li><strong>Cost per case</strong> — average tokens × price</li>
+      </ul>
+
+      <h2 id="eval-workflow">The Eval Workflow</h2>
+      <ol>
+        <li>Build dataset from real user queries or synthetic examples</li>
+        <li>Run dataset through current prompt (baseline)</li>
+        <li>Make a prompt change</li>
+        <li>Run dataset through new prompt</li>
+        <li>Compare accuracy / score — ship if better, iterate if not</li>
+        <li>Add any new failure cases to the dataset</li>
+      </ol>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build an Eval Harness for a Summarization Prompt</h2>
+      <p>Build a complete eval pipeline with code-based and LLM-based grading.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+eval_harness.py — Evaluate a summarization prompt
+pip install anthropic
+"""
+import anthropic
+import json
+import time
+from dataclasses import dataclass
+
+client = anthropic.Anthropic()
+
+# --- Test dataset ---
+TEST_CASES = [
+    {
+        "id": "tc1",
+        "text": "Python was created by Guido van Rossum and first released in 1991. It emphasizes code readability with its notable use of significant indentation. Python is dynamically typed and garbage-collected. It supports multiple programming paradigms, including structured, object-oriented and functional programming.",
+        "required_keywords": ["python", "1991", "readability"],
+        "max_words": 40
+    },
+    {
+        "id": "tc2",
+        "text": "The Apollo 11 mission was the first crewed lunar landing mission. Launched on July 16, 1969, it carried commander Neil Armstrong, command module pilot Michael Collins, and lunar module pilot Edwin Aldrin. On July 20, Armstrong and Aldrin became the first humans to walk on the Moon.",
+        "required_keywords": ["apollo 11", "1969", "moon"],
+        "max_words": 40
+    },
+    {
+        "id": "tc3",
+        "text": "Machine learning is a method of data analysis that automates analytical model building. Based on the idea that systems can learn from data, identify patterns and make decisions with minimal human intervention, machine learning is a branch of artificial intelligence.",
+        "required_keywords": ["machine learning", "data", "patterns"],
+        "max_words": 35
+    },
+]
+
+SUMMARIZATION_PROMPT = """Summarize the following text in 1-2 sentences.
+Be concise. Include the most important facts.
+
+&lt;text&gt;
+{text}
+&lt;/text&gt;"""
+
+
+@dataclass
+class EvalResult:
+    test_id: str
+    response: str
+    word_count: int
+    keywords_found: list[str]
+    keywords_missing: list[str]
+    llm_score: int
+    llm_reasoning: str
+    passed: bool
+    latency_ms: float
+
+
+def run_summarization(text: str) -> tuple[str, float]:
+    """Run the summarization prompt and return (text, latency_ms)."""
+    start = time.time()
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=128,
+        temperature=0,
+        messages=[{
+            "role": "user",
+            "content": SUMMARIZATION_PROMPT.format(text=text)
+        }]
+    )
+    latency = (time.time() - start) * 1000
+    return response.content[0].text.strip(), latency
+
+
+def grade_response(test_case: dict, response: str) -> dict:
+    """Code-based grading."""
+    word_count = len(response.split())
+    keywords_found = [k for k in test_case["required_keywords"]
+                      if k.lower() in response.lower()]
+    keywords_missing = [k for k in test_case["required_keywords"]
+                        if k.lower() not in response.lower()]
+    return {
+        "word_count": word_count,
+        "keywords_found": keywords_found,
+        "keywords_missing": keywords_missing,
+        "within_limit": word_count <= test_case["max_words"]
+    }
+
+
+def grade_with_llm(original_text: str, summary: str) -> dict:
+    """LLM-as-judge grading."""
+    judge_prompt = f"""Rate this summary of a passage on a scale of 1-5.
+
+Original: {original_text[:300]}
+
+Summary: {summary}
+
+Criteria: accuracy (is the summary factually correct?), completeness (key facts included?), conciseness (not verbose?).
+
+Return JSON only: {{"score": 1-5, "reasoning": "one sentence"}}"""
+
+    result = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=100,
+        temperature=0,
+        messages=[{"role": "user", "content": judge_prompt}]
+    )
+    return json.loads(result.content[0].text.strip())
+
+
+def run_eval() -> list[EvalResult]:
+    """Run the full eval suite."""
+    results = []
+    for tc in TEST_CASES:
+        print(f"Running {tc['id']}...")
+        response, latency = run_summarization(tc["text"])
+        code_grade = grade_response(tc, response)
+        llm_grade = grade_with_llm(tc["text"], response)
+
+        passed = (
+            code_grade["within_limit"] and
+            len(code_grade["keywords_missing"]) == 0 and
+            llm_grade["score"] >= 4
+        )
+
+        results.append(EvalResult(
+            test_id=tc["id"],
+            response=response,
+            word_count=code_grade["word_count"],
+            keywords_found=code_grade["keywords_found"],
+            keywords_missing=code_grade["keywords_missing"],
+            llm_score=llm_grade["score"],
+            llm_reasoning=llm_grade["reasoning"],
+            passed=passed,
+            latency_ms=latency
+        ))
+    return results
+
+
+def print_report(results: list[EvalResult]) -> None:
+    """Print eval report."""
+    passed = sum(1 for r in results if r.passed)
+    print(f"\n{'='*60}")
+    print(f"EVAL RESULTS: {passed}/{len(results)} passed ({passed/len(results)*100:.0f}%)")
+    print(f"Avg latency : {sum(r.latency_ms for r in results)/len(results):.0f}ms")
+    print(f"Avg LLM score: {sum(r.llm_score for r in results)/len(results):.1f}/5")
+    print()
+    for r in results:
+        status = "PASS" if r.passed else "FAIL"
+        print(f"[{status}] {r.test_id}")
+        print(f"  Summary   : {r.response[:80]}...")
+        print(f"  Words     : {r.word_count}")
+        print(f"  Keywords  : found={r.keywords_found}, missing={r.keywords_missing}")
+        print(f"  LLM score : {r.llm_score}/5 — {r.llm_reasoning}")
+        print(f"  Latency   : {r.latency_ms:.0f}ms\n")
+
+
+if __name__ == "__main__":
+    results = run_eval()
+    print_report(results)
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/24-xml-tags-examples.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">XML Tags, Examples & Prompt Structure</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/26-extended-thinking.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Extended Thinking, Vision & PDF Support</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 25,
+  slug: '25-prompt-evaluation',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/26-extended-thinking.html',
+  quizData: [
+    {
+      question: "What is 'LLM-as-judge' in eval workflows?",
+      options: ["Using a human to evaluate outputs", "Using another Claude call to grade the quality of a response", "Using automated unit tests", "Using a predefined scoring rubric without AI"],
+      correct: 1,
+      explanation: "LLM-as-judge (or model-based grading) uses a language model (often Claude) to evaluate subjective qualities like helpfulness, tone, and accuracy that can't be measured with code."
+    },
+    {
+      question: "Why should your test dataset include edge cases and hard examples?",
+      options: ["To make the eval harder to pass", "To get a realistic measure of performance on inputs that stress the system", "To reduce the number of test cases needed", "Edge cases aren't important in test datasets"],
+      correct: 1,
+      explanation: "Easy cases can give falsely high accuracy. Edge cases reveal where the prompt breaks down in production — which is what you actually need to know."
+    },
+    {
+      question: "What is the primary purpose of running evals before and after a prompt change?",
+      options: ["To find the cheapest model to use", "To measure whether the change improved or regressed performance", "To satisfy API rate limits", "To generate more training data"],
+      correct: 1,
+      explanation: "Evals before and after a change let you measure the effect objectively — did accuracy improve? Did it regress on any cases? This is the core of iterative prompt development."
+    },
+    {
+      question: "What does Pass@k mean as an eval metric?",
+      options: ["At least k test cases pass", "At least one of k attempts at the same test passes", "k% of responses are correct", "The model passes the test in k seconds"],
+      correct: 1,
+      explanation: "Pass@k measures whether at least one response from k generation attempts passes the test. Useful for tasks where variety is needed and any correct answer is acceptable."
+    },
+    {
+      question: "Which is the most important quality of a good eval test dataset?",
+      options: ["As large as possible (thousands of cases)", "Representative of real production inputs including hard cases", "Only contains cases the model is likely to get right", "Generated entirely by the model you're evaluating"],
+      correct: 1,
+      explanation: "A representative dataset — drawn from or resembling real production inputs, including hard cases — gives the most accurate picture of how your prompt will perform in practice."
+    }
+  ]
+};
+</script>
+</body>
+</html>

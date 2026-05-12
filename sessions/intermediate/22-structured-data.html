@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 22: Structured Data & JSON Outputs — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 22</span></div>
+      <h1 class="session-title">Structured Data & JSON Outputs</h1>
+      <p class="session-tagline">Get machine-readable JSON from Claude every time — with prompt patterns, Pydantic validation, and tool-based structured output.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 35 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="why-structured-output">Why Structured Output Matters</h2>
+      <p>Free-text responses are great for humans, but applications need data they can parse, validate, and act on. Getting Claude to reliably return JSON unlocks use cases like data pipelines, form filling, entity extraction, and API integrations.</p>
+
+      <h2 id="prompt-for-json">Prompting for JSON</h2>
+      <p>The simplest approach: explicitly ask for JSON in the prompt and describe the schema:</p>
+
+      <pre><code class="language-python">import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-haiku-4-5",
+    max_tokens=512,
+    temperature=0,  # Always use low temperature for structured output
+    messages=[{
+        "role": "user",
+        "content": """Extract the contact information from this text and return ONLY valid JSON.
+No explanation, no markdown, just the JSON object.
+
+Schema:
+{
+  "name": string,
+  "email": string | null,
+  "phone": string | null,
+  "company": string | null
+}
+
+Text: "Hi, I'm Sarah Chen from Acme Corp. Reach me at sarah@acme.com or 415-555-0123."
+"""
+    }]
+)
+
+# Parse the JSON response
+data = json.loads(response.content[0].text)
+print(data["name"])   # Sarah Chen
+print(data["email"])  # sarah@acme.com
+</code></pre>
+
+      <h2 id="json-mode-trick">The Prefill Trick for Reliable JSON</h2>
+      <p>Prefill the assistant's response with <code>{</code> to force Claude to start generating JSON immediately (no preamble):</p>
+
+      <pre><code class="language-python">response = client.messages.create(
+    model="claude-haiku-4-5",
+    max_tokens=512,
+    temperature=0,
+    messages=[
+        {
+            "role": "user",
+            "content": "Extract: name, sentiment (positive/negative/neutral), score (0-1) from: 'The product is amazing! Highly recommend it.'"
+        },
+        {
+            "role": "assistant",
+            "content": "{"  # Prefill forces JSON-first output
+        }
+    ]
+)
+
+# The response continues from the prefill
+full_json = "{" + response.content[0].text
+data = json.loads(full_json)
+</code></pre>
+
+      <h2 id="pydantic-validation">Pydantic for Validation</h2>
+      <p>Pydantic models add type safety and validation on top of JSON parsing:</p>
+
+      <pre><code class="language-python">from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional
+import json
+
+class ContactInfo(BaseModel):
+    name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    company: Optional[str] = None
+
+    @field_validator("phone")
+    @classmethod
+    def clean_phone(cls, v):
+        if v:
+            return "".join(filter(str.isdigit, v))
+        return v
+
+# Parse and validate
+raw = response.content[0].text
+contact = ContactInfo(**json.loads(raw))
+print(contact.name)   # Validated string
+print(contact.model_dump())  # Dict representation
+</code></pre>
+
+      <h2 id="tools-for-structure">Tools for Guaranteed Structure</h2>
+      <p>The most reliable approach is using Claude's tool-use feature with a schema — Claude is forced to return the exact shape you define:</p>
+
+      <pre><code class="language-python">tools = [{
+    "name": "extract_contact",
+    "description": "Extract contact information from text",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "name": {"type": "string", "description": "Full name"},
+            "email": {"type": "string", "description": "Email address"},
+            "phone": {"type": "string", "description": "Phone number"},
+            "company": {"type": "string", "description": "Company name"}
+        },
+        "required": ["name"]
+    }
+}]
+
+response = client.messages.create(
+    model="claude-haiku-4-5",
+    max_tokens=512,
+    tools=tools,
+    tool_choice={"type": "tool", "name": "extract_contact"},  # Force this tool
+    messages=[{"role": "user", "content": "Hi, I'm Bob from TechCo. bob@techco.io"}]
+)
+
+# Tool result is always structured correctly
+tool_block = response.content[0]
+print(tool_block.input)  # {"name": "Bob", "email": "bob@techco.io", "company": "TechCo"}
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Best approach by reliability:</strong> Tool use with schema > Prefill trick > Explicit JSON prompt. Use tools when you need guaranteed structure. Use prompt-based JSON when you want a simpler setup.
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Extract Structured Data from Unstructured Text</h2>
+      <p>Build a pipeline that extracts product information from unstructured descriptions and validates it with Pydantic.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+structured_extraction.py — Extract product data from unstructured text
+pip install anthropic pydantic
+"""
+import anthropic
+import json
+from pydantic import BaseModel, field_validator
+from typing import Optional
+
+client = anthropic.Anthropic()
+
+# --- Define the schema ---
+class ProductInfo(BaseModel):
+    name: str
+    price_usd: Optional[float] = None
+    category: str
+    in_stock: bool
+    features: list[str]
+    rating: Optional[float] = None
+
+    @field_validator("rating")
+    @classmethod
+    def check_rating(cls, v):
+        if v is not None and not (0.0 <= v <= 5.0):
+            raise ValueError("Rating must be 0-5")
+        return v
+
+
+EXTRACTION_TOOL = [{
+    "name": "save_product",
+    "description": "Save extracted product information",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "price_usd": {"type": "number"},
+            "category": {"type": "string"},
+            "in_stock": {"type": "boolean"},
+            "features": {"type": "array", "items": {"type": "string"}},
+            "rating": {"type": "number"}
+        },
+        "required": ["name", "category", "in_stock", "features"]
+    }
+}]
+
+
+def extract_product(description: str) -> ProductInfo:
+    """Extract structured product data from a free-text description."""
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=512,
+        temperature=0,
+        tools=EXTRACTION_TOOL,
+        tool_choice={"type": "tool", "name": "save_product"},
+        messages=[{
+            "role": "user",
+            "content": f"Extract product information from this description:\n\n{description}"
+        }]
+    )
+
+    tool_input = response.content[0].input
+    return ProductInfo(**tool_input)
+
+
+# --- Test with sample descriptions ---
+samples = [
+    "The EcoBlend Pro Blender is on sale for $89.99. It's a kitchen appliance with 10-speed settings, a 64oz BPA-free jar, and dishwasher-safe parts. Currently in stock. Customer rating: 4.7/5.",
+    "SOLD OUT: Vintage Oak Writing Desk (furniture). Features: solid oak construction, 3 drawers, cable management holes. No price listed.",
+    "Python Mastery Course — Online Education. Price: $199. Includes 42 hours of video, downloadable resources, certificate of completion. Available now. Rated 4.9 stars by 1,203 students.",
+]
+
+for i, desc in enumerate(samples, 1):
+    print(f"\n--- Product {i} ---")
+    print(f"Input: {desc[:80]}...")
+    product = extract_product(desc)
+    print(f"Extracted: {product.model_dump_json(indent=2)}")
+    print(f"In stock : {product.in_stock}")
+    print(f"Features : {len(product.features)} features found")
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/21-temperature-streaming.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Temperature, Streaming & Output Control</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/23-prompt-engineering.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Prompt Engineering — Clear & Direct</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 22,
+  slug: '22-structured-data',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/23-prompt-engineering.html',
+  quizData: [
+    {
+      question: "What temperature should you use when prompting Claude for JSON output?",
+      options: ["1.0 for maximum output diversity", "0.0 or very low, for consistency", "0.5 as a neutral baseline", "Temperature doesn't affect JSON output"],
+      correct: 1,
+      explanation: "Low temperature (0.0 or close to it) is essential for structured output — it makes Claude deterministic and less likely to add unexpected text or vary the format."
+    },
+    {
+      question: "What is the 'prefill trick' for getting JSON output?",
+      options: ["Adding JSON to the system prompt", "Starting the assistant's reply with '{' to force JSON-first output", "Using stop_sequences=['```']", "Setting a custom Content-Type header"],
+      correct: 1,
+      explanation: "By prefilling the assistant's message with '{', you force Claude to immediately start generating JSON without any preamble or explanation."
+    },
+    {
+      question: "What is the most reliable method for getting guaranteed structured output from Claude?",
+      options: ["Prompting with explicit JSON instructions", "Using the prefill trick", "Using tool use with a defined JSON Schema", "Using a low temperature setting"],
+      correct: 2,
+      explanation: "Tool use with tool_choice forces Claude to return exactly the schema you define. It's more reliable than prompt-based approaches because it's enforced by the API protocol."
+    },
+    {
+      question: "What does Pydantic add on top of JSON parsing?",
+      options: ["Faster JSON parsing performance", "Type validation, field validators, and structured Python objects", "Direct API integration with Anthropic", "Automatic retry logic"],
+      correct: 1,
+      explanation: "Pydantic validates that parsed JSON matches your type definitions, runs custom validators, and gives you typed Python objects instead of raw dicts."
+    },
+    {
+      question: "Which parameter forces Claude to use a specific tool?",
+      options: ["tool_required=True", "tools_only=True", "tool_choice={'type': 'tool', 'name': 'tool_name'}", "force_tool='tool_name'"],
+      correct: 2,
+      explanation: "Setting tool_choice to {'type': 'tool', 'name': 'your_tool_name'} forces Claude to call that specific tool, guaranteeing structured output."
+    }
+  ]
+};
+</script>
+</body>
+</html>

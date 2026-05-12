@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 01: What is Claude? — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 01</span></div>
+      <h1 class="session-title">What is Claude?</h1>
+      <p class="session-tagline">Understand what Claude is, how it differs from other AI assistants, and what makes Anthropic's approach to building AI unique.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Reflection Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <!-- LEARN TAB -->
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Who Built Claude and Why</h2>
+      <p>Claude is an AI assistant created by <strong>Anthropic</strong>, an AI safety company founded in 2021 by Dario Amodei, Daniela Amodei, and several colleagues who previously worked at OpenAI. Anthropic's founding premise was simple but profound: as AI systems become increasingly powerful, the risk of unintended harm grows — and that problem deserves a dedicated research organization.</p>
+      <p>Anthropic's mission is the <em>responsible development and maintenance of advanced AI for the long-term benefit of humanity</em>. This mission shapes everything about Claude — from how it's trained to how it declines certain requests. Claude isn't just a product; it's a research artifact designed to demonstrate that highly capable AI and safety-conscious design can coexist.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Why does the company matter?</strong> Most AI products are built to maximize engagement or revenue. Anthropic's structure (a Public Benefit Corporation) legally commits it to prioritize societal benefit alongside profit. This shapes Claude's design choices at a fundamental level.</div>
+      </div>
+
+      <h2>Claude vs Other AI Assistants</h2>
+      <p>Several AI assistants exist today — ChatGPT (OpenAI), Gemini (Google), Copilot (Microsoft), and others. They all use large language models (LLMs) at their core, but they differ in meaningful ways:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-robot"></i> ChatGPT (OpenAI)</h4>
+          <ul>
+            <li>Backed by Microsoft / OpenAI</li>
+            <li>RLHF-trained from GPT-4 base</li>
+            <li>Deep integration with Microsoft products</li>
+            <li>Plugin ecosystem and image generation</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-gem"></i> Gemini (Google)</h4>
+          <ul>
+            <li>Native multimodal from the ground up</li>
+            <li>Deep integration with Google Search and Workspace</li>
+            <li>Trained on Google's proprietary data pipeline</li>
+            <li>Strong at factual recall via search grounding</li>
+          </ul>
+        </div>
+        <div class="compare-card highlight-card">
+          <h4><i class="fas fa-circle-dot"></i> Claude (Anthropic)</h4>
+          <ul>
+            <li>Constitutional AI training approach</li>
+            <li>Explicitly designed around safety research</li>
+            <li>Known for nuance, long-context reasoning</li>
+            <li>200K+ token context window</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>The key differentiator isn't raw capability — all frontier models are impressively capable. What sets Claude apart is its <strong>Constitutional AI</strong> training methodology, its emphasis on honest and calibrated responses, and its willingness to say "I don't know" rather than confabulate confidently wrong answers.</p>
+
+      <h2>The Three Pillars: Helpful, Honest, Harmless</h2>
+      <p>Anthropic designed Claude around three core properties, sometimes called the "3 Hs":</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Helpful</h4>
+            <p>Claude aims to be genuinely useful — not just technically compliant. If you ask a vague question, Claude tries to understand what you actually need and provides substantive help, not minimal hedged responses. Helpfulness is treated as a moral imperative, not just a feature.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Honest</h4>
+            <p>Claude tries never to deceive — not just by avoiding lies, but by avoiding misleading implications, selective framing, or false confidence. It actively tries to share when it's uncertain. This is a design choice that sometimes means giving you a less satisfying answer than a more confident-sounding model would.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Harmless</h4>
+            <p>Claude is trained to avoid outputs that could cause real-world harm. This includes refusing to provide instructions for weapons, not generating content that exploits vulnerable groups, and flagging when a request seems to have harmful intent. The challenge is calibrating this correctly — being too restrictive is itself a failure.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div><strong>Important nuance:</strong> "Harmless" doesn't mean "never says anything uncomfortable." Claude will discuss difficult topics, historical atrocities, controversial science, and uncomfortable truths. The goal is avoiding <em>actual harm</em>, not avoiding discomfort.</div>
+      </div>
+
+      <h2>What Claude Can and Cannot Do</h2>
+      <p>Understanding Claude's actual capabilities — and its real limits — saves a lot of frustration. Here's an honest map:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Claude excels at</h4>
+          <ul>
+            <li>Writing, editing, summarizing long documents</li>
+            <li>Analyzing code and explaining logic</li>
+            <li>Reasoning through multi-step problems</li>
+            <li>Brainstorming and creative work</li>
+            <li>Research synthesis across topics</li>
+            <li>Explaining complex concepts at any level</li>
+            <li>Holding nuanced, extended conversations</li>
+          </ul>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-xmark"></i> Claude's real limitations</h4>
+          <ul>
+            <li>No real-time internet access (unless given tools)</li>
+            <li>Knowledge has a training cutoff date</li>
+            <li>Can "hallucinate" plausible but wrong facts</li>
+            <li>Cannot take actions in the world by default</li>
+            <li>No persistent memory across separate conversations</li>
+            <li>Not a replacement for licensed professionals</li>
+            <li>Math errors are possible, especially complex arithmetic</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Key insight:</strong> The most effective Claude users treat it as a very capable colleague who has excellent judgment but can sometimes be wrong. You verify important outputs, you push back when something seems off, and you leverage its strengths while compensating for its weaknesses.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Explore Claude's Identity</h2>
+        <p>In this lab you'll have your first intentional conversation with Claude about Claude — asking it to explain itself, reveal its limits, and push back on its answers. This builds a mental model you'll refine throughout the course.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Ask Claude what it is</h3></div>
+          <p>Open <a href="https://claude.ai" target="_blank">claude.ai</a> and start a new conversation. Type exactly:</p>
+          <pre><code class="language-text">In one paragraph, explain what you are, who made you, and what makes you different from other AI assistants. Be specific, not generic.</code></pre>
+          <p>Notice how Claude introduces itself. Does it mention Anthropic? Constitutional AI? Does it compare itself to other models? Save a mental note of the answer.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Test its honesty about limits</h3></div>
+          <p>In the same conversation, ask:</p>
+          <pre><code class="language-text">What are three things you genuinely cannot do well or are likely to get wrong? Don't be modest — be specific about your real limitations.</code></pre>
+          <p>Observe: Does Claude give generic disclaimers, or does it give you specific and honest answers? Good AI assistants should be candid about their weaknesses.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Push back on a claim</h3></div>
+          <p>Whatever Claude says in step 2, respond with:</p>
+          <pre><code class="language-text">I think you're being too modest / too harsh on yourself. Can you give me a more nuanced answer?</code></pre>
+          <p>Notice how Claude responds to pushback. Does it cave immediately? Does it hold its position? This reveals something important about steerability — which we'll cover in Session 8.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Compare to your expectations</h3></div>
+          <p>Write down (in a notes app or paper):</p>
+          <ul>
+            <li>What surprised you about Claude's self-description?</li>
+            <li>What matched what you expected?</li>
+            <li>One thing you want to learn to do better with Claude by end of this course</li>
+          </ul>
+          <p>This reflection will be a useful reference point when you complete Session 17.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Ask the meta question</h3></div>
+          <p>Finally, ask Claude:</p>
+          <pre><code class="language-text">If someone asked you what makes Anthropic's approach to AI safety different from other AI labs, what would you say?</code></pre>
+          <p>This gives you Claude's own perspective on why it was built the way it was — and primes you for the Constitutional AI content coming in Session 4.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="#" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Course Home</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/02-first-conversation.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Your First Conversation</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 1,
+  slug: '01-what-is-claude',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/02-first-conversation.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What company created Claude?',
+      options: [
+        { text: 'OpenAI', correct: false },
+        { text: 'Google DeepMind', correct: false },
+        { text: 'Anthropic', correct: true },
+        { text: 'Meta AI', correct: false }
+      ],
+      explanation: 'Claude was created by Anthropic, an AI safety company founded in 2021 by Dario Amodei, Daniela Amodei, and colleagues from OpenAI.'
+    },
+    {
+      id: 'q2',
+      type: 'mcq',
+      points: 1,
+      question: 'Which of the following best describes Anthropic\'s primary mission?',
+      options: [
+        { text: 'Build the most capable AI as fast as possible', correct: false },
+        { text: 'Responsible development of AI for the long-term benefit of humanity', correct: true },
+        { text: 'Compete with OpenAI for market share', correct: false },
+        { text: 'Provide free AI tools to everyone', correct: false }
+      ],
+      explanation: 'Anthropic\'s mission is "the responsible development and maintenance of advanced AI for the long-term benefit of humanity." Safety research is central to this mission.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'Claude has persistent memory by default, meaning it remembers your previous conversations automatically.',
+      correctAnswer: false,
+      explanation: 'Claude does NOT have persistent memory by default. Each new conversation starts fresh. Projects feature in Claude.ai provides a workaround, but that requires explicit setup.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Which of the following are among Claude\'s genuine strengths? (Select all that apply)',
+      options: [
+        { text: 'Writing and editing long documents', correct: true },
+        { text: 'Real-time stock price lookup', correct: false },
+        { text: 'Reasoning through multi-step problems', correct: true },
+        { text: 'Explaining complex concepts at any level', correct: true },
+        { text: 'Performing flawless arithmetic on large numbers', correct: false }
+      ],
+      explanation: 'Claude excels at writing/editing, multi-step reasoning, and explaining concepts. It does NOT have real-time data access by default, and arithmetic errors are possible for complex calculations.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What does the "Harmless" principle mean in Claude\'s design?',
+      options: [
+        { text: 'Claude never discusses uncomfortable or controversial topics', correct: false },
+        { text: 'Claude avoids outputs that could cause real-world harm while still engaging with difficult subjects', correct: true },
+        { text: 'Claude always agrees with the user to avoid conflict', correct: false },
+        { text: 'Claude refuses any request it finds ethically ambiguous', correct: false }
+      ],
+      explanation: '"Harmless" means avoiding actual harm, not avoiding discomfort. Claude can discuss difficult, controversial, or uncomfortable topics — the goal is preventing real-world damage, not sanitizing conversations.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

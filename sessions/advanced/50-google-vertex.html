@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 50: Claude on Google Vertex AI — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 50</span></div>
+      <h1 class="session-title">Claude on Google Vertex AI</h1>
+      <p class="session-tagline">Access Claude through Google Cloud's Vertex AI — learn project setup, the Vertex SDK, differences from the Anthropic SDK, and how to parallelize workloads.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What is Google Vertex AI?</h2>
+      <p>Google Vertex AI is GCP's managed machine learning platform. It includes access to foundation models including Claude (via the Model Garden), Gemini, and others. Like Bedrock for AWS, Vertex AI lets companies already in the GCP ecosystem access Claude through their existing Google Cloud infrastructure — IAM, VPC, billing, and compliance agreements.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-cloud"></i>
+        <div><strong>Why Vertex AI for Claude?</strong> GCP-native data residency guarantees, Google Cloud's IAM and VPC integration, unified billing with other GCP services, integration with BigQuery and Cloud Storage for data pipelines, and Google's enterprise compliance certifications.</div>
+      </div>
+
+      <h2>Project and Location Setup</h2>
+      <p>Vertex AI organizes resources by GCP project and region (location). Claude is available in specific regions.</p>
+
+      <pre><code class="language-python">import anthropic
+
+# The Anthropic SDK supports Vertex AI directly via the AnthropicVertex client
+# Install: pip install anthropic[vertex]
+# Or: pip install google-cloud-aiplatform anthropic
+
+from anthropic import AnthropicVertex
+
+# Setup
+PROJECT_ID = "my-gcp-project"     # Your GCP project ID
+LOCATION = "us-east5"              # Supported: us-east5, europe-west1, us-central1
+
+client = AnthropicVertex(
+    project_id=PROJECT_ID,
+    region=LOCATION
+)
+
+# Authentication uses Application Default Credentials (ADC)
+# Set up with: gcloud auth application-default login
+# Or set GOOGLE_APPLICATION_CREDENTIALS env var to service account JSON</code></pre>
+
+      <h2>Making Your First Vertex AI Call</h2>
+      <pre><code class="language-python">from anthropic import AnthropicVertex
+
+client = AnthropicVertex(project_id="my-project", region="us-east5")
+
+# Model IDs on Vertex use a slightly different format
+# Available models: claude-opus-4-5@20251101, claude-sonnet-4-5@20251013, claude-haiku-4-5@20241022
+response = client.messages.create(
+    model="claude-opus-4-5@20251101",  # Note the @ version suffix
+    max_tokens=1024,
+    messages=[{
+        "role": "user",
+        "content": "Explain the key differences between Vertex AI and Amazon Bedrock for accessing Claude."
+    }]
+)
+
+print(response.content[0].text)
+print(f"\nUsage: {response.usage}")</code></pre>
+
+      <h2>Differences from the Anthropic SDK</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-code"></i> Anthropic SDK</h4>
+          <pre><code class="language-python">client = anthropic.Anthropic()
+# Auth: ANTHROPIC_API_KEY env var
+
+response = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[...]
+)</code></pre>
+          <ul>
+            <li>Simple API key auth</li>
+            <li>Direct to Anthropic servers</li>
+            <li>model = "claude-opus-4-5"</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fab fa-google"></i> Vertex AI SDK</h4>
+          <pre><code class="language-python">client = AnthropicVertex(
+    project_id="my-project",
+    region="us-east5"
+)
+# Auth: Google ADC
+
+response = client.messages.create(
+    model="claude-opus-4-5@20251101",
+    max_tokens=1024,
+    messages=[...]
+)</code></pre>
+          <ul>
+            <li>Google ADC / service account</li>
+            <li>Traffic within GCP network</li>
+            <li>model = "claude-...@version"</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Vertex-Specific Features</h2>
+      <ul>
+        <li><strong>Data residency:</strong> Choose regions where your data never leaves (EU, US, etc.) for GDPR compliance</li>
+        <li><strong>VPC Service Controls:</strong> Restrict model access to specific VPC networks</li>
+        <li><strong>Cloud Logging:</strong> All API calls automatically logged in Google Cloud Logging</li>
+        <li><strong>Workload Identity:</strong> GKE workloads authenticate without managing credentials</li>
+        <li><strong>Vertex AI Pipelines:</strong> Orchestrate Claude calls in Kubeflow-based ML pipelines</li>
+        <li><strong>BigQuery integration:</strong> Process BigQuery datasets directly with Claude</li>
+      </ul>
+
+      <h2>Streaming on Vertex AI</h2>
+      <pre><code class="language-python">from anthropic import AnthropicVertex
+
+client = AnthropicVertex(project_id="my-project", region="us-east5")
+
+# Streaming works identically to the Anthropic SDK
+with client.messages.stream(
+    model="claude-opus-4-5@20251101",
+    max_tokens=500,
+    messages=[{"role": "user", "content": "Write a short story about a robot learning to code."}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+
+print(f"\n\nFinal message: {stream.get_final_message()}")</code></pre>
+
+      <h2>Parallelizing with Vertex AI</h2>
+      <p>Vertex AI is designed for high-throughput, so parallelizing is a common pattern when processing large datasets stored in BigQuery or Cloud Storage:</p>
+
+      <pre><code class="language-python">import asyncio
+from anthropic import AsyncAnthropicVertex
+
+async def process_batch(items: list[str], project_id: str, region: str) -> list[str]:
+    """Process multiple items in parallel on Vertex AI."""
+    client = AsyncAnthropicVertex(project_id=project_id, region=region)
+
+    async def process_one(item: str) -> str:
+        response = await client.messages.create(
+            model="claude-haiku-4-5@20241022",  # Use Haiku for speed/cost
+            max_tokens=200,
+            messages=[{"role": "user", "content": f"Summarize in one sentence: {item}"}]
+        )
+        return response.content[0].text
+
+    # Fan-out: process all items concurrently
+    tasks = [process_one(item) for item in items]
+    results = await asyncio.gather(*tasks)
+    return list(results)
+
+# Example: process 10 items in parallel
+async def main():
+    items = [f"Document about topic {i}: Some content here..." for i in range(10)]
+    results = await process_batch(items, "my-project", "us-east5")
+    for i, r in enumerate(results, 1):
+        print(f"{i}. {r}")
+
+asyncio.run(main())</code></pre>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Make a Vertex AI API Call to Claude</h2>
+        <p>Call Claude via Vertex AI and compare the response structure with a direct Anthropic SDK call. Also build a parallel document processor that uses Vertex AI.</p>
+      </div>
+
+      <pre><code class="language-python">"""
+vertex_lab.py — Claude on Google Vertex AI
+Requires: pip install anthropic[vertex]
+Auth: gcloud auth application-default login
+"""
+import asyncio
+import time
+import os
+
+# ── Configuration ──────────────────────────────────────────────────────────────
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "your-project-id")
+REGION = "us-east5"  # Primary Vertex region for Claude
+
+def call_vertex_claude(prompt: str, model: str = "claude-haiku-4-5@20241022") -> dict:
+    """Call Claude via Vertex AI."""
+    try:
+        from anthropic import AnthropicVertex
+        client = AnthropicVertex(project_id=PROJECT_ID, region=REGION)
+
+        start = time.time()
+        response = client.messages.create(
+            model=model,
+            max_tokens=300,
+            system="You are a concise assistant.",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        elapsed = time.time() - start
+
+        return {
+            "provider": "Vertex AI",
+            "model": response.model,
+            "text": response.content[0].text,
+            "input_tokens": response.usage.input_tokens,
+            "output_tokens": response.usage.output_tokens,
+            "latency_ms": round(elapsed * 1000),
+            "stop_reason": response.stop_reason
+        }
+    except ImportError:
+        return {"provider": "Vertex AI", "error": "anthropic[vertex] not installed. Run: pip install anthropic[vertex]"}
+    except Exception as e:
+        return {"provider": "Vertex AI", "error": f"Error (check GCP auth + project): {str(e)[:150]}"}
+
+def call_anthropic_direct(prompt: str) -> dict:
+    """Call Claude via Anthropic SDK for comparison."""
+    import anthropic
+    client = anthropic.Anthropic()
+
+    start = time.time()
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=300,
+        system="You are a concise assistant.",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    elapsed = time.time() - start
+
+    return {
+        "provider": "Anthropic Direct",
+        "model": response.model,
+        "text": response.content[0].text,
+        "input_tokens": response.usage.input_tokens,
+        "output_tokens": response.usage.output_tokens,
+        "latency_ms": round(elapsed * 1000),
+        "stop_reason": response.stop_reason
+    }
+
+# ── Comparison ─────────────────────────────────────────────────────────────────
+def compare(prompt: str):
+    print(f"\nPrompt: {prompt}")
+    print("="*60)
+
+    for fn in [call_anthropic_direct, call_vertex_claude]:
+        result = fn(prompt)
+        if "error" in result:
+            print(f"\n[{result['provider']}] Error: {result['error']}")
+        else:
+            print(f"\n[{result['provider']}]")
+            print(f"  Model: {result['model']}")
+            print(f"  Latency: {result['latency_ms']}ms")
+            print(f"  Tokens: {result['input_tokens']} in / {result['output_tokens']} out")
+            print(f"  Response: {result['text'][:150]}")
+
+compare("What is the main advantage of using Vertex AI for accessing Claude?")
+
+# ── Parallel Processing Lab ────────────────────────────────────────────────────
+async def parallel_vertex_processing():
+    """Demonstrate parallel processing on Vertex AI."""
+    try:
+        from anthropic import AsyncAnthropicVertex
+    except ImportError:
+        print("\nSkipping parallel demo — anthropic[vertex] not installed")
+        return
+
+    ARTICLES = [
+        "Quantum computing uses quantum mechanical phenomena to process information exponentially faster than classical computers.",
+        "Neural networks are inspired by biological brains and consist of layers of interconnected nodes that learn from data.",
+        "Blockchain technology provides decentralized, immutable ledgers that enable trustless transactions without intermediaries.",
+        "CRISPR-Cas9 gene editing allows precise modification of DNA sequences, opening new possibilities in medicine and agriculture.",
+    ]
+
+    client = AsyncAnthropicVertex(project_id=PROJECT_ID, region=REGION)
+
+    async def summarize(article: str, idx: int) -> tuple[int, str]:
+        response = await client.messages.create(
+            model="claude-haiku-4-5@20241022",
+            max_tokens=100,
+            messages=[{"role": "user", "content": f"One sentence summary: {article}"}]
+        )
+        return idx, response.content[0].text
+
+    print("\n\nParallel document processing on Vertex AI:")
+    start = time.time()
+
+    tasks = [summarize(article, i) for i, article in enumerate(ARTICLES)]
+    results = await asyncio.gather(*tasks)
+    elapsed = time.time() - start
+
+    results.sort(key=lambda x: x[0])
+    for idx, summary in results:
+        print(f"  Doc {idx+1}: {summary[:100]}")
+
+    print(f"\nProcessed {len(ARTICLES)} docs in {elapsed:.1f}s")
+    print(f"(Sequential would have been ~{len(ARTICLES)*2}s)")
+
+asyncio.run(parallel_vertex_processing())</code></pre>
+
+      <h3>Vertex AI Authentication Setup</h3>
+      <pre><code class="language-python"># Option 1: Application Default Credentials (local development)
+# Run once:
+# gcloud auth application-default login
+
+# Option 2: Service Account (production/CI)
+# Create service account in GCP Console with Vertex AI User role
+# Download JSON key file
+# Set environment variable:
+import os
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/path/to/service-account.json"
+
+# Option 3: Workload Identity (GKE, Cloud Run)
+# No credentials needed — GCP handles auth automatically for GKE pods
+
+# Verify authentication works:
+from google.cloud import aiplatform
+aiplatform.init(project="my-project", location="us-east5")
+print("Authentication successful!")</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>API similarity:</strong> Because the AnthropicVertex client mirrors the Anthropic SDK API, migrating code between providers is mostly changing the client initialization. Tool use, vision, streaming, and system prompts all work identically. This is intentional — Anthropic maintains consistent APIs across all providers.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/49-amazon-bedrock.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Claude on Amazon Bedrock</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/51-capstone.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Capstone Project</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 50,
+  slug: '50-google-vertex',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/51-capstone.html',
+  quizData: [
+    {
+      question: "How do Vertex AI model IDs differ from Anthropic SDK model IDs?",
+      options: [
+        "Vertex IDs are shorter: 'claude-haiku'",
+        "Vertex IDs include a version suffix: 'claude-haiku-4-5@20241022'",
+        "Vertex IDs use underscores: 'claude_haiku_4_5'",
+        "Vertex IDs are numeric: '12345-claude'"
+      ],
+      correct: 1,
+      explanation: "Vertex AI model IDs include a specific version timestamp: claude-haiku-4-5@20241022. This pinning ensures you always get the exact model version you deployed with, important for reproducibility in production."
+    },
+    {
+      question: "What authentication method does Vertex AI use?",
+      options: [
+        "ANTHROPIC_API_KEY environment variable",
+        "HTTP Basic Auth with GCP username and password",
+        "Google Application Default Credentials (ADC) or service accounts",
+        "AWS IAM role assumption"
+      ],
+      correct: 2,
+      explanation: "Vertex AI uses Google Cloud's authentication system — Application Default Credentials (set up with 'gcloud auth application-default login') for local dev, or service accounts for production. No separate API key is needed."
+    },
+    {
+      question: "Which Python package do you need to use Claude on Vertex AI via the Anthropic SDK?",
+      options: [
+        "pip install google-claude",
+        "pip install anthropic[vertex]",
+        "pip install vertexai-anthropic",
+        "pip install gcp-anthropic"
+      ],
+      correct: 1,
+      explanation: "The Anthropic SDK includes Vertex AI support as an optional extra: 'pip install anthropic[vertex]'. This installs the AnthropicVertex and AsyncAnthropicVertex clients along with the required google-auth dependencies."
+    },
+    {
+      question: "A company needs Claude to process BigQuery datasets and requires all data to stay within the EU. Which provider is most appropriate?",
+      options: [
+        "Anthropic direct API — it's always the fastest",
+        "Amazon Bedrock — it has EU regions",
+        "Google Vertex AI — it offers EU data residency and native BigQuery integration",
+        "Either Bedrock or Vertex — they both offer the same features"
+      ],
+      correct: 2,
+      explanation: "Google Vertex AI is ideal here: it has EU data residency guarantees, native integration with BigQuery (the data is already in GCP), and uses the same GCP VPC and IAM the company already manages."
+    },
+    {
+      question: "How does code using AsyncAnthropicVertex for parallel processing differ from the same code using AsyncAnthropic?",
+      options: [
+        "AsyncAnthropicVertex requires thread-based parallelism; asyncio is not supported",
+        "Only the client initialization differs — async patterns and gather() work identically",
+        "AsyncAnthropicVertex has a lower concurrency limit",
+        "You must use Vertex AI Pipelines for parallel processing, not asyncio"
+      ],
+      correct: 1,
+      explanation: "AsyncAnthropicVertex mirrors the AsyncAnthropic API exactly. You swap the client initialization (adding project_id and region), and all your asyncio.gather() patterns, coroutines, and streaming code work unchanged. Anthropic maintains this API parity intentionally."
+    }
+  ]
+};
+</script>
+</body>
+</html>

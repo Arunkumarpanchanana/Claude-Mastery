@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 30: Introduction to MCP — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 30</span></div>
+      <h1 class="session-title">Introduction to MCP</h1>
+      <p class="session-tagline">The Model Context Protocol is the USB standard for AI integrations — write a server once, connect to any compatible AI client.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="what-is-mcp">What Is the Model Context Protocol?</h2>
+      <p>MCP (Model Context Protocol) is an open standard developed by Anthropic that defines how AI models communicate with external tools and data sources. Instead of building custom integrations for each AI client, you build one MCP server and it works with any compliant client.</p>
+
+      <p>Think of it like USB: before USB, every device needed a different cable and driver. MCP creates a standard interface so your tools, databases, and services can plug into Claude (and other AI systems) without custom wiring for each one.</p>
+
+      <h2 id="mcp-vs-tool-use">MCP vs Tool Use</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Aspect</th><th>Tool Use (API)</th><th>MCP</th></tr></thead>
+          <tbody>
+            <tr><td>Where tools run</td><td>Your application code</td><td>A separate MCP server process</td></tr>
+            <tr><td>Protocol</td><td>Anthropic API format</td><td>MCP standard (JSON-RPC over stdio/SSE)</td></tr>
+            <tr><td>Portability</td><td>Tied to your app</td><td>Any MCP client can use your server</td></tr>
+            <tr><td>Best for</td><td>App-specific, tight integration</td><td>Reusable tools, shared infrastructure</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="mcp-architecture">MCP Architecture</h2>
+      <p>MCP uses a client-server architecture:</p>
+      <ul>
+        <li><strong>MCP Host</strong> — the application that wants AI capabilities (Claude Desktop, Claude Code, VS Code, custom apps)</li>
+        <li><strong>MCP Client</strong> — built into the host; manages connections to servers</li>
+        <li><strong>MCP Server</strong> — your code that exposes tools, resources, and prompts</li>
+      </ul>
+
+      <div class="info-box">
+        <strong>Communication:</strong> MCP servers communicate over stdio (for local processes) or HTTP+SSE (for remote servers). The protocol is JSON-RPC 2.0.
+      </div>
+
+      <h2 id="mcp-clients">MCP Clients</h2>
+      <ul>
+        <li><strong>Claude Desktop</strong> — Anthropic's native app; plug in any MCP server in settings</li>
+        <li><strong>Claude Code</strong> — CLI agent; reads MCP config from project settings</li>
+        <li><strong>Claude.ai</strong> — web app with MCP connector support (Integrations)</li>
+        <li><strong>Third-party</strong> — VS Code (Copilot), Cursor, Zed, and many others implement MCP</li>
+      </ul>
+
+      <h2 id="mcp-primitives">The Three MCP Primitives</h2>
+      <ul>
+        <li><strong>Tools</strong> — functions Claude can call (like API tool use, but served by MCP)</li>
+        <li><strong>Resources</strong> — data sources Claude can read (files, database records, API responses)</li>
+        <li><strong>Prompts</strong> — pre-built prompt templates users can invoke by name</li>
+      </ul>
+
+      <h2 id="why-mcp-matters">Why MCP Matters</h2>
+      <p>Before MCP, every team building an AI integration had to:</p>
+      <ol>
+        <li>Learn each AI API's tool format</li>
+        <li>Build custom glue code for each client</li>
+        <li>Re-implement the same logic when switching models</li>
+      </ol>
+      <p>With MCP, you build your server once. It works with Claude Desktop, Claude Code, and any other MCP-compatible client without code changes. The ecosystem of pre-built MCP servers (for GitHub, Postgres, Slack, web browsing, etc.) means you can give Claude powerful capabilities in minutes.</p>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Connect the Filesystem MCP Server to Claude Desktop</h2>
+      <p>In this lab, you'll install an existing MCP server (the official Anthropic filesystem server) and connect it to Claude Desktop — no code writing required.</p>
+
+      <a href="https://modelcontextprotocol.io" target="_blank" class="colab-btn"><i class="fas fa-external-link-alt"></i> MCP Documentation</a>
+
+      <h3>Step 1 — Prerequisites</h3>
+      <pre><code class="language-python"># Install Node.js if not already installed
+# macOS: brew install node
+# Windows: download from nodejs.org
+
+# Verify installation
+node --version   # Should be 18+
+npx --version
+</code></pre>
+
+      <h3>Step 2 — Install Claude Desktop</h3>
+      <p>Download from <a href="https://claude.ai/download" target="_blank">claude.ai/download</a> and sign in with your Anthropic account.</p>
+
+      <h3>Step 3 — Configure the Filesystem MCP Server</h3>
+      <p>Open Claude Desktop settings, go to <strong>Developer</strong> tab, and edit the config file:</p>
+      <pre><code class="language-python"># Location of config file:
+# macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+# Windows: %APPDATA%\Claude\claude_desktop_config.json
+
+# Add this to the config:
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/YOUR_USERNAME/Documents"
+      ]
+    }
+  }
+}
+</code></pre>
+
+      <h3>Step 4 — Restart Claude Desktop</h3>
+      <p>After saving the config, restart Claude Desktop. You should see a tools icon (hammer) in the chat input area indicating MCP servers are connected.</p>
+
+      <h3>Step 5 — Test It</h3>
+      <pre><code class="language-python"># Ask Claude Desktop:
+"List the files in my Documents folder"
+"Read the file called notes.txt"
+"Create a new file called test.txt with the content 'Hello from Claude!'"
+</code></pre>
+
+      <h3>Understanding What Just Happened</h3>
+      <p>The filesystem MCP server exposed tools like <code>list_directory</code>, <code>read_file</code>, and <code>write_file</code>. Claude Desktop discovered these tools via the MCP protocol, and Claude can now call them when needed — without you writing any API integration code.</p>
+
+      <h3>Explore More Pre-Built Servers</h3>
+      <pre><code class="language-python"># Other official MCP servers to try:
+# GitHub integration
+npx @modelcontextprotocol/server-github
+
+# SQLite database
+npx @modelcontextprotocol/server-sqlite --db-path ./my-db.sqlite
+
+# Web browsing
+npx @modelcontextprotocol/server-puppeteer
+
+# Slack
+npx @modelcontextprotocol/server-slack
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/29-multi-turn-tools.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Multi-Turn Tool Conversations</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/31-mcp-tools-resources.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Defining MCP Tools, Resources & Prompts</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 30,
+  slug: '30-intro-mcp',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/31-mcp-tools-resources.html',
+  quizData: [
+    {
+      question: "What does MCP stand for?",
+      options: ["Multi-Claude Protocol", "Model Context Protocol", "Machine Communication Protocol", "Managed Component Platform"],
+      correct: 1,
+      explanation: "MCP stands for Model Context Protocol — an open standard for how AI models communicate with external tools and data sources."
+    },
+    {
+      question: "What is the main advantage of MCP over custom API tool-use integrations?",
+      options: ["MCP is faster than direct API calls", "MCP servers are portable — write once, connect to any compatible AI client", "MCP doesn't require an API key", "MCP is cheaper than the Anthropic API"],
+      correct: 1,
+      explanation: "The key MCP advantage is portability. A single MCP server works with Claude Desktop, Claude Code, and any other MCP client without modification."
+    },
+    {
+      question: "What are the three MCP primitives?",
+      options: ["Models, Clients, Protocols", "Tools, Resources, Prompts", "Functions, Data, Templates", "Inputs, Outputs, Schemas"],
+      correct: 1,
+      explanation: "The three MCP primitives are Tools (functions Claude can call), Resources (data Claude can read), and Prompts (pre-built prompt templates)."
+    },
+    {
+      question: "What protocol does MCP use for communication?",
+      options: ["REST/HTTP", "GraphQL", "JSON-RPC 2.0 over stdio or HTTP+SSE", "gRPC"],
+      correct: 2,
+      explanation: "MCP uses JSON-RPC 2.0 as the message format, transported over stdio (for local processes) or HTTP with Server-Sent Events (for remote servers)."
+    },
+    {
+      question: "Which of the following is NOT an MCP client?",
+      options: ["Claude Desktop", "Claude Code", "The Anthropic API itself", "VS Code with Copilot"],
+      correct: 2,
+      explanation: "The Anthropic API is not an MCP client — it's the API used to call Claude. MCP clients are applications that connect to MCP servers to give Claude access to tools."
+    }
+  ]
+};
+</script>
+</body>
+</html>

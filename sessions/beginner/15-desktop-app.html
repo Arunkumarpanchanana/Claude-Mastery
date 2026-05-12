@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 15: Claude Desktop App Deep Dive — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 15</span></div>
+      <h1 class="session-title">Claude Desktop App Deep Dive</h1>
+      <p class="session-tagline">Go beyond the browser — understand the differences between Claude.ai, the API, and the Desktop App, and discover productivity features most users miss.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 25 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Toolchain Setup Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Three Ways to Access Claude</h2>
+      <p>Most people know Claude through a browser, but there are three distinct access modes, each suited to different users and use cases:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-globe"></i> Claude.ai (Web)</h4>
+          <ul>
+            <li>Full Projects and Artifacts support</li>
+            <li>All account features (history, sharing)</li>
+            <li>Best for most users doing general tasks</li>
+            <li>Requires browser, internet</li>
+            <li>Free and Pro tiers available</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-desktop"></i> Desktop App (Mac/Windows)</h4>
+          <ul>
+            <li>Native app — faster to open, always available</li>
+            <li>Global keyboard shortcut to summon Claude</li>
+            <li>Screen capture and context sharing</li>
+            <li>MCP tool connections (see below)</li>
+            <li>Computer use capabilities</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-code"></i> API</h4>
+          <ul>
+            <li>Direct programmatic access to Claude models</li>
+            <li>Full control over system prompts, temperature, tools</li>
+            <li>Build Claude into applications and workflows</li>
+            <li>Pay per token (usage-based pricing)</li>
+            <li>For developers building on top of Claude</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Which should you use?</strong> For everyday tasks: Claude.ai web or the desktop app. If you need Projects, use the web or desktop. If you're building applications or automating workflows, you need the API. The desktop app is the best choice for power users who want Claude always a keystroke away.</div>
+      </div>
+
+      <h2>Desktop App: Key Features</h2>
+      <p>The Claude Desktop App (available for Mac and Windows at claude.ai/download) has several features that dramatically improve daily productivity:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Global Keyboard Shortcut</h4>
+            <p>Set a keyboard shortcut to summon Claude from anywhere on your computer — no browser switching. On Mac, the default is typically Cmd+Shift+Space or similar. This alone saves dozens of context switches per day for heavy users.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Screen Context and File Access</h4>
+            <p>The desktop app can reference what's on your screen or open files from your computer directly — without manual copy-paste. Ask Claude about something you're looking at, or give it files from your local filesystem.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>MCP Tool Connections</h4>
+            <p>The desktop app supports the Model Context Protocol (MCP) — a standard that lets Claude connect to local tools and services: your file system, databases, APIs, and third-party integrations. This turns Claude from a conversational AI into an AI that can take real actions in your digital environment.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Computer Use</h4>
+            <p>On supported plans, Claude can control your computer — clicking, typing, navigating applications — to complete tasks on your behalf. This is powerful but requires trust and careful oversight.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Productivity Tips and Shortcuts</h2>
+      <p>Whether you use the web or desktop app, these habits dramatically improve your Claude productivity:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-keyboard"></i> Keyboard Shortcuts</h4>
+          <ul>
+            <li>Shift+Enter: new line without submitting</li>
+            <li>Cmd/Ctrl+Enter: submit message</li>
+            <li>Escape: stop generation mid-stream</li>
+            <li>Up arrow: edit previous message</li>
+          </ul>
+        </div>
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-rocket"></i> Workflow Habits</h4>
+          <ul>
+            <li>Use Projects for anything recurring</li>
+            <li>Start conversations with context blocks</li>
+            <li>Name conversations descriptively for easy search</li>
+            <li>Use the "Share conversation" feature to loop in teammates</li>
+          </ul>
+        </div>
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-file-import"></i> Input Optimization</h4>
+          <ul>
+            <li>Paste formatted text — Claude preserves structure</li>
+            <li>Drag images directly into the chat</li>
+            <li>Use file attachments instead of pasting long documents</li>
+            <li>Screenshot and ask questions about what you see</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Choosing Your Claude Tier</h2>
+      <p>Claude offers different service tiers, each suited to different usage levels:</p>
+
+      <ul>
+        <li><strong>Free:</strong> Access to Claude with usage limits. Good for occasional use and learning.</li>
+        <li><strong>Pro:</strong> Higher usage limits, priority access, access to all Claude models, full Projects and Artifacts. Recommended for daily professional use.</li>
+        <li><strong>Team/Enterprise:</strong> Multiple seats, admin controls, security features, custom deployment options. For organizations.</li>
+        <li><strong>API:</strong> Developer access at usage-based pricing. Best for builders and automation workflows.</li>
+      </ul>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>The right tool for the right job:</strong> Don't limit yourself to one interface. Many power users have both the web app (for Project-heavy work) and the desktop app (for quick queries and file work) set up. The API is separate — you'll need it if you want to build applications or automate workflows at scale.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Optimize Your Claude Setup</h2>
+        <p>Configure Claude for your daily workflow — desktop app, keyboard shortcuts, and productivity habits that make Claude feel like a natural extension of your work.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Download and configure the Desktop App</h3></div>
+          <p>If you haven't already, download the Claude Desktop App from <a href="https://claude.ai/download" target="_blank">claude.ai/download</a>.</p>
+          <p>After installing:</p>
+          <ul>
+            <li>Set up the global keyboard shortcut in Preferences</li>
+            <li>Try summoning Claude with the shortcut from another application</li>
+            <li>Sign in with your Claude.ai account — your Projects and history will sync</li>
+          </ul>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Test screen context</h3></div>
+          <p>Open any document or webpage you're working with. Summon Claude via the keyboard shortcut. Ask Claude to describe or help with what's on your screen:</p>
+          <pre><code class="language-text">Based on what you can see on my screen, what are the main things I'm working on right now?</code></pre>
+          <p>Note: screen access must be permitted in your OS settings (usually requires granting screen recording permission).</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Drag and drop a file</h3></div>
+          <p>Find a document on your computer — a PDF, Word doc, or text file. Drag it directly into a Claude chat window (web or desktop app). Ask Claude to summarize it or extract specific information.</p>
+          <p>Compare this to copy-pasting: the file attachment approach preserves formatting and is much faster for long documents.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Practice keyboard shortcuts</h3></div>
+          <p>Spend 5 minutes using only keyboard shortcuts in a Claude conversation:</p>
+          <ul>
+            <li>Write a message with multiple paragraphs using Shift+Enter</li>
+            <li>Submit with Cmd/Ctrl+Enter</li>
+            <li>Stop a long generation partway through with Escape</li>
+            <li>Edit a previous message using the up arrow</li>
+          </ul>
+          <p>These shortcuts become reflexive quickly and meaningfully speed up your workflow.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Design your daily Claude workflow</h3></div>
+          <p>Ask Claude to help you design a daily workflow using the tools you've set up:</p>
+          <pre><code class="language-text">I want to integrate Claude into my daily work more effectively. I am a [role] who mainly does [types of tasks]. I have the desktop app and Claude.ai web access.
+
+Help me design a simple daily workflow for when and how to use Claude — what tasks to start with it, how to structure my usage, and what habits to build.</code></pre>
+          <p>Refine the workflow it suggests based on your actual schedule and needs. Write it down — a workflow you've articulated is much more likely to stick than one you just imagine.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/14-projects-artifacts.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Projects, Artifacts &amp; Organization</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/16-learning-career-partner.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">AI as a Learning &amp; Career Partner</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 15,
+  slug: '15-desktop-app',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/16-learning-career-partner.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the primary advantage of the Claude Desktop App over the web version?',
+      options: [
+        { text: 'It has access to more powerful AI models', correct: false },
+        { text: 'It\'s always a keyboard shortcut away — no browser switching — and supports local tool connections via MCP', correct: true },
+        { text: 'It\'s completely free with no usage limits', correct: false },
+        { text: 'It stores conversations locally for privacy', correct: false }
+      ],
+      explanation: 'The desktop app\'s main advantages: global keyboard shortcut (summon Claude from anywhere), screen context access, file system integration, and MCP tool connections. Model capabilities are essentially the same between web and desktop.'
+    },
+    {
+      id: 'q2',
+      type: 'mcq',
+      points: 1,
+      question: 'What is MCP (Model Context Protocol) in the desktop app context?',
+      options: [
+        { text: 'A security protocol for encrypting Claude conversations', correct: false },
+        { text: 'A standard that lets Claude connect to local tools, files, databases, and services', correct: true },
+        { text: 'A method for compressing large files before uploading', correct: false },
+        { text: 'The protocol Claude uses to access the internet', correct: false }
+      ],
+      explanation: 'MCP (Model Context Protocol) is a standard that enables Claude to connect to local tools and services — your file system, databases, APIs, and integrations. It turns Claude from a conversational tool into an agent that can interact with your digital environment.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'The Claude API is the best choice for users who want to do everyday tasks like writing emails and summarizing documents.',
+      correctAnswer: false,
+      explanation: 'The API is designed for developers building applications and automated workflows — it requires programming knowledge and charges per token. For everyday tasks, Claude.ai (web) or the Desktop App are much more appropriate. The API is for builders, not general users.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Which of these are features of the Claude Desktop App? (Select all that apply)',
+      options: [
+        { text: 'Global keyboard shortcut to summon Claude from any application', correct: true },
+        { text: 'Screen context awareness', correct: true },
+        { text: 'Offline usage without internet', correct: false },
+        { text: 'MCP tool connections to local services', correct: true },
+        { text: 'Computer use capabilities (on supported plans)', correct: true }
+      ],
+      explanation: 'Desktop app features: global keyboard shortcut, screen context, MCP connections, and computer use. It does NOT work offline — Claude requires an internet connection as all processing happens on Anthropic\'s servers.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What keyboard shortcut stops Claude\'s generation mid-stream on most platforms?',
+      options: [
+        { text: 'Ctrl+Z (Undo)', correct: false },
+        { text: 'Escape', correct: true },
+        { text: 'Ctrl+C (Copy)', correct: false },
+        { text: 'Backspace', correct: false }
+      ],
+      explanation: 'Pressing Escape stops Claude\'s text generation mid-stream — useful when you can tell early that the response is going in the wrong direction. Combined with Shift+Enter (new line) and Cmd/Ctrl+Enter (submit), these are the core keyboard shortcuts for efficient Claude use.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

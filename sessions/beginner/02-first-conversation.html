@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 02: Your First Conversation — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 02</span></div>
+      <h1 class="session-title">Your First Conversation</h1>
+      <p class="session-tagline">Learn the anatomy of a good prompt, how to match Claude's tone to your needs, and how to get dramatically better results through iteration.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 25 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Hands-on Chat Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Anatomy of a Good Prompt</h2>
+      <p>Every message you send Claude is a <em>prompt</em>. The quality of Claude's response is heavily shaped by the quality of your prompt. But "quality" doesn't mean length — a three-word prompt can be excellent, and a ten-paragraph prompt can be terrible. What matters is <strong>clarity of intent</strong>.</p>
+
+      <p>A well-structured prompt typically answers these questions, explicitly or implicitly:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>What do you want? (Task)</h4>
+            <p>The core request. "Write," "Explain," "Compare," "Summarize," "Debug," "Brainstorm" — start with an action verb. Vague requests like "tell me about X" produce vague responses.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Why do you want it? (Context)</h4>
+            <p>Context transforms generic answers into tailored ones. "Explain photosynthesis" gets a textbook answer. "Explain photosynthesis for my 8-year-old who loves Minecraft" gets something actually useful.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>What form should it take? (Format)</h4>
+            <p>If you need bullet points, say so. If you need a 200-word summary, specify it. If you want code with comments, ask for it. Claude will guess at format, but your guess is usually better than Claude's guess.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>What are the constraints? (Limits)</h4>
+            <p>What should Claude avoid? What assumptions shouldn't it make? Constraints reduce the search space and help Claude land closer to what you actually need.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-xmark"></i> Weak Prompt</h4>
+          <p>"Tell me about project management"</p>
+          <p style="font-size:0.85rem;color:#78716c;margin-top:0.5rem">Claude has to guess: what level? what context? what aspect? The response will be generic.</p>
+        </div>
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Strong Prompt</h4>
+          <p>"I'm a software engineer moving into a team lead role. Summarize the 3 most important project management concepts I need to understand in my first 90 days. Use bullet points, keep it practical."</p>
+          <p style="font-size:0.85rem;color:#78716c;margin-top:0.5rem">Clear task, specific context, explicit format, implicit constraints (practical, not theoretical).</p>
+        </div>
+      </div>
+
+      <h2>Tone Matching — Getting the Right Register</h2>
+      <p>Claude is remarkably adaptable in tone and register. It will match the formality level of your message, mirror technical vocabulary back to you, and adjust depth based on cues in your language. You can — and should — make this explicit.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Tone vocabulary to use with Claude:</strong> casual, formal, technical, simple, conversational, Socratic, terse, thorough, friendly, direct. You can combine these: "Be direct and technical, no fluff."</div>
+      </div>
+
+      <p>Tone instructions at the start of a conversation persist. If you open with "Please be concise and don't use bullet points," Claude will honor that throughout — until you change it. This is a powerful tool for customizing your working style.</p>
+
+      <p>Some useful tone settings:</p>
+      <ul>
+        <li><strong>For brainstorming:</strong> "Think out loud, share half-formed ideas, don't polish."</li>
+        <li><strong>For technical work:</strong> "Assume I have a CS background. Skip basic explanations."</li>
+        <li><strong>For sensitive topics:</strong> "Be direct and honest, even if the truth is uncomfortable."</li>
+        <li><strong>For learning:</strong> "Use analogies and examples. Check if I understand before moving on."</li>
+      </ul>
+
+      <h2>Iteration — The Real Skill</h2>
+      <p>New users treat Claude like a search engine: one query, one answer, done. Expert users treat Claude like a conversation: they ask, evaluate, refine, push back, and steer. <strong>The best outputs almost always come from iteration, not from a perfect first prompt.</strong></p>
+
+      <p>Here's what productive iteration looks like:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">A</div>
+          <div class="step-content">
+            <h4>Ask for alternatives</h4>
+            <p>"Give me 3 different approaches to this." Then pick the best and refine it.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">B</div>
+          <div class="step-content">
+            <h4>Add what's missing</h4>
+            <p>"Good, but now make it shorter / more technical / focused on the cost angle."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">C</div>
+          <div class="step-content">
+            <h4>Challenge the output</h4>
+            <p>"I'm not convinced by point 2. What's the counter-argument?" This forces Claude to think more carefully.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">D</div>
+          <div class="step-content">
+            <h4>Ask follow-up questions</h4>
+            <p>"You mentioned X — can you explain that in more detail?" Conversations compound; each turn can build on what came before.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Pro move:</strong> After Claude gives an answer you like, ask "What important considerations did you not mention?" This surfaces blind spots and often yields the most valuable information.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Prompt Iteration in Practice</h2>
+        <p>This lab walks you through a realistic prompt improvement exercise. You'll take a weak prompt, improve it step by step, and see the difference in output quality.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Start with a weak prompt</h3></div>
+          <p>In a new Claude conversation, type:</p>
+          <pre><code class="language-text">Help me write an email</code></pre>
+          <p>Observe: Claude will ask clarifying questions or make assumptions. Note what it needs to know that you didn't provide.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Add context and constraints</h3></div>
+          <p>Now try this improved version (adapt to your own situation):</p>
+          <pre><code class="language-text">Write a professional email to my manager requesting one day of work-from-home per week. I've been at the company 18 months, my role is mostly independent work (no client calls), and my team already has two people who WFH Fridays. Keep it under 150 words, confident but not demanding in tone.</code></pre>
+          <p>Compare the outputs. The second prompt specifies task, context, relevant facts, format, and tone. Notice how much more targeted the result is.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Iterate on the result</h3></div>
+          <p>After getting the email in step 2, do at least two of these follow-ups:</p>
+          <pre><code class="language-text">Make it warmer and more personal — right now it sounds too corporate.
+
+Also add a brief mention that I'm happy to discuss any concerns.</code></pre>
+          <p>Then try: <code>Give me an alternative version that's even shorter — just 3 sentences.</code></p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Use the "what's missing" technique</h3></div>
+          <p>After you have a version you like, ask:</p>
+          <pre><code class="language-text">What important considerations about requesting remote work did you not include in this email? Should any of them be added?</code></pre>
+          <p>This often surfaces things like: proposing a trial period, noting productivity metrics, or mentioning communication plans — considerations you might not have thought of.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Reflect on the process</h3></div>
+          <p>How many iterations did it take to get something genuinely useful? Most people find that 2-4 turns produces something much better than the first response. This is normal and expected — iteration is the skill, not perfect first prompts.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/01-what-is-claude.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">What is Claude?</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/03-how-claude-thinks.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">How Claude Generates Text</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 2,
+  slug: '02-first-conversation',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/03-how-claude-thinks.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'Which element is MOST important for turning a generic prompt into a targeted one?',
+      options: [
+        { text: 'Making the prompt longer', correct: false },
+        { text: 'Adding context about why you need the answer', correct: true },
+        { text: 'Using polite language', correct: false },
+        { text: 'Asking multiple questions at once', correct: false }
+      ],
+      explanation: 'Context transforms generic answers into tailored ones. Knowing WHY you need something allows Claude to shape the response appropriately for your actual situation.'
+    },
+    {
+      id: 'q2',
+      type: 'truefalse',
+      points: 1,
+      question: 'The best results from Claude typically come from crafting a perfect first prompt rather than iterating.',
+      correctAnswer: false,
+      explanation: 'Iteration is the core skill. Expert Claude users treat it as a conversation — they ask, evaluate, refine, and push back. Most good outputs require 2-4 turns of iteration.'
+    },
+    {
+      id: 'q3',
+      type: 'mcq',
+      points: 1,
+      question: 'What happens when you specify a tone at the start of a conversation (e.g., "be concise and direct")?',
+      options: [
+        { text: 'It only affects the first response', correct: false },
+        { text: 'Claude ignores stylistic instructions', correct: false },
+        { text: 'It persists throughout the conversation until you change it', correct: true },
+        { text: 'You must repeat it every message', correct: false }
+      ],
+      explanation: 'Tone and style instructions at the start of a conversation persist throughout — Claude remembers and applies them to each response until you explicitly change them.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Which of these are productive iteration techniques with Claude? (Select all that apply)',
+      options: [
+        { text: 'Asking for 3 different approaches then picking the best', correct: true },
+        { text: 'Asking "what important considerations did you not mention?"', correct: true },
+        { text: 'Repeating your original prompt if you don\'t like the answer', correct: false },
+        { text: 'Challenging a specific point you disagree with', correct: true },
+        { text: 'Telling Claude what\'s missing from its response', correct: true }
+      ],
+      explanation: 'Good iteration includes: asking for alternatives, surfacing blind spots, challenging specific points, and adding missing context. Simply repeating the same prompt rarely helps.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'A prompt asking Claude to "tell me about machine learning" is weak because:',
+      options: [
+        { text: 'Machine learning is too complex for Claude', correct: false },
+        { text: 'It lacks context, format specification, and constraints — leaving everything to Claude\'s guessing', correct: true },
+        { text: 'It should be phrased as a question', correct: false },
+        { text: 'It needs to include technical vocabulary', correct: false }
+      ],
+      explanation: '"Tell me about X" gives Claude no information about your level, purpose, format preference, or what aspect of X you care about — resulting in a generic response that may not serve your actual needs.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 20: Multi-Turn Conversations & System Prompts — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 20</span></div>
+      <h1 class="session-title">Multi-Turn Conversations & System Prompts</h1>
+      <p class="session-tagline">Build stateful conversations by managing message history yourself — and shape Claude's behavior with a powerful system prompt.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="stateless-api">The API Is Stateless</h2>
+      <p>Each call to <code>messages.create()</code> is independent. Claude does not remember previous messages automatically — you must send the entire conversation history with every request. This is a feature, not a bug: it gives you full control over what context Claude sees.</p>
+
+      <h2 id="message-history-array">Building the Message History Array</h2>
+      <p>The <code>messages</code> parameter is an ordered list of alternating user/assistant turns:</p>
+
+      <pre><code class="language-python">messages = [
+    {"role": "user",      "content": "My name is Alex."},
+    {"role": "assistant", "content": "Nice to meet you, Alex! How can I help?"},
+    {"role": "user",      "content": "What's my name?"},
+]
+# Claude will correctly answer "Your name is Alex."
+</code></pre>
+
+      <div class="info-box">
+        <strong>Rules for the messages array:</strong>
+        <ul>
+          <li>Must start with a user turn</li>
+          <li>Must alternate: user → assistant → user → assistant…</li>
+          <li>The last message must be a user turn</li>
+          <li>No empty content strings allowed</li>
+        </ul>
+      </div>
+
+      <h2 id="roles">Roles: user vs assistant</h2>
+      <p><code>user</code> represents human input (or tool results). <code>assistant</code> represents Claude's prior responses. When building a chatbot, append each exchange to the history list before the next API call.</p>
+
+      <h2 id="system-prompt">The System Prompt Parameter</h2>
+      <p>The <code>system</code> parameter is a top-level string that sets Claude's persona, constraints, and context for the entire conversation. It is not part of the <code>messages</code> array.</p>
+
+      <pre><code class="language-python">response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    system="You are a concise technical assistant. Answer in plain text only. No markdown. Keep responses under 3 sentences.",
+    messages=[
+        {"role": "user", "content": "What is a REST API?"}
+    ]
+)
+</code></pre>
+
+      <h2 id="system-prompt-best-practices">System Prompt Best Practices</h2>
+      <ul>
+        <li><strong>Define the persona</strong> — who Claude is in this context</li>
+        <li><strong>Set output constraints</strong> — format, length, tone, language</li>
+        <li><strong>Provide domain context</strong> — what the app does, who the user is</li>
+        <li><strong>Specify what NOT to do</strong> — topics to avoid, off-limits actions</li>
+      </ul>
+
+      <h2 id="context-window-management">Context Window Management</h2>
+      <p>As conversations grow, the message history gets longer and costs more. Common strategies:</p>
+      <ul>
+        <li><strong>Sliding window</strong> — keep only the last N turns</li>
+        <li><strong>Summarization</strong> — periodically ask Claude to summarize the conversation so far, then replace history with the summary</li>
+        <li><strong>Selective pruning</strong> — remove tool-use turns once they're no longer relevant</li>
+      </ul>
+
+      <pre><code class="language-python">def trim_history(messages: list, max_turns: int = 10) -> list:
+    """Keep only the most recent max_turns exchanges."""
+    # Each exchange = 2 messages (user + assistant)
+    if len(messages) > max_turns * 2:
+        return messages[-(max_turns * 2):]
+    return messages
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build a Multi-Turn Chatbot</h2>
+      <p>A complete interactive chatbot that maintains conversation history and uses a system prompt to shape its persona.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+chatbot.py — Multi-turn chatbot with system prompt and history trimming
+Run: python chatbot.py
+"""
+import anthropic
+
+client = anthropic.Anthropic()
+
+SYSTEM_PROMPT = """You are Ada, a friendly Python programming tutor.
+Your rules:
+- Always encourage the learner, even when they make mistakes
+- Provide working code examples when asked
+- Explain concepts at a beginner level unless the user says otherwise
+- If you don't know something, say so honestly
+- Keep responses focused and under 200 words unless code is needed
+"""
+
+def chat(messages: list, user_input: str) -> tuple[str, list]:
+    """
+    Send a user message, get Claude's response, and return
+    the updated message history.
+    """
+    messages.append({"role": "user", "content": user_input})
+
+    response = client.messages.create(
+        model="claude-haiku-4-5",  # Fast for chat
+        max_tokens=1024,
+        system=SYSTEM_PROMPT,
+        messages=messages
+    )
+
+    assistant_reply = response.content[0].text
+    messages.append({"role": "assistant", "content": assistant_reply})
+
+    return assistant_reply, messages
+
+
+def run_chatbot():
+    """Interactive CLI chatbot loop."""
+    history = []
+    print("Ada: Hi! I'm Ada, your Python tutor. What would you like to learn today?")
+    print("(Type 'quit' to exit, 'history' to see message count)\n")
+
+    while True:
+        user_input = input("You: ").strip()
+
+        if not user_input:
+            continue
+        if user_input.lower() == "quit":
+            print("Ada: Happy coding! Goodbye!")
+            break
+        if user_input.lower() == "history":
+            print(f"[{len(history)} messages in history]")
+            continue
+
+        # Trim history if it gets long (optional)
+        if len(history) > 20:
+            history = history[-20:]
+            print("[Context trimmed to last 10 turns]")
+
+        reply, history = chat(history, user_input)
+        print(f"\nAda: {reply}\n")
+
+
+# --- Demo mode (non-interactive, for testing) ---
+def demo_conversation():
+    """Simulate a 3-turn conversation to show context retention."""
+    history = []
+    turns = [
+        "My name is Jordan and I'm new to Python.",
+        "What data type should I use to store a list of items?",
+        "Can you show me how to add an item to it?",
+    ]
+
+    for turn in turns:
+        print(f"User: {turn}")
+        reply, history = chat(history, turn)
+        print(f"Ada : {reply}\n")
+        print(f"[History length: {len(history)} messages]\n")
+
+
+if __name__ == "__main__":
+    import sys
+    if "--demo" in sys.argv:
+        demo_conversation()
+    else:
+        run_chatbot()
+</code></pre>
+
+      <h3>Run the demo</h3>
+      <pre><code class="language-python">python chatbot.py --demo
+</code></pre>
+      <p>You'll see Ada correctly reference "Jordan" in later turns, demonstrating that context is preserved through the history array.</p>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/19-api-first-request.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">API Keys & Your First API Request</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/21-temperature-streaming.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Temperature, Streaming & Output Control</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 20,
+  slug: '20-multi-turn-system',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/21-temperature-streaming.html',
+  quizData: [
+    {
+      question: "Why must you send the entire conversation history with each API call?",
+      options: ["To reduce API latency", "Because the Claude API is stateless — it has no memory between calls", "To enable prompt caching", "Because the SDK requires it for validation"],
+      correct: 1,
+      explanation: "The Anthropic API is stateless. Each call is independent, so you must include the full conversation history in the messages array for Claude to have context."
+    },
+    {
+      question: "What is the correct order for the messages array in a 2-turn conversation?",
+      options: ["assistant → user → assistant → user", "user → assistant → user → assistant", "system → user → assistant → user", "user → user → assistant → assistant"],
+      correct: 1,
+      explanation: "Messages must alternate user → assistant → user → assistant, always starting and ending with a user message."
+    },
+    {
+      question: "Where does the system prompt go in a messages.create() call?",
+      options: ["As the first message in the messages array with role='system'", "As a top-level 'system' parameter, separate from the messages array", "As part of the model name", "In the headers of the HTTP request"],
+      correct: 1,
+      explanation: "The system prompt is a top-level parameter called 'system', not part of the messages array. This is different from some other AI APIs."
+    },
+    {
+      question: "What is the 'sliding window' context management strategy?",
+      options: ["Sending all messages but compressing them", "Keeping only the most recent N turns of conversation history", "Splitting long messages across multiple API calls", "Caching frequently used prompts"],
+      correct: 1,
+      explanation: "The sliding window approach keeps only the most recent N message pairs in the history, discarding older turns to control context size and cost."
+    },
+    {
+      question: "What happens if you include an empty string as a message's content?",
+      options: ["Claude ignores it silently", "The API returns an error", "Claude responds with an empty message", "The SDK auto-fills it with a placeholder"],
+      correct: 1,
+      explanation: "The Anthropic API does not allow empty content strings in messages and will return an error if you include them."
+    }
+  ]
+};
+</script>
+</body>
+</html>

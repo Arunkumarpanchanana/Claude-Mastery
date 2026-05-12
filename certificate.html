@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Certificate of Completion — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <style>
+    .cert-page { max-width:900px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+    .cert-form { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; margin-bottom:2rem; box-shadow:var(--shadow-md); text-align:center; }
+    .cert-form h2 { margin:0 0 0.5rem; font-size:1.5rem; }
+    .cert-form p { color:var(--text-muted); margin:0 0 1.5rem; }
+    .cert-form input { width:100%; max-width:400px; padding:0.85rem 1.25rem; border:1.5px solid var(--border); border-radius:10px; font-size:1rem; font-family:var(--font-sans); color:var(--text); background:var(--surface); outline:none; transition:border-color 0.2s; display:block; margin:0 auto 1rem; }
+    .cert-form input:focus { border-color:var(--brand); }
+    .cert-form button { background:linear-gradient(135deg,var(--brand),#b45309); color:#fff; border:none; padding:0.85rem 2.5rem; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; font-family:var(--font-sans); transition:all 0.2s; }
+    .cert-form button:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(217,119,6,0.35); }
+
+    .cert-actions { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:2rem; }
+    .cert-action-btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.7rem 1.5rem; border-radius:10px; font-size:0.875rem; font-weight:600; cursor:pointer; transition:all 0.2s; text-decoration:none; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-family:var(--font-sans); }
+    .cert-action-btn.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+    .cert-action-btn.primary:hover { background:#b45309; color:#fff; }
+    .cert-action-btn:hover { border-color:var(--border-strong); }
+
+    /* ===== CERTIFICATE ===== */
+    .certificate {
+      background:#fff; border:1px solid #e7e5e4; border-radius:20px;
+      padding:3.5rem; position:relative; overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      display:none;
+    }
+    .certificate.visible { display:block; }
+
+    /* Corner decorations */
+    .cert-corner { position:absolute; width:60px; height:60px; }
+    .cert-corner.tl { top:16px; left:16px; border-top:3px solid var(--brand); border-left:3px solid var(--brand); border-radius:8px 0 0 0; }
+    .cert-corner.tr { top:16px; right:16px; border-top:3px solid var(--brand); border-right:3px solid var(--brand); border-radius:0 8px 0 0; }
+    .cert-corner.bl { bottom:16px; left:16px; border-bottom:3px solid var(--brand); border-left:3px solid var(--brand); border-radius:0 0 0 8px; }
+    .cert-corner.br { bottom:16px; right:16px; border-bottom:3px solid var(--brand); border-right:3px solid var(--brand); border-radius:0 0 8px 0; }
+
+    .cert-watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:18rem; opacity:0.03; pointer-events:none; user-select:none; }
+
+    .cert-header { text-align:center; margin-bottom:2.5rem; }
+    .cert-logo { font-size:3rem; margin-bottom:0.75rem; }
+    .cert-issuer { font-size:0.8rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--text-muted); font-weight:700; margin-bottom:1.5rem; }
+    .cert-title-label { font-size:0.85rem; text-transform:uppercase; letter-spacing:0.15em; color:var(--text-muted); font-weight:600; margin-bottom:0.5rem; }
+    .cert-title { font-family:'Playfair Display', serif; font-size:2.2rem; color:var(--text); margin:0 0 1.5rem; font-style:italic; }
+    .cert-recipient-label { font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem; }
+    .cert-recipient { font-family:'Playfair Display', serif; font-size:2.8rem; font-weight:700; color:var(--brand); margin-bottom:0; line-height:1.2; }
+
+    .cert-body { text-align:center; color:var(--text-light); font-size:0.95rem; line-height:1.8; margin:2rem 0; padding:0 2rem; }
+
+    .cert-skills { display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center; margin:1.5rem 0 2rem; }
+    .cert-skill { background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; padding:0.25rem 0.75rem; border-radius:999px; font-size:0.78rem; font-weight:600; }
+
+    .cert-footer { display:flex; justify-content:space-between; align-items:flex-end; margin-top:2.5rem; padding-top:2rem; border-top:1px solid var(--border); }
+    .cert-sig-name { font-family:'Playfair Display', serif; font-size:1.2rem; font-style:italic; color:var(--text); margin-bottom:0.25rem; }
+    .cert-sig-title { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:600; }
+    .cert-id { font-family:var(--font-mono); font-size:0.7rem; color:var(--text-light); }
+
+    @media print {
+      body * { visibility:hidden; }
+      .certificate, .certificate * { visibility:visible; }
+      .certificate { position:fixed; top:0; left:0; width:100%; height:100%; border:none; box-shadow:none; border-radius:0; padding:2.5rem; }
+      @page { size:landscape; margin:0; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="cert-page" style="margin-top:80px;">
+  <div style="text-align:center; margin-bottom:2rem;">
+    <div style="font-size:3rem; margin-bottom:0.5rem;">🎓</div>
+    <h1 style="font-size:2rem; margin:0 0 0.5rem;">Your Certificate of Completion</h1>
+    <p style="color:var(--text-muted); max-width:500px; margin:0 auto;">Complete the course and generate your personalized certificate. Download as PDF or share on LinkedIn.</p>
+  </div>
+
+  <div class="cert-form" id="cert-form">
+    <h2>Generate Your Certificate</h2>
+    <p>Enter your full name as you'd like it to appear on the certificate.</p>
+    <input type="text" id="name-input" placeholder="Your Full Name" maxlength="60" oninput="previewName(this.value)"/>
+    <button onclick="generateCert()">Generate Certificate →</button>
+  </div>
+
+  <div class="cert-actions" id="cert-actions" style="display:none">
+    <button class="cert-action-btn primary" onclick="window.print()"><i class="fas fa-download"></i> Download PDF</button>
+    <button class="cert-action-btn" onclick="copyLink()"><i class="fas fa-link"></i> Copy Share Link</button>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Farunkumarpanchanana.github.io%2FClaude-Mastery%2Fcertificate.html" target="_blank" class="cert-action-btn" style="background:#0a66c2;color:#fff;border-color:#0a66c2;"><i class="fab fa-linkedin"></i> Share on LinkedIn</a>
+  </div>
+
+  <!-- THE CERTIFICATE -->
+  <div class="certificate" id="certificate">
+    <div class="cert-corner tl"></div>
+    <div class="cert-corner tr"></div>
+    <div class="cert-corner bl"></div>
+    <div class="cert-corner br"></div>
+    <div class="cert-watermark">🤖</div>
+
+    <div class="cert-header">
+      <div class="cert-logo">🤖</div>
+      <div class="cert-issuer">Arunkumar Panchanana</div>
+      <div class="cert-title-label">Certificate of Completion</div>
+      <h2 class="cert-title">Claude Mastery</h2>
+      <div class="cert-recipient-label">Proudly awarded to</div>
+      <div class="cert-recipient" id="cert-name">Your Name</div>
+    </div>
+
+    <div class="cert-body">
+      This certifies that <strong id="cert-name-2">Your Name</strong> has successfully completed
+      the <strong>Claude Mastery</strong> course — a comprehensive, hands-on curriculum spanning
+      <strong>51 sessions</strong> across Beginner, Intermediate, and Advanced tracks.
+      The recipient has demonstrated proficiency in Claude AI through
+      real labs, code projects, and graded assessments.
+    </div>
+
+    <div class="cert-skills">
+      <span class="cert-skill">Claude Fundamentals</span>
+      <span class="cert-skill">Prompt Engineering</span>
+      <span class="cert-skill">Claude API</span>
+      <span class="cert-skill">Tool Use</span>
+      <span class="cert-skill">MCP</span>
+      <span class="cert-skill">RAG Pipelines</span>
+      <span class="cert-skill">AI Agents</span>
+      <span class="cert-skill">Subagents</span>
+      <span class="cert-skill">Claude Code</span>
+      <span class="cert-skill">Claude Code SDK</span>
+      <span class="cert-skill">Amazon Bedrock</span>
+      <span class="cert-skill">Google Vertex AI</span>
+    </div>
+
+    <div class="cert-footer">
+      <div class="cert-sig">
+        <div class="cert-sig-name">Arunkumar Panchanana</div>
+        <div class="cert-sig-title">Course Creator</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:2rem;">🏆</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">51 Sessions Completed</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cert-id" id="cert-id">CERT-000000</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;" id="cert-date">2025</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+  // Pre-fill from URL param
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+    if (name) {
+      document.getElementById('name-input').value = name;
+      generateCert();
+    }
+  });
+
+  function previewName(val) {
+    if (val.trim()) {
+      document.getElementById('cert-name').textContent = val;
+      document.getElementById('cert-name-2').textContent = val;
+    }
+  }
+
+  function generateCert() {
+    const name = document.getElementById('name-input').value.trim();
+    if (!name) { alert('Please enter your name.'); return; }
+    document.getElementById('cert-name').textContent = name;
+    document.getElementById('cert-name-2').textContent = name;
+    const id = btoa(name + '2025').replace(/[^A-Z0-9]/gi,'').substring(0,10).toUpperCase();
+    document.getElementById('cert-id').textContent = 'CERT-' + id;
+    document.getElementById('cert-date').textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('certificate').classList.add('visible');
+    document.getElementById('cert-actions').style.display = 'flex';
+    document.getElementById('cert-form').style.display = 'none';
+    document.getElementById('certificate').scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  function copyLink() {
+    const name = document.getElementById('name-input').value.trim();
+    const url = `${location.origin}/Claude-Mastery/certificate.html?name=${encodeURIComponent(name)}`;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = event.target.closest('button');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      setTimeout(() => btn.innerHTML = orig, 2000);
+    });
+  }
+</script>
+</body>
+</html>

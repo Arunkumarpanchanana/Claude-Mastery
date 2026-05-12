@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 47: MCP Advanced — Sampling &amp; Notifications — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 47</span></div>
+      <h1 class="session-title">MCP Advanced — Sampling &amp; Notifications</h1>
+      <p class="session-tagline">Master advanced MCP capabilities: let your MCP server call LLMs via sampling, and send real-time progress and log notifications back to clients.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 50 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>MCP Sampling — LLMs Calling LLMs</h2>
+      <p>MCP sampling is one of the most powerful — and least understood — MCP capabilities. It allows an MCP server to request an LLM completion from the client (Claude Code). In other words: <strong>your MCP tool can ask Claude questions</strong>.</p>
+
+      <p>This creates a powerful pattern: your MCP server handles specialized logic (database queries, API calls, computations), and when it needs to process language or reason about the results, it delegates back to Claude via sampling.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-exchange-alt"></i>
+        <div><strong>The sampling flow:</strong> Claude → calls MCP tool → MCP server processes → MCP server sends sampling/createMessage → Claude Code routes to LLM → LLM response returned to MCP server → MCP server returns tool result to Claude.</div>
+      </div>
+
+      <h2>Why Sampling Matters</h2>
+      <p>Without sampling, MCP servers are stateless data pipes — they take inputs and return outputs. With sampling, MCP servers become intelligent. They can:</p>
+      <ul>
+        <li>Summarize large data retrieved from a database before returning it</li>
+        <li>Classify or categorize query results automatically</li>
+        <li>Generate structured output from unstructured raw data</li>
+        <li>Make decisions based on retrieved context</li>
+      </ul>
+
+      <h2>Implementing Sampling in Python</h2>
+      <pre><code class="language-python">from mcp.server import Server
+from mcp.server.models import InitializationOptions
+import mcp.types as types
+
+app = Server("intelligent-db-server")
+
+@app.call_tool()
+async def query_and_summarize(name: str, arguments: dict) -> list[types.TextContent]:
+    """
+    Tool that queries a database and uses sampling to summarize results.
+    """
+    if name != "query_and_summarize":
+        raise ValueError(f"Unknown tool: {name}")
+
+    sql_query = arguments.get("query", "")
+    focus = arguments.get("focus", "key findings")
+
+    # Step 1: Execute the database query (your actual DB logic here)
+    raw_results = await execute_query(sql_query)  # Returns list of dicts
+
+    if not raw_results:
+        return [types.TextContent(type="text", text="No results found.")]
+
+    # Step 2: Use sampling to have Claude summarize the results
+    # This calls back to the MCP client (Claude Code) to get an LLM response
+    sampling_result = await app.request_context.session.create_message(
+        messages=[
+            types.SamplingMessage(
+                role="user",
+                content=types.TextContent(
+                    type="text",
+                    text=f"""Summarize these database results focusing on: {focus}
+
+Results:
+{format_results(raw_results)}
+
+Provide a concise summary with key insights and any anomalies."""
+                )
+            )
+        ],
+        max_tokens=500,
+        system_prompt="You are a data analyst. Summarize database results concisely.",
+        # The client (Claude Code) will use its default model for sampling
+        # You can optionally suggest a model preference:
+        model_preferences=types.ModelPreferences(
+            hints=[types.ModelHint(name="claude-haiku-4-5")],  # Suggest fast model
+            cost_priority=0.8  # Prefer cheaper models (0=quality, 1=cost)
+        )
+    )
+
+    summary = sampling_result.content.text if hasattr(sampling_result.content, 'text') else str(sampling_result.content)
+
+    return [types.TextContent(
+        type="text",
+        text=f"Query results ({len(raw_results)} rows):\n\n{summary}"
+    )]
+
+async def execute_query(sql: str) -> list[dict]:
+    """Simulate database query."""
+    return [
+        {"user_id": 1, "revenue": 45230, "orders": 234},
+        {"user_id": 2, "revenue": 12100, "orders": 89},
+        {"user_id": 3, "revenue": 98450, "orders": 445},
+    ]
+
+def format_results(results: list[dict]) -> str:
+    if not results:
+        return "No data"
+    headers = list(results[0].keys())
+    rows = [",".join(headers)]
+    for r in results:
+        rows.append(",".join(str(r[h]) for h in headers))
+    return "\n".join(rows)</code></pre>
+
+      <h2>MCP Progress Notifications</h2>
+      <p>For long-running operations, progress notifications let your MCP tool update the client on its status in real time. The client (Claude Code) can display these to the user.</p>
+
+      <pre><code class="language-python">from mcp.server import Server
+import mcp.types as types
+
+app = Server("progress-demo-server")
+
+@app.call_tool()
+async def process_large_dataset(name: str, arguments: dict) -> list[types.TextContent]:
+    """Tool that processes data in stages and reports progress."""
+    if name != "process_large_dataset":
+        raise ValueError(f"Unknown tool: {name}")
+
+    files = arguments.get("files", [])
+    progress_token = arguments.get("_meta", {}).get("progressToken")
+
+    total = len(files)
+    results = []
+
+    for i, file_path in enumerate(files):
+        # Send progress notification
+        if progress_token:
+            await app.request_context.session.send_progress_notification(
+                progress_token=progress_token,
+                progress=i,
+                total=total,
+                # Optional message for display
+            )
+
+        # Process the file (your actual logic here)
+        result = await process_file(file_path)
+        results.append(result)
+
+    # Send final progress (100%)
+    if progress_token:
+        await app.request_context.session.send_progress_notification(
+            progress_token=progress_token,
+            progress=total,
+            total=total
+        )
+
+    return [types.TextContent(
+        type="text",
+        text=f"Processed {total} files. Results: {results}"
+    )]
+
+async def process_file(path: str) -> str:
+    import asyncio
+    await asyncio.sleep(0.1)  # Simulate work
+    return f"processed:{path}"</code></pre>
+
+      <h2>MCP Log Notifications</h2>
+      <p>Log notifications let your MCP server send structured log messages to the client. These appear in Claude Code's output and help with debugging.</p>
+
+      <pre><code class="language-python">import mcp.types as types
+
+async def my_tool_handler(name: str, arguments: dict):
+    """Send different levels of log messages."""
+    session = app.request_context.session
+
+    # Debug — detailed diagnostic info
+    await session.send_log_message(
+        level="debug",
+        data={"action": "starting", "input": arguments},
+        logger="my-tool"
+    )
+
+    try:
+        result = await do_work(arguments)
+
+        # Info — normal operation
+        await session.send_log_message(
+            level="info",
+            data=f"Successfully processed {len(result)} items",
+            logger="my-tool"
+        )
+
+        return result
+
+    except Exception as e:
+        # Error — something went wrong
+        await session.send_log_message(
+            level="error",
+            data={"error": str(e), "traceback": "..."},
+            logger="my-tool"
+        )
+        raise</code></pre>
+
+      <h2>Combining Sampling + Notifications</h2>
+      <p>The most powerful pattern combines both: process data in stages (with progress notifications), use sampling to summarize intermediate results, and log key decisions:</p>
+
+      <pre><code class="language-python">@app.call_tool()
+async def intelligent_pipeline(name: str, arguments: dict):
+    """Full pipeline with progress, logging, and sampling."""
+    session = app.request_context.session
+    progress_token = arguments.get("_meta", {}).get("progressToken")
+    stages = ["fetch", "preprocess", "analyze", "summarize"]
+
+    for i, stage in enumerate(stages):
+        # Progress notification
+        if progress_token:
+            await session.send_progress_notification(
+                progress_token=progress_token,
+                progress=i, total=len(stages)
+            )
+
+        # Log notification
+        await session.send_log_message(
+            level="info", data=f"Starting stage: {stage}", logger="pipeline"
+        )
+
+        if stage == "analyze":
+            # Use sampling for intelligent analysis
+            raw_data = await fetch_data()
+            analysis = await session.create_message(
+                messages=[types.SamplingMessage(
+                    role="user",
+                    content=types.TextContent(type="text", text=f"Analyze: {raw_data}")
+                )],
+                max_tokens=200
+            )
+            await session.send_log_message(
+                level="debug", data=f"Analysis complete: {analysis.content}", logger="pipeline"
+            )
+
+    return [types.TextContent(type="text", text="Pipeline complete")]</code></pre>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Add Sampling and Progress Notifications to an MCP Server</h2>
+        <p>Build a complete MCP server with a document analysis tool that uses sampling to summarize documents and sends progress notifications for multi-document processing.</p>
+      </div>
+
+      <pre><code class="language-python">#!/usr/bin/env python3
+"""
+mcp_advanced_server.py — MCP server with sampling + notifications.
+Run with: python mcp_advanced_server.py
+"""
+import asyncio
+import json
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+import mcp.types as types
+
+app = Server("document-analyzer")
+
+@app.list_tools()
+async def list_tools() -> list[types.Tool]:
+    return [
+        types.Tool(
+            name="analyze_documents",
+            description="Analyze multiple documents and produce a summary using AI.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "documents": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of document texts to analyze"
+                    },
+                    "analysis_type": {
+                        "type": "string",
+                        "enum": ["summary", "sentiment", "themes"],
+                        "default": "summary",
+                        "description": "Type of analysis to perform"
+                    }
+                },
+                "required": ["documents"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def handle_tool(name: str, arguments: dict) -> list[types.TextContent]:
+    if name != "analyze_documents":
+        raise ValueError(f"Unknown tool: {name}")
+
+    documents = arguments.get("documents", [])
+    analysis_type = arguments.get("analysis_type", "summary")
+    progress_token = arguments.get("_meta", {}).get("progressToken")
+    session = app.request_context.session
+
+    if not documents:
+        return [types.TextContent(type="text", text="No documents provided.")]
+
+    total = len(documents)
+    individual_analyses = []
+
+    await session.send_log_message(
+        level="info",
+        data=f"Starting {analysis_type} analysis of {total} documents",
+        logger="document-analyzer"
+    )
+
+    # Process each document
+    for i, doc in enumerate(documents):
+        if progress_token:
+            await session.send_progress_notification(
+                progress_token=progress_token,
+                progress=i,
+                total=total + 1  # +1 for final synthesis step
+            )
+
+        await session.send_log_message(
+            level="debug",
+            data=f"Processing document {i+1}/{total} ({len(doc)} chars)",
+            logger="document-analyzer"
+        )
+
+        # Use sampling to analyze each document
+        analysis_prompt = {
+            "summary": f"Summarize this document in 2-3 sentences:\n\n{doc}",
+            "sentiment": f"Analyze the sentiment of this text (positive/negative/neutral) and explain why:\n\n{doc}",
+            "themes": f"List the 3 main themes in this text as bullet points:\n\n{doc}"
+        }.get(analysis_type, f"Analyze:\n\n{doc}")
+
+        # Sampling: ask Claude to analyze the document
+        sampling_result = await session.create_message(
+            messages=[
+                types.SamplingMessage(
+                    role="user",
+                    content=types.TextContent(type="text", text=analysis_prompt)
+                )
+            ],
+            max_tokens=150,
+            model_preferences=types.ModelPreferences(
+                hints=[types.ModelHint(name="claude-haiku-4-5")],
+                cost_priority=0.9  # Use cheap model for individual analyses
+            )
+        )
+
+        analysis_text = sampling_result.content.text if hasattr(sampling_result.content, 'text') else str(sampling_result.content)
+        individual_analyses.append({
+            "document_index": i + 1,
+            "analysis": analysis_text
+        })
+
+        await session.send_log_message(
+            level="debug",
+            data=f"Document {i+1} analysis: {analysis_text[:100]}...",
+            logger="document-analyzer"
+        )
+
+    # Final synthesis step
+    if progress_token:
+        await session.send_progress_notification(
+            progress_token=progress_token,
+            progress=total,
+            total=total + 1
+        )
+
+    await session.send_log_message(
+        level="info",
+        data="Synthesizing final report...",
+        logger="document-analyzer"
+    )
+
+    # Use sampling again for synthesis
+    analyses_text = "\n\n".join([
+        f"Document {a['document_index']}: {a['analysis']}"
+        for a in individual_analyses
+    ])
+
+    synthesis_result = await session.create_message(
+        messages=[
+            types.SamplingMessage(
+                role="user",
+                content=types.TextContent(
+                    type="text",
+                    text=f"""Synthesize these individual document analyses into a coherent overall report.
+Identify common themes and key differences.
+
+Individual analyses:
+{analyses_text}
+
+Write a unified analysis in 2-3 paragraphs."""
+                )
+            )
+        ],
+        max_tokens=400,
+        model_preferences=types.ModelPreferences(
+            hints=[types.ModelHint(name="claude-opus-4-5")],
+            cost_priority=0.2  # Use quality model for synthesis
+        )
+    )
+
+    synthesis = synthesis_result.content.text if hasattr(synthesis_result.content, 'text') else str(synthesis_result.content)
+
+    # Final progress
+    if progress_token:
+        await session.send_progress_notification(
+            progress_token=progress_token,
+            progress=total + 1,
+            total=total + 1
+        )
+
+    await session.send_log_message(
+        level="info",
+        data="Analysis complete!",
+        logger="document-analyzer"
+    )
+
+    return [types.TextContent(
+        type="text",
+        text=f"Document Analysis Report ({analysis_type})\n{'='*40}\n\n{synthesis}\n\n"
+             f"Individual analyses:\n" +
+             "\n".join([f"- Doc {a['document_index']}: {a['analysis'][:100]}..."
+                        for a in individual_analyses])
+    )]
+
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="document-analyzer",
+                server_version="1.0.0",
+                capabilities=app.get_capabilities(
+                    notification_options=types.NotificationOptions(
+                        tools_changed=False,
+                        resources_changed=False,
+                        prompts_changed=False
+                    ),
+                    experimental_capabilities={}
+                )
+            )
+        )
+
+if __name__ == "__main__":
+    from mcp.server.models import InitializationOptions
+    asyncio.run(main())</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>What you built:</strong> An MCP server that processes documents in stages, sends real-time progress updates, logs each step, and uses MCP sampling to call back to Claude for intelligent analysis — using cheaper Haiku for individual docs and Opus for final synthesis. This is a production-grade pattern.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/46-agent-skills.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Agent Skills</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/48-mcp-transports.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">MCP Transports</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 47,
+  slug: '47-mcp-advanced',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/48-mcp-transports.html',
+  quizData: [
+    {
+      question: "What is MCP sampling?",
+      options: [
+        "A method for sampling random tool calls to test reliability",
+        "Allowing an MCP server to request an LLM completion from the client (Claude Code)",
+        "Taking statistical samples from large datasets in MCP resources",
+        "A rate-limiting technique to prevent too many MCP tool calls"
+      ],
+      correct: 1,
+      explanation: "MCP sampling lets your MCP server call back to the MCP client (e.g., Claude Code) to get an LLM completion. This means your tool can perform AI-powered analysis on data it retrieves before returning results."
+    },
+    {
+      question: "When does it make sense to use sampling in an MCP tool?",
+      options: [
+        "To make the tool faster by caching LLM responses",
+        "When the tool retrieves data that needs intelligent processing before returning to the user",
+        "To bypass Claude's safety guidelines for internal MCP operations",
+        "When the tool needs to authenticate with an external API"
+      ],
+      correct: 1,
+      explanation: "Sampling is useful when your tool fetches raw data (database rows, API responses) that needs interpretation, summarization, classification, or analysis before it's useful to Claude. Without sampling, Claude would have to process all raw data itself."
+    },
+    {
+      question: "What is the purpose of a progress_token in MCP progress notifications?",
+      options: [
+        "It authenticates the progress notification with the server",
+        "It identifies which specific tool call the progress belongs to (since multiple tools may run simultaneously)",
+        "It controls the frequency at which progress updates are sent",
+        "It sets the maximum progress value (like a denominator)"
+      ],
+      correct: 1,
+      explanation: "When multiple tools run concurrently, the client needs to associate each progress notification with the correct tool call. The progress_token is passed to the tool in _meta and echoed back in notifications to make this association."
+    },
+    {
+      question: "What log level should you use for detailed diagnostic info (variable values, intermediate states) in MCP logging?",
+      options: ["info", "warning", "debug", "trace"],
+      correct: 2,
+      explanation: "MCP supports standard log levels: debug (detailed diagnostics), info (normal operations), warning (unexpected but handled situations), error (failures). Debug messages are the right place for variable values and internal state that's useful for troubleshooting but too verbose for normal operation."
+    },
+    {
+      question: "In the model_preferences for sampling, what does cost_priority=0.9 mean?",
+      options: [
+        "The server is willing to pay up to 90% more for a better model",
+        "Strongly prefer cheaper models over higher quality models",
+        "90% of sampling requests should use the cheapest model",
+        "The model should use 90% of the max_tokens budget"
+      ],
+      correct: 1,
+      explanation: "cost_priority is a 0-1 scale where 0 = prefer quality, 1 = prefer cost. cost_priority=0.9 tells the client to strongly prefer cheaper, faster models — appropriate for high-volume individual document analyses where speed matters more than perfect quality."
+    }
+  ]
+};
+</script>
+</body>
+</html>

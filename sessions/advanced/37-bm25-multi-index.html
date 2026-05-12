@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 37: BM25 Search &amp; Multi-Index RAG — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 37</span></div>
+      <h1 class="session-title">BM25 Search &amp; Multi-Index RAG</h1>
+      <p class="session-tagline">Combine lexical BM25 search with semantic embeddings to build hybrid retrieval that outperforms either approach alone.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Why Semantic Search Alone Isn't Enough</h2>
+      <p>Semantic search with embeddings is powerful — it can find "automobile" when you search "car" because the vectors are nearby. But it has a critical weakness: <strong>it struggles with exact keyword matches</strong>. If a user searches for "HIPAA section 164.312" or a specific error code like "ECONNREFUSED", semantic search may return vague conceptually-similar results instead of the exact document containing that string.</p>
+
+      <p>This is where <strong>BM25</strong> (Best Match 25) shines. BM25 is a classical information retrieval algorithm that ranks documents by term frequency and inverse document frequency. It excels at exact keyword matching and is the backbone of systems like Elasticsearch and Apache Solr.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Key insight:</strong> BM25 wins on precision (find exactly this term); semantic wins on recall (find conceptually related content). Combining them — hybrid search — consistently outperforms either alone in retrieval benchmarks.</div>
+      </div>
+
+      <h2>BM25 Explained</h2>
+      <p>BM25 scores a document <em>d</em> against query <em>q</em> using:</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-calculator"></i>
+        <div><strong>BM25 formula (simplified):</strong> For each query term t in document d, score += IDF(t) * (TF(t,d) * (k1+1)) / (TF(t,d) + k1*(1-b+b*|d|/avgdl))
+        <br/><br/>Where: IDF = inverse document frequency (rare terms score higher), TF = term frequency in document, k1 (typically 1.5) controls TF saturation, b (typically 0.75) controls length normalization, avgdl = average document length.</div>
+      </div>
+
+      <pre><code class="language-python">from rank_bm25 import BM25Okapi
+import numpy as np
+
+corpus = [
+    "RAG pipelines use embeddings and vector stores",
+    "BM25 is a classical lexical search algorithm",
+    "Hybrid search combines BM25 with semantic embeddings",
+    "FAISS enables fast approximate nearest neighbor search",
+    "Claude is an AI assistant with a 200K context window",
+]
+
+# Tokenize corpus (simple whitespace tokenization)
+tokenized_corpus = [doc.lower().split() for doc in corpus]
+bm25 = BM25Okapi(tokenized_corpus)
+
+# Query
+query = "BM25 search algorithm"
+tokenized_query = query.lower().split()
+scores = bm25.get_scores(tokenized_query)
+
+# Rank results
+ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
+print(f"Query: {query}\n")
+for idx, score in ranked[:3]:
+    print(f"Score: {score:.3f} | {corpus[idx]}")</code></pre>
+
+      <h2>When BM25 Wins vs When Semantic Wins</h2>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-font"></i> BM25 Wins When...</h4>
+          <ul>
+            <li>Query contains specific keywords, codes, or names</li>
+            <li>Exact phrase matching matters ("HIPAA 164.312")</li>
+            <li>Domain-specific jargon not in embedding training data</li>
+            <li>Short, factual lookups ("Python 3.11 release date")</li>
+            <li>No GPU available — BM25 runs on CPU in milliseconds</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-brain"></i> Semantic Wins When...</h4>
+          <ul>
+            <li>Query uses synonyms ("car" vs "automobile")</li>
+            <li>Paraphrase matching needed ("how do I..." vs "steps to...")</li>
+            <li>Multilingual queries on English documents</li>
+            <li>Conceptual or abstract queries ("explain transformation")</li>
+            <li>User query is poorly worded but semantically clear</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Hybrid Search Architecture</h2>
+      <p>A hybrid retriever runs both BM25 and semantic search in parallel, then merges the result lists. The merging step is critical — raw scores from BM25 and cosine similarity are not comparable (different scales), so we use <strong>Reciprocal Rank Fusion (RRF)</strong> instead.</p>
+
+      <h3>Reciprocal Rank Fusion (RRF)</h3>
+      <p>RRF converts rank positions to scores, then sums them. It's robust, requires no tuning, and handles score incompatibility between retrievers.</p>
+
+      <pre><code class="language-python">def reciprocal_rank_fusion(
+    result_lists: list[list[int]],
+    k: int = 60
+) -> list[tuple[int, float]]:
+    """
+    Merge multiple ranked result lists using RRF.
+
+    Args:
+        result_lists: List of ranked document ID lists (best first)
+        k: Constant to prevent high scores for top-1 docs (default 60)
+
+    Returns:
+        Merged list of (doc_id, rrf_score) sorted by score descending
+    """
+    scores = {}
+    for result_list in result_lists:
+        for rank, doc_id in enumerate(result_list):
+            if doc_id not in scores:
+                scores[doc_id] = 0.0
+            scores[doc_id] += 1.0 / (k + rank + 1)
+
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)</code></pre>
+
+      <h2>Multi-Index RAG Architecture</h2>
+      <p>For production systems, you often need to search across multiple indexes simultaneously:</p>
+
+      <ul>
+        <li><strong>Dense index</strong> — vector embeddings for semantic search</li>
+        <li><strong>Sparse index</strong> — BM25 / inverted index for keyword search</li>
+        <li><strong>Metadata index</strong> — structured filters (date range, document type, author)</li>
+      </ul>
+
+      <pre><code class="language-python">class MultiIndexRetriever:
+    """Hybrid retriever combining BM25 and semantic search via RRF."""
+
+    def __init__(self, chunks: list[str], embedder, faiss_index):
+        self.chunks = chunks
+        self.embedder = embedder
+        self.faiss_index = faiss_index
+
+        # Build BM25 index
+        tokenized = [c.lower().split() for c in chunks]
+        self.bm25 = BM25Okapi(tokenized)
+
+    def semantic_search(self, query: str, k: int = 10) -> list[int]:
+        """Return top-k chunk indices via semantic similarity."""
+        q_emb = self.embedder.encode([query], normalize_embeddings=True).astype('float32')
+        _, indices = self.faiss_index.search(q_emb, k)
+        return [int(i) for i in indices[0] if i >= 0]
+
+    def bm25_search(self, query: str, k: int = 10) -> list[int]:
+        """Return top-k chunk indices via BM25."""
+        scores = self.bm25.get_scores(query.lower().split())
+        ranked = np.argsort(scores)[::-1][:k]
+        return [int(i) for i in ranked]
+
+    def hybrid_search(self, query: str, k: int = 5) -> list[dict]:
+        """Merge BM25 and semantic results using RRF."""
+        semantic_ids = self.semantic_search(query, k=10)
+        bm25_ids = self.bm25_search(query, k=10)
+
+        # Fuse rankings
+        merged = reciprocal_rank_fusion([semantic_ids, bm25_ids])
+
+        results = []
+        for doc_id, score in merged[:k]:
+            results.append({
+                "chunk": self.chunks[doc_id],
+                "rrf_score": score,
+                "in_semantic": doc_id in semantic_ids,
+                "in_bm25": doc_id in bm25_ids
+            })
+        return results</code></pre>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Implement Hybrid BM25 + Semantic Search</h2>
+        <p>Build a complete hybrid retrieval system and compare BM25, semantic, and hybrid results on the same queries.</p>
+      </div>
+
+      <div class="lab-prereqs">
+        <h3>Prerequisites</h3>
+        <pre><code class="language-python">pip install rank-bm25 sentence-transformers faiss-cpu numpy anthropic</code></pre>
+      </div>
+
+      <h3>Full Hybrid RAG Implementation</h3>
+      <pre><code class="language-python">import numpy as np
+import faiss
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer
+import anthropic
+
+# ── Sample corpus ──────────────────────────────────────────────────────────────
+CHUNKS = [
+    "RAG stands for Retrieval Augmented Generation. It combines a retrieval system with a language model.",
+    "BM25 is a probabilistic ranking function used in information retrieval systems like Elasticsearch.",
+    "Semantic search uses vector embeddings to find conceptually similar documents regardless of exact wording.",
+    "Hybrid search combines BM25 lexical retrieval with semantic vector search for better overall recall.",
+    "Reciprocal Rank Fusion (RRF) merges result lists from multiple retrieval systems without score normalization.",
+    "FAISS is a library for efficient similarity search developed by Facebook AI Research.",
+    "ChromaDB is an open-source vector store with built-in persistence and metadata filtering.",
+    "Claude claude-opus-4-5 supports a 200,000 token context window, enabling processing of large documents.",
+    "Prompt caching in Claude reduces costs by reusing previously processed prompt prefixes.",
+    "Constitutional AI is Anthropic's training technique that uses a set of principles to guide model behavior.",
+    "ECONNREFUSED error typically means the target server refused the connection on the specified port.",
+    "HIPAA section 164.312 covers technical safeguards for electronic protected health information.",
+]
+
+# ── Setup ──────────────────────────────────────────────────────────────────────
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Build semantic index
+print("Building semantic index...")
+embeddings = embedder.encode(CHUNKS, normalize_embeddings=True).astype('float32')
+d = embeddings.shape[1]
+faiss_index = faiss.IndexFlatIP(d)
+faiss_index.add(embeddings)
+
+# Build BM25 index
+tokenized = [c.lower().split() for c in CHUNKS]
+bm25 = BM25Okapi(tokenized)
+
+# ── RRF function ───────────────────────────────────────────────────────────────
+def rrf(lists, k=60):
+    scores = {}
+    for lst in lists:
+        for rank, doc_id in enumerate(lst):
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank + 1)
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+# ── Individual retrievers ──────────────────────────────────────────────────────
+def semantic_search(query, top_k=5):
+    q_emb = embedder.encode([query], normalize_embeddings=True).astype('float32')
+    distances, indices = faiss_index.search(q_emb, top_k)
+    return [int(i) for i in indices[0] if i >= 0]
+
+def bm25_search(query, top_k=5):
+    scores = bm25.get_scores(query.lower().split())
+    return list(np.argsort(scores)[::-1][:top_k].astype(int))
+
+def hybrid_search(query, top_k=5):
+    sem_ids = semantic_search(query, top_k=top_k*2)
+    bm_ids = bm25_search(query, top_k=top_k*2)
+    merged = rrf([sem_ids, bm_ids])
+    return [doc_id for doc_id, _ in merged[:top_k]]
+
+# ── Compare retrievers ─────────────────────────────────────────────────────────
+def compare_retrievers(query):
+    print(f"\n{'='*60}")
+    print(f"Query: {query}")
+    print('='*60)
+
+    for name, fn in [("BM25", bm25_search), ("Semantic", semantic_search), ("Hybrid", hybrid_search)]:
+        ids = fn(query, top_k=3) if name != "Hybrid" else hybrid_search(query, top_k=3)
+        print(f"\n{name}:")
+        for i, idx in enumerate(ids, 1):
+            print(f"  {i}. {CHUNKS[idx][:80]}...")
+
+# Test with different query types
+compare_retrievers("ECONNREFUSED connection error")          # BM25 should win
+compare_retrievers("how does retrieval augmented work")     # Semantic should win
+compare_retrievers("hybrid search combining multiple indexes")  # Both contribute
+
+# ── Full RAG with hybrid retrieval ─────────────────────────────────────────────
+client = anthropic.Anthropic()
+
+def hybrid_rag(question):
+    ids = hybrid_search(question, top_k=4)
+    context = "\n\n".join([CHUNKS[i] for i in ids])
+
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=400,
+        system="Answer using only the provided context. Be concise.",
+        messages=[{
+            "role": "user",
+            "content": f"Context:\n{context}\n\nQuestion: {question}"
+        }]
+    )
+    return response.content[0].text
+
+print("\n\nHybrid RAG Answer:")
+print(hybrid_rag("What are the benefits of combining BM25 with semantic search?"))</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>Key finding:</strong> Run the comparison and notice BM25 retrieves "ECONNREFUSED" correctly by exact match, while semantic search finds conceptually similar but not identical results. Hybrid search wins on both types of queries.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/36-rag-pipelines.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">RAG Pipelines</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/38-reranking-retrieval.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Reranking &amp; Contextual Retrieval</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 37,
+  slug: '37-bm25-multi-index',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/38-reranking-retrieval.html',
+  quizData: [
+    {
+      question: "What is BM25's primary advantage over semantic embedding search?",
+      options: [
+        "It is more accurate for abstract conceptual queries",
+        "It excels at exact keyword and phrase matching",
+        "It requires no tokenization or preprocessing",
+        "It uses GPU acceleration for faster results"
+      ],
+      correct: 1,
+      explanation: "BM25 is a term-frequency based algorithm that precisely matches documents containing the exact query terms. This makes it ideal for exact codes, names, and domain-specific jargon."
+    },
+    {
+      question: "Why is Reciprocal Rank Fusion (RRF) preferred over averaging raw scores when merging retrieval results?",
+      options: [
+        "RRF scores are always between 0 and 1",
+        "BM25 and cosine similarity scores are on incomparable scales — RRF uses rank position instead",
+        "RRF is computationally cheaper than score averaging",
+        "RRF always produces exactly k results regardless of input"
+      ],
+      correct: 1,
+      explanation: "BM25 produces scores based on term frequencies (no fixed range) while cosine similarity ranges from -1 to 1. You can't meaningfully average them. RRF converts both to ranks, making them comparable."
+    },
+    {
+      question: "In the RRF formula score += 1/(k + rank), what does the constant k do?",
+      options: [
+        "k controls how many results are returned",
+        "k prevents rank-1 documents from dominating — higher k = more uniform distribution",
+        "k is the number of retrieval systems being fused",
+        "k sets the minimum similarity threshold"
+      ],
+      correct: 1,
+      explanation: "With k=60 (the standard), rank-1 gives 1/61 ≈ 0.016 and rank-10 gives 1/70 ≈ 0.014 — a narrow range. Without k, rank-1 would give 1.0 and rank-2 would give 0.5, causing top results to completely dominate."
+    },
+    {
+      question: "When would semantic search outperform BM25?",
+      options: [
+        "Searching for a specific error code like 'TypeError: NoneType'",
+        "Finding documents about 'automobiles' when indexed documents say 'cars'",
+        "Looking up a specific person's name in a document collection",
+        "Searching for an exact regulatory citation number"
+      ],
+      correct: 1,
+      explanation: "Semantic search maps 'automobiles' and 'cars' to nearby embedding vectors. BM25 would miss 'cars' documents when searching 'automobiles' because the exact string doesn't match."
+    },
+    {
+      question: "What is a multi-index RAG architecture?",
+      options: [
+        "Using multiple copies of the same FAISS index for redundancy",
+        "Running multiple LLMs in parallel to generate diverse answers",
+        "Combining dense semantic, sparse BM25, and metadata indexes to search simultaneously",
+        "Indexing the same document multiple times with different chunk sizes"
+      ],
+      correct: 2,
+      explanation: "Multi-index RAG uses a dense vector index for semantic search, a sparse inverted index (BM25) for keyword search, and optionally a structured metadata index for filtering — all queried in parallel and merged."
+    }
+  ]
+};
+</script>
+</body>
+</html>

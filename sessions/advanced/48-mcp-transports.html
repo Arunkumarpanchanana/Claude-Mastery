@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 48: MCP Transports — STDIO &amp; StreamableHTTP — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 48</span></div>
+      <h1 class="session-title">MCP Transports — STDIO &amp; StreamableHTTP</h1>
+      <p class="session-tagline">Master both MCP transport types: use STDIO for local process tools and StreamableHTTP for remote, stateful, multi-tenant MCP servers.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 50 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>MCP Transport Overview</h2>
+      <p>An MCP transport is the communication channel between the MCP client (Claude Code) and the MCP server. It handles how JSON-RPC messages are framed and delivered. MCP supports two official transports: <strong>STDIO</strong> (Standard Input/Output) and <strong>StreamableHTTP</strong> (HTTP with optional Server-Sent Events).</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-terminal"></i> STDIO Transport</h4>
+          <ul>
+            <li>Client spawns server as a subprocess</li>
+            <li>Messages via stdin/stdout pipes</li>
+            <li>One process per client session</li>
+            <li>Perfect for local dev tools</li>
+            <li>No network required, very low latency</li>
+            <li>Simple — just a Python script</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-server"></i> StreamableHTTP Transport</h4>
+          <ul>
+            <li>Client connects to HTTP server</li>
+            <li>Supports Server-Sent Events for streaming</li>
+            <li>One server, many clients</li>
+            <li>Perfect for shared/remote servers</li>
+            <li>Supports authentication (API keys, OAuth)</li>
+            <li>Stateful sessions via session IDs</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>STDIO Transport Deep Dive</h2>
+      <p>STDIO is the simplest and most common transport for local tools. The client starts your server as a subprocess and communicates via newline-delimited JSON on stdin/stdout.</p>
+
+      <h3>The JSON Message Format</h3>
+      <pre><code class="language-python"># Each message is a single line of JSON on stdout
+# Requests from client to server:
+{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "read_file", "arguments": {"path": "test.py"}}}
+
+# Responses from server to client:
+{"jsonrpc": "2.0", "id": 1, "result": {"content": [{"type": "text", "text": "...file content..."}]}}
+
+# Notifications (no id — no response expected):
+{"jsonrpc": "2.0", "method": "notifications/progress", "params": {"progressToken": "abc", "progress": 5, "total": 10}}</code></pre>
+
+      <h3>Complete STDIO Server</h3>
+      <pre><code class="language-python">#!/usr/bin/env python3
+# my_stdio_server.py — A complete STDIO MCP server
+
+import asyncio
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.server.models import InitializationOptions
+import mcp.types as types
+
+app = Server("my-local-tool")
+
+@app.list_tools()
+async def list_tools() -> list[types.Tool]:
+    return [
+        types.Tool(
+            name="hello",
+            description="A simple hello tool",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Name to greet"}
+                },
+                "required": ["name"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
+    if name == "hello":
+        return [types.TextContent(type="text", text=f"Hello, {arguments['name']}!")]
+    raise ValueError(f"Unknown tool: {name}")
+
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="my-local-tool",
+                server_version="1.0.0",
+                capabilities=app.get_capabilities(
+                    notification_options=types.NotificationOptions(),
+                    experimental_capabilities={}
+                )
+            )
+        )
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+      <h3>Claude Code Configuration for STDIO</h3>
+      <pre><code class="language-python"># ~/.claude/claude_desktop_config.json (or .claude/settings.json)
+{
+  "mcpServers": {
+    "my-local-tool": {
+      "command": "python3",
+      "args": ["/path/to/my_stdio_server.py"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost/mydb"
+      }
+    }
+  }
+}</code></pre>
+
+      <h2>StreamableHTTP Transport Deep Dive</h2>
+      <p>StreamableHTTP runs as a persistent HTTP server. Multiple clients can connect simultaneously. It supports Server-Sent Events (SSE) for streaming responses from server to client.</p>
+
+      <h3>Why StreamableHTTP?</h3>
+      <ul>
+        <li><strong>Multi-tenant:</strong> One server instance serves your entire team</li>
+        <li><strong>Authentication:</strong> Add API keys, OAuth, or JWT validation</li>
+        <li><strong>Shared state:</strong> Maintain connection pools, caches, user sessions</li>
+        <li><strong>Remote deployment:</strong> Run on a server, accessed by any Claude Code instance</li>
+        <li><strong>Scalability:</strong> Deploy behind a load balancer</li>
+      </ul>
+
+      <h3>Complete StreamableHTTP Server</h3>
+      <pre><code class="language-python">#!/usr/bin/env python3
+# my_http_server.py — StreamableHTTP MCP server using FastAPI
+
+import asyncio
+import uuid
+from fastapi import FastAPI, Request, Header
+from fastapi.responses import StreamingResponse
+from mcp.server import Server
+from mcp.server.streamable_http import StreamableHTTPServerTransport
+from mcp.server.models import InitializationOptions
+import mcp.types as types
+
+app_server = Server("remote-tool")
+fastapi_app = FastAPI()
+
+# Per-session state (each client gets an isolated session)
+sessions: dict[str, dict] = {}
+
+@app_server.list_tools()
+async def list_tools() -> list[types.Tool]:
+    return [
+        types.Tool(
+            name="get_session_data",
+            description="Returns data specific to this client session",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        ),
+        types.Tool(
+            name="store_note",
+            description="Store a note in this session",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "note": {"type": "string"}
+                },
+                "required": ["note"]
+            }
+        )
+    ]
+
+@app_server.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
+    # Get session ID from context (set by the transport layer)
+    session_id = app_server.request_context.session_id if hasattr(app_server.request_context, 'session_id') else "unknown"
+
+    if name == "get_session_data":
+        data = sessions.get(session_id, {"notes": [], "request_count": 0})
+        return [types.TextContent(type="text", text=str(data))]
+
+    elif name == "store_note":
+        if session_id not in sessions:
+            sessions[session_id] = {"notes": [], "request_count": 0}
+        sessions[session_id]["notes"].append(arguments["note"])
+        sessions[session_id]["request_count"] += 1
+        return [types.TextContent(type="text", text=f"Note stored. Total notes: {len(sessions[session_id]['notes'])}")]
+
+    raise ValueError(f"Unknown tool: {name}")
+
+@fastapi_app.post("/mcp")
+async def handle_mcp_post(request: Request, x_api_key: str = Header(None)):
+    """Handle MCP requests via HTTP POST."""
+    # Authentication
+    if x_api_key != "secret-api-key-123":
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+
+    # Create a new session ID for this client if needed
+    session_id = request.headers.get("mcp-session-id") or str(uuid.uuid4())
+
+    transport = StreamableHTTPServerTransport(
+        mcp_session_id=session_id,
+        is_json_response_enabled=True
+    )
+
+    async def run():
+        async with transport.connect() as streams:
+            await app_server.run(
+                streams[0], streams[1],
+                InitializationOptions(
+                    server_name="remote-tool",
+                    server_version="1.0.0",
+                    capabilities=app_server.get_capabilities(
+                        notification_options=types.NotificationOptions(),
+                        experimental_capabilities={}
+                    )
+                )
+            )
+
+    return await transport.handle_request(request, run)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=8080)</code></pre>
+
+      <h3>Claude Code Configuration for StreamableHTTP</h3>
+      <pre><code class="language-python"># ~/.claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "remote-tool": {
+      "url": "https://my-mcp-server.company.com/mcp",
+      "headers": {
+        "x-api-key": "secret-api-key-123"
+      }
+    }
+  }
+}</code></pre>
+
+      <h2>Choosing the Right Transport</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Factor</th><th>Use STDIO</th><th>Use StreamableHTTP</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Deployment</td><td>Local machine</td><td>Remote server, cloud</td></tr>
+          <tr><td>Users</td><td>Single user</td><td>Team / multiple users</td></tr>
+          <tr><td>State</td><td>Per-process (ephemeral)</td><td>Persistent sessions</td></tr>
+          <tr><td>Auth needed</td><td>No (process isolation)</td><td>Yes (API keys, OAuth)</td></tr>
+          <tr><td>Streaming</td><td>N/A</td><td>SSE for long responses</td></tr>
+          <tr><td>Setup complexity</td><td>Low</td><td>Medium-High</td></tr>
+        </tbody>
+      </table>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Convert a STDIO MCP Server to StreamableHTTP</h2>
+        <p>Take a working STDIO MCP server and convert it to StreamableHTTP, adding authentication and session state management.</p>
+      </div>
+
+      <h3>Step 1: The Original STDIO Server</h3>
+      <pre><code class="language-python">#!/usr/bin/env python3
+# original_stdio_server.py — We'll convert this to HTTP
+
+import asyncio
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.server.models import InitializationOptions
+import mcp.types as types
+
+app = Server("notes-tool")
+in_memory_notes = []  # Session state
+
+@app.list_tools()
+async def list_tools() -> list[types.Tool]:
+    return [
+        types.Tool(
+            name="add_note",
+            description="Add a note to the in-memory note store",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "content": {"type": "string", "description": "Note content"},
+                    "tag": {"type": "string", "description": "Optional tag", "default": "general"}
+                },
+                "required": ["content"]
+            }
+        ),
+        types.Tool(
+            name="list_notes",
+            description="List all stored notes",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "tag": {"type": "string", "description": "Filter by tag (optional)"}
+                }
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
+    global in_memory_notes
+
+    if name == "add_note":
+        note = {
+            "content": arguments["content"],
+            "tag": arguments.get("tag", "general"),
+            "id": len(in_memory_notes) + 1
+        }
+        in_memory_notes.append(note)
+        return [types.TextContent(type="text", text=f"Note #{note['id']} added.")]
+
+    elif name == "list_notes":
+        tag_filter = arguments.get("tag")
+        notes = in_memory_notes if not tag_filter else [n for n in in_memory_notes if n["tag"] == tag_filter]
+        if not notes:
+            return [types.TextContent(type="text", text="No notes found.")]
+        text = "\n".join([f"#{n['id']} [{n['tag']}]: {n['content']}" for n in notes])
+        return [types.TextContent(type="text", text=text)]
+
+    raise ValueError(f"Unknown tool: {name}")
+
+async def main():
+    async with stdio_server() as (r, w):
+        await app.run(r, w, InitializationOptions(
+            server_name="notes-tool", server_version="1.0.0",
+            capabilities=app.get_capabilities(
+                notification_options=types.NotificationOptions(),
+                experimental_capabilities={}
+            )
+        ))
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+      <h3>Step 2: The Converted HTTP Server</h3>
+      <pre><code class="language-python">#!/usr/bin/env python3
+# converted_http_server.py — Same functionality, HTTP transport
+
+from fastapi import FastAPI, Request, HTTPException, Header
+from fastapi.responses import JSONResponse
+import uvicorn
+import uuid
+import json
+import asyncio
+from datetime import datetime
+
+fastapi_app = FastAPI(title="Notes MCP Server (HTTP)")
+
+# Per-session note storage (HTTP version is multi-tenant!)
+SESSION_NOTES: dict[str, list[dict]] = {}
+VALID_API_KEYS = {"my-secret-key-123", "team-key-456"}
+
+def get_or_create_session(session_id: str) -> list[dict]:
+    if session_id not in SESSION_NOTES:
+        SESSION_NOTES[session_id] = []
+    return SESSION_NOTES[session_id]
+
+def handle_tool_call(tool_name: str, arguments: dict, session_id: str) -> dict:
+    """Business logic — identical to STDIO version, but session-aware."""
+    notes = get_or_create_session(session_id)
+
+    if tool_name == "add_note":
+        note = {
+            "content": arguments["content"],
+            "tag": arguments.get("tag", "general"),
+            "id": len(notes) + 1,
+            "created_at": datetime.now().isoformat()
+        }
+        notes.append(note)
+        return {"content": [{"type": "text", "text": f"Note #{note['id']} added."}]}
+
+    elif tool_name == "list_notes":
+        tag_filter = arguments.get("tag")
+        filtered = notes if not tag_filter else [n for n in notes if n["tag"] == tag_filter]
+        if not filtered:
+            text = "No notes found."
+        else:
+            text = "\n".join([f"#{n['id']} [{n['tag']}]: {n['content']}" for n in filtered])
+        return {"content": [{"type": "text", "text": text}]}
+
+    raise ValueError(f"Unknown tool: {tool_name}")
+
+TOOLS = [
+    {
+        "name": "add_note",
+        "description": "Add a note to your personal note store",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "content": {"type": "string"},
+                "tag": {"type": "string", "default": "general"}
+            },
+            "required": ["content"]
+        }
+    },
+    {
+        "name": "list_notes",
+        "description": "List all your stored notes",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"tag": {"type": "string"}}
+        }
+    }
+]
+
+@fastapi_app.post("/mcp")
+async def handle_mcp(request: Request, x_api_key: str = Header(None)):
+    # Auth
+    if x_api_key not in VALID_API_KEYS:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # Session management
+    session_id = request.headers.get("mcp-session-id") or str(uuid.uuid4())
+
+    body = await request.json()
+    method = body.get("method")
+    request_id = body.get("id")
+    params = body.get("params", {})
+
+    # Handle MCP JSON-RPC methods
+    if method == "initialize":
+        return JSONResponse({
+            "jsonrpc": "2.0", "id": request_id,
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "serverInfo": {"name": "notes-tool", "version": "2.0.0"},
+                "capabilities": {"tools": {}}
+            }
+        }, headers={"mcp-session-id": session_id})
+
+    elif method == "tools/list":
+        return JSONResponse({
+            "jsonrpc": "2.0", "id": request_id,
+            "result": {"tools": TOOLS}
+        })
+
+    elif method == "tools/call":
+        tool_name = params.get("name")
+        arguments = params.get("arguments", {})
+        try:
+            result = handle_tool_call(tool_name, arguments, session_id)
+            return JSONResponse({"jsonrpc": "2.0", "id": request_id, "result": result})
+        except ValueError as e:
+            return JSONResponse({
+                "jsonrpc": "2.0", "id": request_id,
+                "error": {"code": -32601, "message": str(e)}
+            })
+
+    elif method == "notifications/initialized":
+        return JSONResponse({"jsonrpc": "2.0", "result": None})
+
+    return JSONResponse({
+        "jsonrpc": "2.0", "id": request_id,
+        "error": {"code": -32601, "message": f"Method not found: {method}"}
+    })
+
+@fastapi_app.get("/health")
+async def health():
+    return {"status": "ok", "sessions": len(SESSION_NOTES)}
+
+if __name__ == "__main__":
+    print("Starting Notes MCP Server on http://localhost:8080")
+    print("Configure Claude Code with:")
+    print('  "url": "http://localhost:8080/mcp"')
+    print('  "headers": {"x-api-key": "my-secret-key-123"}')
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=8080)</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>Key differences in the HTTP version:</strong> (1) Multi-tenant — each client gets its own session via mcp-session-id header. (2) Authentication — API key validation on every request. (3) Persistent state — notes survive across multiple tool calls from the same client. (4) Deployable to any HTTP host.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/47-mcp-advanced.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">MCP Advanced — Sampling &amp; Notifications</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/49-amazon-bedrock.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Claude on Amazon Bedrock</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 48,
+  slug: '48-mcp-transports',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/49-amazon-bedrock.html',
+  quizData: [
+    {
+      question: "In STDIO transport, how does the MCP client start the server?",
+      options: [
+        "By making an HTTP GET request to the server's URL",
+        "By spawning the server as a child process and communicating via stdin/stdout",
+        "By connecting to a shared message queue",
+        "By loading the server as a Python module import"
+      ],
+      correct: 1,
+      explanation: "STDIO transport has the MCP client (Claude Code) spawn the server as a subprocess. Messages flow through the process's stdin (client → server) and stdout (server → client) as newline-delimited JSON."
+    },
+    {
+      question: "What is the key advantage of StreamableHTTP over STDIO for team environments?",
+      options: [
+        "HTTP servers respond faster than subprocess pipes",
+        "HTTP servers can serve multiple clients simultaneously with per-session state",
+        "HTTP servers don't require Python to be installed",
+        "HTTP servers automatically scale across multiple CPU cores"
+      ],
+      correct: 1,
+      explanation: "STDIO creates one server process per client. StreamableHTTP runs one server instance that handles all clients, with session IDs differentiating each client's state. This is essential for team-shared MCP servers."
+    },
+    {
+      question: "What does the mcp-session-id HTTP header do in StreamableHTTP transport?",
+      options: [
+        "It authenticates the client with the server",
+        "It identifies which client session a request belongs to, enabling per-user state",
+        "It specifies which MCP server to route the request to",
+        "It sets the request timeout"
+      ],
+      correct: 1,
+      explanation: "When multiple clients connect to the same HTTP MCP server, the mcp-session-id header tells the server which session's state to use for each request. The server associates tool call results, notes, and other stateful data with the correct client."
+    },
+    {
+      question: "What MCP feature does StreamableHTTP support that STDIO does not?",
+      options: [
+        "Tool definitions with input schemas",
+        "Progress notifications",
+        "Server-Sent Events (SSE) for real-time streaming from server to client",
+        "Prompt listing"
+      ],
+      correct: 2,
+      explanation: "StreamableHTTP supports Server-Sent Events, allowing the server to push updates to the client over an open connection. This enables real-time streaming of long responses. STDIO supports notifications but not SSE since it's a subprocess pipe."
+    },
+    {
+      question: "You need to build an MCP tool that accesses a company database and will be used by 20 engineers. Which transport should you use?",
+      options: [
+        "STDIO — each engineer runs the server locally",
+        "StreamableHTTP — deploy once, all engineers connect to the shared server",
+        "Both simultaneously for redundancy",
+        "Neither — use the Anthropic API directly"
+      ],
+      correct: 1,
+      explanation: "A company database tool should run as a central StreamableHTTP server: one deployment, API key authentication, database connection pooling, and all 20 engineers connect to it. STDIO would require each engineer to install the server locally with database credentials."
+    }
+  ]
+};
+</script>
+</body>
+</html>

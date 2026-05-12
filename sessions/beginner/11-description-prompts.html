@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 11: Description — Writing Great Prompts — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 11</span></div>
+      <h1 class="session-title">Description — Writing Great Prompts</h1>
+      <p class="session-tagline">Build mastery in prompt construction — anatomy, few-shot techniques, and the iterative refinement process that separates mediocre from exceptional results.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 35 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Prompt Building Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>The Full Anatomy of a Prompt</h2>
+      <p>We introduced prompt basics in Session 2. Now let's build a complete mental model. A fully-formed prompt can have up to six components — not every prompt needs all six, but knowing them gives you a toolkit to draw from.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Role (optional but powerful)</h4>
+            <p>"You are a [role]..." — Sets Claude's perspective, expertise, and communication style. Use when you want a specific angle or domain emphasis.</p>
+            <p><em>Example:</em> "You are an experienced UX writer who specializes in fintech apps..."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Context (often critical)</h4>
+            <p>Background information Claude needs: who you are, what project this is for, what audience will see the output, what assumptions apply.</p>
+            <p><em>Example:</em> "...I'm working on a mobile banking app for first-time investors aged 25-35. The app needs to feel approachable, not intimidating."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Task (always required)</h4>
+            <p>The core request — what you want Claude to do. Start with a verb. Be specific about what "done" looks like.</p>
+            <p><em>Example:</em> "...Write 5 micro-copy variants for the onboarding screen that explains compound interest."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Format (often underspecified)</h4>
+            <p>How the output should be structured: length, headings, bullets, tables, code blocks, numbered lists. If you don't specify, Claude guesses — and often guesses wrong for your needs.</p>
+            <p><em>Example:</em> "...Format: each variant on its own line, labeled Variant 1-5. Max 25 words each."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h4>Constraints (reduces guessing)</h4>
+            <p>What Claude should avoid, what assumptions it shouldn't make, what's off-limits. Constraints sharpen the output space dramatically.</p>
+            <p><em>Example:</em> "...Avoid financial jargon. Don't use the phrase 'compound interest' itself in the copy. No exclamation marks."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">6</div>
+          <div class="step-content">
+            <h4>Examples (the secret weapon)</h4>
+            <p>One or two examples of what good output looks like. This is the most powerful calibration tool available. "Few-shot prompting" — providing examples — dramatically improves output quality.</p>
+            <p><em>Example:</em> "...Here's the style I'm going for: 'Your money works while you sleep — here's how.' (short, clear, benefit-first)"</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Few-Shot Prompting: Show, Don't Just Tell</h2>
+      <p>One example in a prompt is worth a hundred adjectives. When you tell Claude "write in a warm, conversational tone," you get Claude's interpretation of warm and conversational. When you show Claude an example, it calibrates to your specific definition.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-xmark"></i> Zero-shot (no examples)</h4>
+          <pre style="font-size:0.8rem;background:#fef3c7;padding:0.75rem;border-radius:0.5rem;">Write product descriptions in a casual, friendly tone for our sustainable clothing brand.</pre>
+          <p style="font-size:0.85rem;color:#78716c;margin-top:0.5rem">Claude guesses at "casual and friendly" — may be off from your specific brand voice.</p>
+        </div>
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Few-shot (with examples)</h4>
+          <pre style="font-size:0.8rem;background:#dcfce7;padding:0.75rem;border-radius:0.5rem;">Write product descriptions for our sustainable clothing brand. Here are two examples of our style:
+"These aren't just jeans — they're the last pair you'll ever need to buy. Seriously."
+"Made from recycled ocean plastic. Feels like cotton. Saves a fish."
+Now write one for our new hemp t-shirt collection.</pre>
+          <p style="font-size:0.85rem;color:#78716c;margin-top:0.5rem">Claude now has a precise calibration target — it matches your specific voice, not a generic "casual."</p>
+        </div>
+      </div>
+
+      <p>Few-shot tips:</p>
+      <ul>
+        <li>1-3 examples is usually enough. Too many examples can confuse the calibration.</li>
+        <li>Choose examples that represent the range of what you want, not just one extreme.</li>
+        <li>Bad examples can backfire — make sure your examples are actually good models.</li>
+        <li>For formatting examples, show the exact format structure you want reproduced.</li>
+      </ul>
+
+      <h2>Prompt Iteration: The Real Skill</h2>
+      <p>Even well-crafted prompts often need iteration. The goal of a first prompt is to get something useful to work with, not to get the final output. Here's a structured iteration approach:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-1"></i> First pass: get the shape</h4>
+          <p>Your initial prompt gets the rough structure and approach right. Don't worry about perfection — get something on paper.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-2"></i> Second pass: fix specifics</h4>
+          <p>Identify what's wrong and add specifics: "The third paragraph is too formal. Make it sound more like a conversation." Target your feedback.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-3"></i> Third pass: polish and variants</h4>
+          <p>"This is close — give me 3 variations of the opening sentence." Or "Make the whole thing 20% shorter." Refinement, not reconstruction.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>The iteration mindset:</strong> Your first prompt is a hypothesis. Claude's response is data. Your next prompt is a revised hypothesis based on that data. Treat it like a dialogue, not a command, and you'll converge on excellent outputs much faster.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Build a Prompt Library</h2>
+        <p>Create 3 fully-formed prompts for real tasks in your life, using the complete anatomy. Then test and iterate them.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Identify 3 recurring tasks</h3></div>
+          <p>Think of 3 tasks you do repeatedly that Claude could help with. Examples:</p>
+          <ul>
+            <li>Writing status update emails to your manager</li>
+            <li>Summarizing long articles or documents</li>
+            <li>Brainstorming ideas for presentations or projects</li>
+            <li>Drafting professional messages for difficult situations</li>
+            <li>Creating study notes or flashcards from reading material</li>
+          </ul>
+          <p>Write them down. These will become your personal prompt templates.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Build each prompt using the 6-component anatomy</h3></div>
+          <p>For each task, write a full prompt template using placeholders for the variable parts. Example structure:</p>
+          <pre><code class="language-text">Role: You are [X].
+Context: [Background about me and this task].
+Task: [Specific action verb + what you want].
+Format: [Length, structure, style].
+Constraints: [What to avoid].
+Example: [If applicable, one example of the output style].</code></pre>
+          <p>The [brackets] become the things you fill in each time you use it.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Test each prompt with real content</h3></div>
+          <p>Fill in a real instance of each template and test it with Claude. For each:</p>
+          <ul>
+            <li>Rate the first output 1-10</li>
+            <li>Write one follow-up prompt that improves it</li>
+            <li>Rate the second output 1-10</li>
+          </ul>
+          <p>Most prompts improve significantly with one targeted iteration. Note what specific change caused the improvement.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Add few-shot examples to your best prompt</h3></div>
+          <p>Take your highest-performing prompt template and add 1-2 examples of ideal output. Test whether adding examples improves quality further.</p>
+          <p>This is especially powerful for creative tasks, where "good" is hard to define in words but easy to demonstrate with examples.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Build your prompt library document</h3></div>
+          <p>Create a simple document (notes app, Notion, Google Docs) with your 3 refined prompt templates. Give each a descriptive name and note when to use it.</p>
+          <p>Ask Claude to help you create it:</p>
+          <pre><code class="language-text">Help me create a personal prompt library document. Here are the 3 prompts I've developed [paste them]. Format it as a clean reference document with a name, use case, and the template for each.</code></pre>
+          <p>This document grows over time and becomes one of your most valuable AI productivity assets.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/10-delegation.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Delegation</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/12-discernment.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Discernment — Evaluating Outputs</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 11,
+  slug: '11-description-prompts',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/12-discernment.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What is "few-shot prompting"?',
+      options: [
+        { text: 'Asking Claude multiple short questions in sequence', correct: false },
+        { text: 'Providing 1-3 examples of the desired output style in your prompt', correct: true },
+        { text: 'Limiting your prompt to under 50 words', correct: false },
+        { text: 'A technique for bypassing Claude\'s safety filters', correct: false }
+      ],
+      explanation: 'Few-shot prompting means including 1-3 examples of good output in your prompt. This calibrates Claude to your specific definition of quality far more precisely than describing it in words alone.'
+    },
+    {
+      id: 'q2',
+      type: 'multi',
+      points: 2,
+      question: 'Which components are part of the full prompt anatomy? (Select all that apply)',
+      options: [
+        { text: 'Role', correct: true },
+        { text: 'Context', correct: true },
+        { text: 'Word count of the prompt', correct: false },
+        { text: 'Task', correct: true },
+        { text: 'Constraints', correct: true },
+        { text: 'Examples', correct: true }
+      ],
+      explanation: 'The 6 components: Role, Context, Task, Format, Constraints, and Examples. Word count of the prompt is not a component — length matters less than clarity and completeness of the relevant components.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'The goal of a first prompt is to get the perfect final output in one shot.',
+      correctAnswer: false,
+      explanation: 'The goal of a first prompt is to get something useful to work with — the right shape and approach. Iteration refines from there. Expecting perfection in one shot leads to over-engineered prompts and frustration. Treat prompting as a dialogue.'
+    },
+    {
+      id: 'q4',
+      type: 'mcq',
+      points: 1,
+      question: 'Why is the "Format" component of a prompt often underspecified?',
+      options: [
+        { text: 'Format doesn\'t matter as long as the content is correct', correct: false },
+        { text: 'People assume Claude will automatically use the right format', correct: true },
+        { text: 'Format instructions are too complex to write', correct: false },
+        { text: 'Claude ignores format instructions', correct: false }
+      ],
+      explanation: 'People often forget to specify format because they assume Claude will guess correctly — but Claude\'s default format may not match your needs. Specifying length, structure, bullets vs prose, and similar details dramatically improves usability of the output.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the best approach when Claude\'s first response isn\'t quite right?',
+      options: [
+        { text: 'Start over with a completely new prompt from scratch', correct: false },
+        { text: 'Identify specifically what\'s wrong and add targeted follow-up instructions', correct: true },
+        { text: 'Accept the output as-is — Claude can\'t do better', correct: false },
+        { text: 'Repeat the original prompt in all caps to emphasize it', correct: false }
+      ],
+      explanation: 'Targeted iteration beats starting over. Identify specifically what\'s wrong (too formal, missing X, too long) and give Claude precise follow-up instructions. This converges on excellent outputs much faster than rebuilding from scratch.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

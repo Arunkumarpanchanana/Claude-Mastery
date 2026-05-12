@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 06: Claude's Knowledge &amp; Limitations — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 06</span></div>
+      <h1 class="session-title">Claude's Knowledge &amp; Limitations</h1>
+      <p class="session-tagline">Understand training cutoffs, what hallucination really means, and build a practical habit for knowing when to verify Claude's outputs.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Verification Skills Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>The Training Cutoff</h2>
+      <p>Claude's knowledge comes from text it was trained on. That training process ends at a specific date — the <em>training cutoff</em>. Events, research, products, laws, and discoveries that happened after that date are simply not in Claude's training data, and it cannot know about them unless you tell it.</p>
+
+      <p>This creates an interesting asymmetry: Claude knows a great deal about historical events, scientific knowledge, and cultural context accumulated over decades of human writing — but it has a blind spot for everything recent.</p>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div><strong>The cutoff fuzziness:</strong> The boundary isn't sharp. Events close to the cutoff date may be underrepresented in training data because the internet hadn't finished writing about them yet. Claude's effective knowledge of events 3-6 months before the cutoff may be incomplete even though those events technically occurred "before" the cutoff.</div>
+      </div>
+
+      <p>Topics where the cutoff matters most:</p>
+      <ul>
+        <li><strong>Current events and news</strong> — Claude doesn't know recent elections, crises, or policy changes</li>
+        <li><strong>Software versions and APIs</strong> — Libraries update frequently; Claude may reference deprecated methods</li>
+        <li><strong>Scientific research</strong> — New papers, clinical trials, discoveries aren't in Claude's knowledge</li>
+        <li><strong>Company information</strong> — Org changes, products, executives, financials</li>
+        <li><strong>Laws and regulations</strong> — Especially fast-moving areas like AI law, crypto, healthcare policy</li>
+      </ul>
+
+      <p>Topics where the cutoff matters less:</p>
+      <ul>
+        <li>Mathematics and logic — These don't change</li>
+        <li>Classic literature and history — Pre-cutoff events are well-documented</li>
+        <li>Core programming concepts — Fundamentals remain stable</li>
+        <li>General science principles — Physics, chemistry, biology fundamentals are stable</li>
+      </ul>
+
+      <h2>Hallucination: What It Actually Is</h2>
+      <p>"Hallucination" is the AI field's term for outputs that are fluent, confident, and wrong. It's a poor name — Claude isn't having a visual experience — but it captures the key property: the output looks real but isn't.</p>
+
+      <p>Hallucination happens because Claude generates statistically likely text, not verified facts. A generated reference to a paper, law case, or person can be completely made up — but follow the exact format of a real citation, which makes it convincing.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Fabricated citations</h4>
+            <p>Claude may generate realistic-looking academic citations that don't exist. Author names are real, journal names are real, but the specific paper doesn't exist. Always verify citations before using them.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Invented statistics</h4>
+            <p>Specific percentages, study sample sizes, and statistics can be generated to match the context rather than recalled from training. "Studies show 73% of people..." may be invented.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Biographical errors</h4>
+            <p>Claude may confuse details about real people — wrong birth years, conflated achievements, incorrect affiliations. Famous people with similar profiles are especially prone to this.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Plausible-but-wrong technical details</h4>
+            <p>API methods, function signatures, command flags — Claude may generate plausible-looking technical details that don't work in the real library. Always test code before deploying.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Building a Verification Habit</h2>
+      <p>Effective Claude users develop a calibrated sense of when to trust outputs and when to verify. You don't need to fact-check everything — that would defeat the purpose. But you should verify when the stakes are high or the risk of error is elevated.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Generally safe to trust</h4>
+          <ul>
+            <li>Well-known historical facts</li>
+            <li>Explanations of concepts (check the logic, not just the claim)</li>
+            <li>Creative writing and brainstorming (correctness isn't the point)</li>
+            <li>Code logic (verify behavior by running it)</li>
+            <li>Frameworks and mental models</li>
+          </ul>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-magnifying-glass"></i> Always verify</h4>
+          <ul>
+            <li>Specific statistics and numbers</li>
+            <li>Academic citations and sources</li>
+            <li>Legal or medical specifics</li>
+            <li>Current events and recent developments</li>
+            <li>Specific quotes attributed to real people</li>
+            <li>Library/API methods before using in production</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Verification prompt technique:</strong> Ask Claude directly: "How confident are you in this? What parts are you least certain about?" A well-calibrated Claude will tell you where its uncertainty is high — giving you a targeted list of things to verify rather than having to check everything.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Probing Knowledge Limits and Hallucination</h2>
+        <p>Practice identifying Claude's knowledge boundaries and build habits for catching and correcting hallucinations.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Find the cutoff</h3></div>
+          <p>Ask Claude:</p>
+          <pre><code class="language-text">What is your knowledge cutoff date? What's the most recent event you're confident you have good information about?</code></pre>
+          <p>Then ask about something you know happened recently — a major news story, product launch, or scientific discovery from the last year. See how Claude handles the gap.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Request a citation (then verify it)</h3></div>
+          <p>Ask Claude to support a claim with a specific academic source:</p>
+          <pre><code class="language-text">What does research say about the effect of sleep on memory consolidation? Cite a specific study with authors, journal, and year.</code></pre>
+          <p>Take the citation and search for it on Google Scholar or PubMed. Is it real? Does the paper say what Claude claims? This exercise makes hallucination viscerally real.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Use the calibration technique</h3></div>
+          <p>After any complex factual response, ask:</p>
+          <pre><code class="language-text">Which parts of what you just told me are you most uncertain about? Give me a confidence rating for each main claim on a scale of 1-5, with 1 being "I might be wrong" and 5 being "I'm very confident."</code></pre>
+          <p>Claude should give you a useful map of uncertainty. Focus your verification energy on the low-confidence claims.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Test biographical accuracy</h3></div>
+          <p>Ask about someone real but with a specific detail that's easy to verify:</p>
+          <pre><code class="language-text">Tell me about Grace Hopper — her key contributions to computing, when she was born, and what rank she achieved in the Navy.</code></pre>
+          <p>Verify the key facts: birth year (1906), Navy rank (Rear Admiral), major contribution (COBOL, compiler concept). Did Claude get them all right?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Build your personal verification checklist</h3></div>
+          <p>Write down your own list of "always verify before using" categories for your specific work. Examples might include:</p>
+          <ul>
+            <li>If you work in medicine: any drug interactions or dosing information</li>
+            <li>If you work in law: any case citations or statute references</li>
+            <li>If you code: any API method you haven't used before</li>
+            <li>If you write: any specific quote attributed to a real person</li>
+          </ul>
+          <p>This personal checklist is one of the most valuable tools you'll develop in this course.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/05-next-token-prediction.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Next Token Prediction</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/07-working-memory.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Working Memory &amp; Context Windows</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 6,
+  slug: '06-knowledge-limitations',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/07-working-memory.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What is Claude\'s "training cutoff"?',
+      options: [
+        { text: 'The maximum number of tokens Claude can process', correct: false },
+        { text: 'The date after which Claude has no knowledge of events', correct: true },
+        { text: 'The limit on how long Claude can run before stopping', correct: false },
+        { text: 'Anthropic\'s deadline for releasing new models', correct: false }
+      ],
+      explanation: 'The training cutoff is the date after which Claude\'s training data ends. Events, research, and developments after this date are not in Claude\'s knowledge unless provided in the conversation.'
+    },
+    {
+      id: 'q2',
+      type: 'mcq',
+      points: 1,
+      question: 'What is AI "hallucination"?',
+      options: [
+        { text: 'When Claude generates images instead of text', correct: false },
+        { text: 'Outputs that are fluent and confident-sounding but factually wrong', correct: true },
+        { text: 'When Claude misunderstands the question', correct: false },
+        { text: 'Technical errors that cause garbled text output', correct: false }
+      ],
+      explanation: 'Hallucination refers to outputs that appear real and authoritative but are factually wrong or invented — like citations that don\'t exist, statistics that were generated rather than recalled, or biographical details that are wrong.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'You should always fact-check every single claim Claude makes to be safe.',
+      correctAnswer: false,
+      explanation: 'Fact-checking everything defeats the purpose of using Claude. A calibrated approach is better: trust explanations and reasoning you can verify logically; verify specific statistics, citations, quotes, and recent facts before using them consequentially.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Which of these should you ALWAYS verify before using Claude\'s output? (Select all that apply)',
+      options: [
+        { text: 'Specific statistics and percentages', correct: true },
+        { text: 'Academic paper citations', correct: true },
+        { text: 'General explanations of how photosynthesis works', correct: false },
+        { text: 'Specific quotes attributed to real people', correct: true },
+        { text: 'Code behavior in a production environment', correct: true }
+      ],
+      explanation: 'Always verify: specific numbers, citations, quotes, and code before deploying. General concept explanations and reasoning you can evaluate logically are lower-risk. The higher the stakes, the more verification matters.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the best technique to identify which parts of Claude\'s response need the most verification?',
+      options: [
+        { text: 'Assume everything is wrong and verify it all', correct: false },
+        { text: 'Ask Claude to rate its own confidence on each claim', correct: true },
+        { text: 'Only use Claude for creative tasks, never factual ones', correct: false },
+        { text: 'Ask the same question 3 times and compare answers', correct: false }
+      ],
+      explanation: 'Asking Claude to rate its confidence on each claim gives you a targeted map of uncertainty. Focus verification on low-confidence claims. This approach is efficient — you verify where it matters most rather than everything.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

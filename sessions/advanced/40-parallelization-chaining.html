@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 40: Parallelization, Chaining &amp; Routing — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 40</span></div>
+      <h1 class="session-title">Parallelization, Chaining &amp; Routing</h1>
+      <p class="session-tagline">Implement all three core workflow patterns in production-ready Python — fan-out parallelization, sequential chaining, and intelligent input routing.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 50 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Pattern Deep Dive: Parallelization</h2>
+      <p>Parallelization runs multiple LLM calls simultaneously. Since each Claude API call typically takes 1-5 seconds, parallelizing 5 calls saves 4-20 seconds of wall-clock time. The tradeoff: more concurrent API calls means higher peak cost per second (though total cost stays the same).</p>
+
+      <h3>Fan-out / Fan-in with asyncio</h3>
+      <pre><code class="language-python">import asyncio
+import anthropic
+import time
+
+client = anthropic.AsyncAnthropic()  # Use async client for concurrent calls
+
+async def analyze_section(section: str, section_name: str) -> dict:
+    """Analyze one document section asynchronously."""
+    response = await client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=200,
+        messages=[{
+            "role": "user",
+            "content": f"Summarize the key point of this section in 1-2 sentences:\n\n{section}"
+        }]
+    )
+    return {"section": section_name, "summary": response.content[0].text}
+
+async def parallel_document_analysis(sections: dict[str, str]) -> list[dict]:
+    """Fan-out: analyze all sections in parallel. Fan-in: collect results."""
+    tasks = [
+        analyze_section(content, name)
+        for name, content in sections.items()
+    ]
+    results = await asyncio.gather(*tasks)  # All run concurrently
+    return list(results)
+
+# Example usage
+sections = {
+    "Introduction": "RAG systems combine retrieval with generation...",
+    "Methods": "We chunk documents using recursive splitting...",
+    "Results": "Hybrid search improved precision by 34%...",
+    "Conclusion": "Future work should explore reranking techniques..."
+}
+
+async def main():
+    start = time.time()
+    results = await parallel_document_analysis(sections)
+    elapsed = time.time() - start
+    print(f"Analyzed {len(results)} sections in {elapsed:.1f}s (parallel)")
+    for r in results:
+        print(f"\n[{r['section']}] {r['summary']}")
+
+asyncio.run(main())</code></pre>
+
+      <div class="callout callout-info">
+        <i class="fas fa-clock"></i>
+        <div><strong>Speed comparison:</strong> 4 sequential calls at ~2s each = 8 seconds. 4 parallel calls = ~2 seconds. Parallelization provides near-linear speedup when tasks are I/O-bound (network calls), which API calls are.</div>
+      </div>
+
+      <h3>Thread-based Parallelization (for synchronous contexts)</h3>
+      <pre><code class="language-python">from concurrent.futures import ThreadPoolExecutor, as_completed
+import anthropic
+
+client = anthropic.Anthropic()  # Sync client
+
+def analyze_section_sync(args):
+    name, content = args
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=200,
+        messages=[{"role": "user", "content": f"Summarize: {content}"}]
+    )
+    return {"section": name, "summary": response.content[0].text}
+
+def parallel_analysis(sections: dict, max_workers: int = 4) -> list[dict]:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(analyze_section_sync, (name, content)): name
+            for name, content in sections.items()
+        }
+        results = []
+        for future in as_completed(futures):
+            results.append(future.result())
+    return results</code></pre>
+
+      <h2>Pattern Deep Dive: Prompt Chaining</h2>
+      <p>Chaining passes the output of one LLM call as input to the next. Each step transforms the data in a focused way. Gates (conditional checks) can short-circuit the chain early.</p>
+
+      <h3>Chaining with Gate Conditions</h3>
+      <pre><code class="language-python">import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+def chain_with_gate(document: str) -> dict:
+    """
+    Chain: Extract → Validate → Translate
+    Gate: If validation fails, stop early and return error.
+    """
+    # Step 1: Extract structured data
+    step1 = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=300,
+        messages=[{
+            "role": "user",
+            "content": f"""Extract from this text (respond ONLY with valid JSON):
+{{
+  "topic": "main topic in 5 words",
+  "sentiment": "positive|negative|neutral",
+  "key_claim": "most important claim",
+  "has_data": true or false
+}}
+
+Text: {document}"""
+        }]
+    )
+
+    try:
+        extracted = json.loads(step1.content[0].text)
+    except json.JSONDecodeError:
+        return {"status": "error", "step": 1, "message": "Failed to parse JSON"}
+
+    # GATE: Only proceed if document has data claims
+    if not extracted.get("has_data"):
+        return {"status": "skipped", "reason": "No quantitative data found", "data": extracted}
+
+    # Step 2: Validate the key claim
+    step2 = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=100,
+        messages=[{
+            "role": "user",
+            "content": f"""Is this claim reasonable and verifiable?
+Claim: {extracted['key_claim']}
+Respond with only: VALID or INVALID, then one sentence why."""
+        }]
+    )
+    validation = step2.content[0].text
+
+    if "INVALID" in validation:
+        return {"status": "rejected", "reason": validation, "data": extracted}
+
+    # Step 3: Generate a headline
+    step3 = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=80,
+        messages=[{
+            "role": "user",
+            "content": f"Write a professional news headline for this: {extracted['key_claim']}"
+        }]
+    )
+
+    return {
+        "status": "complete",
+        "extracted": extracted,
+        "validation": validation,
+        "headline": step3.content[0].text.strip()
+    }
+
+result = chain_with_gate("Climate models predict 2.5°C warming by 2100 if current trends continue.")
+print(json.dumps(result, indent=2))</code></pre>
+
+      <h2>Pattern Deep Dive: Routing</h2>
+      <p>Routing classifies the input and dispatches it to a specialist handler. The classifier can be a fast/cheap model while handlers use an appropriate model per case.</p>
+
+      <pre><code class="language-python">import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+def classify_intent(message: str) -> str:
+    """Fast classification using Haiku."""
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=20,
+        messages=[{
+            "role": "user",
+            "content": f"""Classify this message into exactly one category:
+BILLING, TECHNICAL, ACCOUNT, GENERAL
+
+Message: {message}
+Category:"""
+        }]
+    )
+    text = response.content[0].text.strip().upper()
+    for cat in ["BILLING", "TECHNICAL", "ACCOUNT"]:
+        if cat in text:
+            return cat
+    return "GENERAL"
+
+# Specialist handlers (each has a focused system prompt)
+HANDLERS = {
+    "BILLING": {
+        "system": "You are a billing specialist. Help with invoices, payments, and subscriptions. Be empathetic and solution-focused.",
+        "model": "claude-haiku-4-5"
+    },
+    "TECHNICAL": {
+        "system": "You are a senior technical support engineer. Diagnose and solve technical problems systematically. Ask clarifying questions if needed.",
+        "model": "claude-opus-4-5"
+    },
+    "ACCOUNT": {
+        "system": "You are an account management specialist. Handle account settings, permissions, and user management questions.",
+        "model": "claude-haiku-4-5"
+    },
+    "GENERAL": {
+        "system": "You are a helpful customer service representative. Answer general questions about the product.",
+        "model": "claude-haiku-4-5"
+    }
+}
+
+def route_and_handle(message: str) -> dict:
+    """Classify and route to appropriate handler."""
+    intent = classify_intent(message)
+    handler = HANDLERS[intent]
+
+    response = client.messages.create(
+        model=handler["model"],
+        max_tokens=300,
+        system=handler["system"],
+        messages=[{"role": "user", "content": message}]
+    )
+
+    return {
+        "intent": intent,
+        "model_used": handler["model"],
+        "response": response.content[0].text
+    }
+
+# Test routing
+test_messages = [
+    "My invoice shows a charge I didn't authorize",
+    "Getting a 503 error when I try to connect to your API",
+    "How do I add a team member to my workspace?"
+]
+
+for msg in test_messages:
+    result = route_and_handle(msg)
+    print(f"\nMessage: {msg}")
+    print(f"Routed to: {result['intent']} (using {result['model_used']})")
+    print(f"Response: {result['response'][:100]}...")</code></pre>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Parallel Document Analyzer with Result Aggregator</h2>
+        <p>Build a system that analyzes multiple documents in parallel, then aggregates and synthesizes the results into a single coherent report.</p>
+      </div>
+
+      <pre><code class="language-python">import asyncio
+import anthropic
+import time
+from dataclasses import dataclass
+
+client = anthropic.AsyncAnthropic()
+
+DOCUMENTS = {
+    "doc1": """
+    Transformer architecture revolutionized NLP in 2017. The attention mechanism
+    allows parallel processing of all tokens. BERT achieved state-of-the-art results
+    on 11 NLP benchmarks. GPT-3's 175B parameters enabled few-shot learning.
+    """,
+    "doc2": """
+    Large language models show emergent capabilities at scale. Chain-of-thought
+    prompting enables complex reasoning. Constitutional AI improves alignment.
+    RLHF training makes models more helpful and less harmful.
+    """,
+    "doc3": """
+    Vector databases enable semantic search over millions of documents.
+    RAG pipelines combine retrieval with generation for accuracy.
+    Embedding models map text to dense vector representations.
+    Approximate nearest neighbor search makes retrieval fast at scale.
+    """,
+    "doc4": """
+    Agentic AI systems can complete multi-step tasks autonomously.
+    Tool use lets models interact with external APIs and databases.
+    Multi-agent systems distribute complex tasks across specialized models.
+    Human-in-the-loop oversight is critical for high-stakes decisions.
+    """
+}
+
+@dataclass
+class DocumentAnalysis:
+    doc_id: str
+    topic: str
+    key_insight: str
+    complexity: str  # "introductory" | "intermediate" | "advanced"
+    word_count: int
+
+async def analyze_document(doc_id: str, content: str) -> DocumentAnalysis:
+    """Analyze a single document asynchronously."""
+    response = await client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=200,
+        messages=[{
+            "role": "user",
+            "content": f"""Analyze this document and respond in this exact format:
+TOPIC: (3-5 word topic)
+INSIGHT: (single most important insight, one sentence)
+COMPLEXITY: (introductory|intermediate|advanced)
+
+Document:
+{content}"""
+        }]
+    )
+    text = response.content[0].text
+
+    # Parse response
+    def extract(label):
+        for line in text.split('\n'):
+            if line.startswith(label + ':'):
+                return line.split(':', 1)[1].strip()
+        return "unknown"
+
+    return DocumentAnalysis(
+        doc_id=doc_id,
+        topic=extract("TOPIC"),
+        key_insight=extract("INSIGHT"),
+        complexity=extract("COMPLEXITY"),
+        word_count=len(content.split())
+    )
+
+async def aggregate_analyses(analyses: list[DocumentAnalysis]) -> str:
+    """Fan-in: synthesize all analyses into a coherent report."""
+    analyses_text = "\n".join([
+        f"Document {a.doc_id}: Topic='{a.topic}', Insight='{a.key_insight}', Level={a.complexity}"
+        for a in analyses
+    ])
+
+    response = await client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=500,
+        messages=[{
+            "role": "user",
+            "content": f"""You have analyzed {len(analyses)} documents about AI/ML.
+Here are the individual analyses:
+
+{analyses_text}
+
+Write a 3-paragraph synthesis that:
+1. Identifies the common themes across documents
+2. Notes the progression from foundational to advanced topics
+3. Recommends a learning order for someone new to the field"""
+        }]
+    )
+    return response.content[0].text
+
+async def main():
+    print("Starting parallel document analysis...")
+    start = time.time()
+
+    # Fan-out: analyze all documents in parallel
+    tasks = [analyze_document(doc_id, content)
+             for doc_id, content in DOCUMENTS.items()]
+    analyses = await asyncio.gather(*tasks)
+
+    parallel_time = time.time() - start
+    print(f"\nAll {len(analyses)} documents analyzed in {parallel_time:.1f}s")
+
+    # Display individual results
+    print("\n" + "="*50)
+    print("INDIVIDUAL ANALYSES")
+    print("="*50)
+    for a in analyses:
+        print(f"\n[{a.doc_id}] {a.topic}")
+        print(f"  Insight: {a.key_insight}")
+        print(f"  Complexity: {a.complexity}")
+
+    # Fan-in: aggregate
+    print("\n" + "="*50)
+    print("SYNTHESIZED REPORT")
+    print("="*50)
+    report = await aggregate_analyses(analyses)
+    print(report)
+
+    total_time = time.time() - start
+    print(f"\nTotal wall-clock time: {total_time:.1f}s")
+    print(f"(Sequential would have been ~{len(DOCUMENTS) * 2}s)")
+
+asyncio.run(main())</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>Pattern achieved:</strong> Fan-out (4 parallel analyze calls) + Fan-in (1 aggregation call using all results). Notice the separation: Haiku handles individual analysis (fast, cheap), Opus handles synthesis (complex reasoning). Right model for right job.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/39-agents-workflows.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Agents &amp; Workflows</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/41-agents-tools.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Agents with Tools</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 40,
+  slug: '40-parallelization-chaining',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/41-agents-tools.html',
+  quizData: [
+    {
+      question: "What Python mechanism does asyncio.gather() provide for parallel API calls?",
+      options: [
+        "It runs calls on separate CPU cores using multiprocessing",
+        "It suspends each coroutine while waiting for I/O and runs others during that wait",
+        "It batches all calls into a single HTTP request",
+        "It caches results from previous identical calls"
+      ],
+      correct: 1,
+      explanation: "asyncio.gather() runs coroutines concurrently on a single thread using cooperative multitasking. When one coroutine awaits an API response, the event loop runs another coroutine — perfect for I/O-bound tasks like API calls."
+    },
+    {
+      question: "In prompt chaining, what is a 'gate condition'?",
+      options: [
+        "A rate limiter that prevents too many API calls",
+        "A conditional check that stops the chain early if certain conditions aren't met",
+        "A security check that validates API credentials",
+        "A timeout that terminates slow chains"
+      ],
+      correct: 1,
+      explanation: "A gate is a condition evaluated between chain steps. If the condition fails (e.g., document has no quantitative data), the chain terminates early rather than wasting API calls on subsequent steps."
+    },
+    {
+      question: "Why use a cheap/fast model for routing classification and a more capable model for complex handlers?",
+      options: [
+        "Routing classification is too complex for advanced models",
+        "Classification is a simple task; routing reduces overall latency and cost without sacrificing quality",
+        "Advanced models cannot be used for classification",
+        "Fast models have higher API rate limits"
+      ],
+      correct: 1,
+      explanation: "Classifying intent into BILLING/TECHNICAL/etc. is a simple, well-defined task where a fast model like Haiku works perfectly. Spending on Opus for classification wastes money. Reserve Opus for handlers that need complex reasoning."
+    },
+    {
+      question: "What is the fan-in step in a parallelization workflow?",
+      options: [
+        "Distributing work to multiple workers",
+        "Authenticating parallel API requests",
+        "Collecting and merging results from all parallel workers",
+        "Monitoring the health of parallel processes"
+      ],
+      correct: 2,
+      explanation: "Fan-out distributes work (one → many). Fan-in collects and merges results (many → one). asyncio.gather() handles both: it launches all tasks (fan-out) and returns when all complete with a list of results (fan-in)."
+    },
+    {
+      question: "ThreadPoolExecutor is an alternative to asyncio for parallel API calls. What is its main advantage?",
+      options: [
+        "It is always faster than asyncio",
+        "It works in synchronous code without requiring async/await throughout your codebase",
+        "It uses less memory than asyncio",
+        "It automatically retries failed API calls"
+      ],
+      correct: 1,
+      explanation: "If you're working in synchronous code, adding asyncio requires converting your entire call stack to async. ThreadPoolExecutor lets you parallelize API calls without that refactor — it uses OS threads to handle concurrent blocking I/O."
+    }
+  ]
+};
+</script>
+</body>
+</html>

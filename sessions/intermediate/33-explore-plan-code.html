@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 33: The Explore → Plan → Code → Commit Flow — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 33</span></div>
+      <h1 class="session-title">The Explore → Plan → Code → Commit Flow</h1>
+      <p class="session-tagline">The four-phase workflow that makes Claude Code shine — use it for any feature or bug fix to get better results with fewer mistakes.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="the-four-phases">The Four-Phase Workflow</h2>
+      <p>The most effective way to use Claude Code for non-trivial tasks isn't to just fire off a single prompt. The four-phase workflow forces Claude to understand before acting:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Phase</th><th>What happens</th><th>Prompt signal</th></tr></thead>
+          <tbody>
+            <tr><td>1. Explore</td><td>Claude reads relevant code, understands structure</td><td>"Read/explore/understand..."</td></tr>
+            <tr><td>2. Plan</td><td>Claude proposes an approach before touching files</td><td>"Plan/outline/describe how you'd..."</td></tr>
+            <tr><td>3. Code</td><td>Claude implements the plan iteratively</td><td>"Now implement..."</td></tr>
+            <tr><td>4. Commit</td><td>Review, test, then commit</td><td>"Run tests, then commit with..."</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="phase-1-explore">Phase 1 — Explore</h2>
+      <p>Before asking Claude to write any code, ask it to understand the relevant part of the codebase:</p>
+
+      <pre><code class="language-python"># In Claude Code terminal:
+> Explore the authentication module in src/auth/. Read the relevant files and explain:
+  1. How users are currently authenticated
+  2. Where session tokens are stored
+  3. What the token expiry logic looks like
+  Don't make any changes yet.
+</code></pre>
+
+      <p>This phase gives Claude the context it needs to make correct, consistent changes instead of guessing at patterns.</p>
+
+      <h2 id="phase-2-plan">Phase 2 — Plan</h2>
+      <p>With context loaded, ask Claude to propose a plan before writing code:</p>
+
+      <pre><code class="language-python">> Based on what you've read, plan how you would add refresh token support.
+  List:
+  - Which files you'll modify
+  - What new files you'll create (if any)
+  - The changes at a function/class level
+  - Any edge cases to handle
+  Wait for my approval before implementing.
+</code></pre>
+
+      <div class="info-box">
+        <strong>Why plan first?</strong> Planning catches architectural mistakes before they're in code. It also gives you a checklist to verify the implementation matches the intention.
+      </div>
+
+      <h2 id="phase-3-code">Phase 3 — Code (Iteratively)</h2>
+      <p>Once you've approved the plan, ask Claude to implement it. Do it in steps — don't ask for everything at once:</p>
+
+      <pre><code class="language-python">> Good plan. Start with step 1: add the refresh token model to models.py.
+  Don't move on to step 2 until I confirm this looks right.
+
+# After review:
+> This looks good. Now implement step 2: the refresh endpoint in auth/routes.py.
+</code></pre>
+
+      <h2 id="git-integration">Git Integration</h2>
+      <p>Claude Code has full git access. Use it throughout:</p>
+
+      <pre><code class="language-python">> What does git log show for the last 5 commits to auth/routes.py?
+
+> Create a new branch called feature/refresh-tokens before we start.
+
+> Show me a git diff of all changes so far.
+
+> Run the tests and if they pass, commit with message: "feat: add refresh token support"
+</code></pre>
+
+      <h2 id="phase-4-commit">Phase 4 — Commit</h2>
+      <p>Always run tests before committing. Ask Claude to handle this:</p>
+
+      <pre><code class="language-python">> Run all tests in the tests/ directory. If all pass, create a git commit with a conventional commit message summarizing the changes. If any fail, fix them first.
+</code></pre>
+
+      <h2 id="when-to-commit">When to Commit</h2>
+      <ul>
+        <li>After each logically complete unit of work (not after every file edit)</li>
+        <li>Before switching to a different task</li>
+        <li>After tests pass — never commit broken code</li>
+        <li>With descriptive messages following your project's convention</li>
+      </ul>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build a Small Python CLI Tool End-to-End</h2>
+      <p>Use the full Explore → Plan → Code → Commit flow with Claude Code to build a word frequency counter CLI.</p>
+
+      <a href="https://claude.ai/code" target="_blank" class="colab-btn"><i class="fas fa-external-link-alt"></i> Claude Code Docs</a>
+
+      <h3>Setup</h3>
+      <pre><code class="language-python">mkdir wordfreq-cli && cd wordfreq-cli
+git init
+echo "# Word Frequency CLI" > README.md
+git add . && git commit -m "Initial commit"
+claude
+</code></pre>
+
+      <h3>Phase 1 — Explore</h3>
+      <pre><code class="language-python">> We're building a Python CLI tool that counts word frequencies in a text file.
+  Before writing any code, explore the current project structure and tell me:
+  1. What files exist
+  2. What Python version is available
+  3. Whether pytest is installed
+  Don't write any code yet.
+</code></pre>
+
+      <h3>Phase 2 — Plan</h3>
+      <pre><code class="language-python">> Plan the implementation of wordfreq.py - a CLI tool that:
+  - Takes a filename as a CLI argument
+  - Reads the file
+  - Counts word frequencies (case-insensitive, strips punctuation)
+  - Prints the top N words (N is a flag, default 10)
+  - Shows a simple bar chart using ASCII characters
+
+  Include:
+  - List of functions to create
+  - The CLI interface (argparse)
+  - Error handling plan
+
+  Wait for my approval.
+</code></pre>
+
+      <h3>Phase 3 — Code</h3>
+      <pre><code class="language-python">> Implement the plan. Create wordfreq.py with all the described functionality.
+
+# After seeing the code:
+> Now create tests/test_wordfreq.py with at least 5 test cases covering:
+  - Basic word counting
+  - Case insensitivity
+  - Punctuation stripping
+  - Empty file handling
+  - Top N filtering
+
+# After seeing tests:
+> Run the tests with pytest -v.
+</code></pre>
+
+      <h3>Phase 4 — Commit</h3>
+      <pre><code class="language-python">> If all tests pass, commit the implementation with a conventional commit message.
+  Then show me how to use the tool with an example.
+</code></pre>
+
+      <h3>Expected final structure</h3>
+      <pre><code class="language-python">wordfreq-cli/
+├── wordfreq.py        # Main CLI script
+├── tests/
+│   └── test_wordfreq.py
+└── README.md
+</code></pre>
+
+      <h3>Example usage (Claude Code generates this too)</h3>
+      <pre><code class="language-python">python wordfreq.py sample.txt --top 5
+
+# Output:
+# Top 5 words in sample.txt:
+# the       ████████████████████  45
+# and       ████████████████      32
+# python    ████████████          24
+# code      ████████              18
+# with      ██████                14
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/32-claude-code-intro.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Claude Code — Install & First Prompt</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/34-context-management.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Context Management & Code Review</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 33,
+  slug: '33-explore-plan-code',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/34-context-management.html',
+  quizData: [
+    {
+      question: "What is the purpose of the Explore phase in the Claude Code workflow?",
+      options: ["To give Claude time to generate code", "To let Claude read and understand the relevant codebase before making any changes", "To set up the git repository", "To install required dependencies"],
+      correct: 1,
+      explanation: "The Explore phase has Claude read and understand relevant code before writing anything. This prevents guessing at patterns and leads to more consistent, correct implementations."
+    },
+    {
+      question: "Why should you ask Claude to Plan before it starts writing code?",
+      options: ["Planning takes fewer tokens", "It creates a checklist to verify implementation and catches architectural mistakes early", "It's required by Claude Code's internal process", "Planning reduces API latency"],
+      correct: 1,
+      explanation: "Planning forces Claude to think through the approach before committing to code, catching architectural mistakes early and giving you a reviewable checklist."
+    },
+    {
+      question: "When is the right time to commit in the Claude Code workflow?",
+      options: ["After every file is modified", "Only at the end of the entire project", "After a logically complete unit of work, with tests passing", "Before running any tests"],
+      correct: 2,
+      explanation: "Commit after each logically complete unit of work (not every file edit), and always after tests pass — never commit broken code."
+    },
+    {
+      question: "What is the benefit of implementing code iteratively (step by step) rather than all at once?",
+      options: ["It uses fewer API tokens", "Each step can be reviewed and corrected before building on it, reducing compounding errors", "Claude Code requires iterative prompting", "It's faster overall"],
+      correct: 1,
+      explanation: "Iterative implementation lets you review each step before proceeding. Mistakes caught early are much easier to fix than architectural errors discovered after the whole feature is built."
+    },
+    {
+      question: "Which Claude Code slash command would you use when the context has become too cluttered and you want to start fresh?",
+      options: ["/reset", "/new", "/clear", "/restart"],
+      correct: 2,
+      explanation: "/clear clears the Claude Code context window, letting you start a fresh session without accumulated history from previous exchanges."
+    }
+  ]
+};
+</script>
+</body>
+</html>

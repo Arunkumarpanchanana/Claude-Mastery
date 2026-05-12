@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 43: Designing Effective Subagents — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 43</span></div>
+      <h1 class="session-title">Designing Effective Subagents</h1>
+      <p class="session-tagline">Learn to design clear subagent instructions, define scope boundaries, compose multi-subagent systems, and avoid common pitfalls.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>The Anatomy of a Good Subagent</h2>
+      <p>An effective subagent instruction has four components: <strong>role</strong>, <strong>scope</strong>, <strong>input format</strong>, and <strong>output format</strong>. Vague instructions produce vague outputs that are hard for the orchestrator to use.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-times-circle" style="color:#ef4444"></i> Poor Subagent Instruction</h4>
+          <pre><code class="language-python">Task(
+  description="Code reviewer",
+  prompt="Look at the code and tell me what you think."
+)</code></pre>
+          <p>Problems: No defined scope, no output format, ambiguous "what you think".</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-check-circle" style="color:#22c55e"></i> Strong Subagent Instruction</h4>
+          <pre><code class="language-python">Task(
+  description="Security vulnerability scanner",
+  prompt="""You are a security-focused code reviewer.
+
+SCOPE: Review ONLY for security vulnerabilities.
+Do NOT comment on style, performance, or logic.
+
+INPUT: The Python files in /src/auth/
+
+OUTPUT FORMAT (strict):
+CRITICAL: [issue] at [file]:[line]
+HIGH: [issue] at [file]:[line]
+MEDIUM: [issue] at [file]:[line]
+SUMMARY: [N] issues found, [N] critical
+
+If no issues found, output: SUMMARY: Clean - no security issues found."""
+)</code></pre>
+        </div>
+      </div>
+
+      <h2>Scope and Responsibility Boundaries</h2>
+      <p>Overlapping responsibilities between subagents cause duplicated work and conflicting recommendations. Define clear, non-overlapping scopes:</p>
+
+      <pre><code class="language-python"># BAD: Overlapping scopes — both agents will comment on "bad variable names"
+subagents = [
+    Task("Code quality reviewer", "Review the code quality"),
+    Task("Best practices checker", "Check if the code follows best practices")
+]
+
+# GOOD: Clear, non-overlapping scopes
+subagents = [
+    Task("Security scanner",
+         "ONLY security vulnerabilities (injection, auth, crypto, data exposure)"),
+    Task("Performance analyst",
+         "ONLY algorithmic complexity, memory usage, and database query efficiency"),
+    Task("Style checker",
+         "ONLY naming conventions, docstrings, and PEP 8 compliance"),
+]</code></pre>
+
+      <h2>Subagent Composition Patterns</h2>
+
+      <h3>Pattern 1: Independent Parallel (no dependencies)</h3>
+      <pre><code class="language-python"># All subagents run simultaneously, results combined at end
+results = await asyncio.gather(
+    run_subagent("security"),    # Independent
+    run_subagent("performance"), # Independent
+    run_subagent("style"),       # Independent
+)
+synthesis = orchestrator_synthesize(results)</code></pre>
+
+      <h3>Pattern 2: Sequential with Handoff</h3>
+      <pre><code class="language-python"># Each subagent builds on the previous one's output
+outline = await run_subagent("Outliner", "Create a report outline for: " + topic)
+draft = await run_subagent("Writer", f"Write the report using this outline:\n{outline}")
+final = await run_subagent("Editor", f"Polish and improve this draft:\n{draft}")</code></pre>
+
+      <h3>Pattern 3: Critic-Reviser Loop</h3>
+      <pre><code class="language-python"># One subagent creates, another critiques, loop until quality threshold
+content = await run_subagent("Creator", task)
+for _ in range(3):  # Max 3 revision rounds
+    critique = await run_subagent("Critic",
+        f"Rate quality 1-10 and list improvements:\n{content}")
+    score = extract_score(critique)
+    if score >= 8:
+        break
+    content = await run_subagent("Reviser",
+        f"Improve based on:\n{critique}\n\nOriginal:\n{content}")</code></pre>
+
+      <h2>Testing Subagents</h2>
+      <p>Test each subagent in isolation before assembling the full system. Key things to verify:</p>
+
+      <pre><code class="language-python">def test_subagent(name: str, prompt: str, test_inputs: list[dict]) -> dict:
+    """Test a subagent against multiple inputs and check output format."""
+    results = {"passed": 0, "failed": 0, "issues": []}
+
+    for test in test_inputs:
+        output = run_subagent(name, prompt + "\n\n" + test["input"])
+
+        # Check expected format
+        for required_field in test.get("required_fields", []):
+            if required_field not in output:
+                results["failed"] += 1
+                results["issues"].append(
+                    f"Missing '{required_field}' in output for input: {test['input'][:50]}"
+                )
+                continue
+
+        # Check expected content
+        if "expected_contains" in test:
+            for expected in test["expected_contains"]:
+                if expected.lower() not in output.lower():
+                    results["failed"] += 1
+                    results["issues"].append(f"Expected '{expected}' in output")
+                    continue
+
+        results["passed"] += 1
+
+    return results
+
+# Example test
+test_results = test_subagent(
+    name="Security Scanner",
+    prompt="Review code for security issues. Format: CRITICAL/HIGH/MEDIUM: [issue] at [file]:[line]",
+    test_inputs=[
+        {
+            "input": "query = f\"SELECT * FROM users WHERE id={user_id}\"",
+            "required_fields": ["CRITICAL"],
+            "expected_contains": ["SQL", "injection"]
+        },
+        {
+            "input": "x = 1 + 1",
+            "expected_contains": ["SUMMARY: Clean"]
+        }
+    ]
+)
+print(test_results)</code></pre>
+
+      <h2>Common Pitfalls</h2>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Pitfall 1: Context overflow</strong> — Giving subagents too much context causes them to lose focus. Each subagent should receive only what it needs for its specific task.
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Pitfall 2: Unstructured output</strong> — If a subagent returns prose instead of structured data, the orchestrator can't reliably parse it. Always specify exact output format.
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Pitfall 3: Scope creep</strong> — A security subagent that also "helpfully" comments on code style dilutes focus and creates overlapping work. Enforce strict scope in the prompt.
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Pitfall 4: No error handling</strong> — A subagent that encounters an error might return empty output or an error message. The orchestrator must handle these gracefully rather than passing empty strings to synthesis.
+        </div>
+      </div>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Multi-Subagent Code Review System</h2>
+        <p>Design and test a complete multi-subagent code review system with clear scope boundaries, structured outputs, and robust error handling.</p>
+      </div>
+
+      <pre><code class="language-python">import anthropic
+import json
+import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+
+client = anthropic.Anthropic()
+
+@dataclass
+class ReviewIssue:
+    severity: str  # CRITICAL, HIGH, MEDIUM, LOW
+    description: str
+    location: str
+
+@dataclass
+class SubagentResult:
+    role: str
+    issues: list[ReviewIssue] = field(default_factory=list)
+    summary: str = ""
+    error: str = ""
+
+    @property
+    def success(self):
+        return not self.error
+
+# ── Subagent definitions with strict scopes and output formats ─────────────────
+
+SUBAGENT_CONFIGS = {
+    "security": {
+        "system": """You are a security vulnerability specialist.
+SCOPE: ONLY security issues — SQL injection, XSS, CSRF, insecure deserialization,
+hardcoded secrets, weak cryptography, authentication bypass, privilege escalation.
+DO NOT comment on performance, style, or logic errors.""",
+        "output_format": """Report ONLY security issues in this format:
+[CRITICAL|HIGH|MEDIUM|LOW]: <issue description> at <location>
+
+End with:
+SUMMARY: <N> security issues found (<N> critical, <N> high, <N> medium, <N> low)
+
+If no security issues: SUMMARY: Clean - no security issues found"""
+    },
+
+    "performance": {
+        "system": """You are a performance optimization specialist.
+SCOPE: ONLY performance issues — O(n²) algorithms, N+1 database queries,
+missing indexes, blocking I/O in async context, large memory allocations,
+unnecessary computation inside loops.
+DO NOT comment on security, style, or correctness.""",
+        "output_format": """Report ONLY performance issues in this format:
+[HIGH|MEDIUM|LOW]: <issue description> at <location> (estimated impact: <impact>)
+
+End with:
+SUMMARY: <N> performance issues found"""
+    },
+
+    "maintainability": {
+        "system": """You are a code maintainability specialist.
+SCOPE: ONLY maintainability issues — missing docstrings on public functions,
+unclear variable names (single letters where descriptive names are appropriate),
+functions longer than 50 lines, deep nesting (>4 levels), magic numbers.
+DO NOT comment on security or performance.""",
+        "output_format": """Report ONLY maintainability issues in this format:
+[HIGH|MEDIUM|LOW]: <issue description> at <location>
+
+End with:
+SUMMARY: <N> maintainability issues found"""
+    }
+}
+
+def run_specialized_review(role: str, code: str) -> SubagentResult:
+    """Run a specialized subagent review."""
+    config = SUBAGENT_CONFIGS[role]
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=600,
+            system=config["system"],
+            messages=[{
+                "role": "user",
+                "content": f"{config['output_format']}\n\nCode to review:\n```python\n{code}\n```"
+            }]
+        )
+        output = response.content[0].text
+
+        # Parse structured output
+        issues = []
+        for line in output.split('\n'):
+            match = re.match(r'\[(CRITICAL|HIGH|MEDIUM|LOW)\]: (.+?) at (.+?)$', line.strip())
+            if match:
+                issues.append(ReviewIssue(
+                    severity=match.group(1),
+                    description=match.group(2),
+                    location=match.group(3)
+                ))
+
+        summary_match = re.search(r'SUMMARY: (.+?)$', output, re.MULTILINE)
+        summary = summary_match.group(1) if summary_match else "Summary not found"
+
+        return SubagentResult(role=role, issues=issues, summary=summary)
+
+    except Exception as e:
+        return SubagentResult(role=role, error=str(e))
+
+def orchestrate_full_review(code: str) -> str:
+    """Orchestrate all three review subagents and synthesize results."""
+    print("Spawning 3 specialized review subagents in parallel...\n")
+
+    # Parallel fan-out
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(run_specialized_review, role, code): role
+            for role in SUBAGENT_CONFIGS
+        }
+        results = {}
+        for future in as_completed(futures):
+            result = future.result()
+            results[result.role] = result
+            if result.success:
+                print(f"[{result.role.upper()}] Done: {result.summary}")
+            else:
+                print(f"[{result.role.upper()}] ERROR: {result.error}")
+
+    # Count issues by severity
+    all_issues = []
+    for r in results.values():
+        all_issues.extend(r.issues)
+
+    criticals = [i for i in all_issues if i.severity == "CRITICAL"]
+    highs = [i for i in all_issues if i.severity == "HIGH"]
+
+    # Orchestrator synthesizes
+    issues_text = "\n".join([
+        f"[{r.role.upper()}] {i.severity}: {i.description} at {i.location}"
+        for r in results.values() if r.success
+        for i in r.issues
+    ])
+
+    synthesis = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=500,
+        system="You are a senior engineering lead synthesizing a code review.",
+        messages=[{
+            "role": "user",
+            "content": f"""Synthesize these specialist reviews into an actionable report.
+Prioritize by impact. Be direct and constructive.
+
+All issues found:
+{issues_text if issues_text else "No issues found by any reviewer."}
+
+Write: (1) Immediate blockers, (2) Should fix soon, (3) Nice to have"""
+        }]
+    )
+
+    report = f"""
+CODE REVIEW REPORT
+==================
+Total Issues: {len(all_issues)} | Critical: {len(criticals)} | High: {len(highs)}
+
+SPECIALIST SUMMARIES:
+- Security: {results.get('security', SubagentResult('security', error='failed')).summary}
+- Performance: {results.get('performance', SubagentResult('performance', error='failed')).summary}
+- Maintainability: {results.get('maintainability', SubagentResult('maintainability', error='failed')).summary}
+
+SYNTHESIZED RECOMMENDATIONS:
+{synthesis.content[0].text}
+"""
+    return report
+
+# Test code with multiple issue types
+TEST_CODE = """
+import sqlite3
+import time
+
+secret_key = "hardcoded_secret_123"  # Never do this!
+
+def get_user_data(user_id, search_term):
+    conn = sqlite3.connect('db.sqlite')
+    # SQL injection vulnerability
+    results = conn.execute(f"SELECT * FROM users WHERE id={user_id} AND name LIKE '%{search_term}%'").fetchall()
+
+    processed = []
+    for r in results:
+        # N+1 query problem
+        orders = conn.execute(f"SELECT * FROM orders WHERE user_id={r[0]}").fetchall()
+        processed.append({'user': r, 'orders': orders})
+
+    return processed
+
+def f(x, y, z, a, b):  # Poor naming
+    result = 0
+    for i in range(len(x)):
+        for j in range(len(y)):
+            for k in range(len(z)):  # O(n^3)
+                result += x[i] * y[j] * z[k]
+    return result
+"""
+
+print(orchestrate_full_review(TEST_CODE))</code></pre>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/42-subagents-intro.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Introduction to Subagents</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/44-claude-code-hooks.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Claude Code Hooks</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 43,
+  slug: '43-designing-subagents',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/44-claude-code-hooks.html',
+  quizData: [
+    {
+      question: "What are the four components of a well-designed subagent instruction?",
+      options: [
+        "Model, temperature, max_tokens, stop_sequences",
+        "Role, scope, input format, output format",
+        "System prompt, user prompt, context, tools",
+        "Task name, priority, deadline, dependencies"
+      ],
+      correct: 1,
+      explanation: "A good subagent instruction defines: Role (what is this agent's identity?), Scope (what exactly should it focus on?), Input format (how is input provided?), and Output format (exactly how should it structure results?)."
+    },
+    {
+      question: "Why is the Critic-Reviser Loop pattern useful for content generation?",
+      options: [
+        "It reduces API costs by caching intermediate results",
+        "It allows iterative quality improvement until a quality threshold is met",
+        "It enables parallel processing of revisions",
+        "It bypasses Claude's content policies for certain content"
+      ],
+      correct: 1,
+      explanation: "The Critic-Reviser pattern creates a feedback loop: a Creator subagent produces content, a Critic subagent rates it and suggests improvements, and a Reviser improves it. This continues until quality criteria are met or the iteration limit is reached."
+    },
+    {
+      question: "Two subagents both comment on 'bad variable names'. What design problem does this indicate?",
+      options: [
+        "The orchestrator is using too many subagents",
+        "The model temperature is too high",
+        "Overlapping scope boundaries — responsibilities aren't clearly separated",
+        "The subagents need more context to work correctly"
+      ],
+      correct: 2,
+      explanation: "When two subagents cover the same ground, it indicates scope boundaries weren't defined clearly enough. This causes duplicate work, potentially conflicting recommendations, and wastes tokens."
+    },
+    {
+      question: "What is 'context overflow' in subagent design?",
+      options: [
+        "The orchestrator's context grows too large from accumulated subagent outputs",
+        "A subagent receiving more context than needed, diluting its focus",
+        "The subagent's context window is exceeded by its output",
+        "Multiple subagents writing to the same file simultaneously"
+      ],
+      correct: 1,
+      explanation: "Context overflow happens when a subagent is given the entire codebase when it only needs one module. The excess context dilutes focus, increases cost, and can lead to off-topic responses."
+    },
+    {
+      question: "How should an orchestrator handle a subagent that returns an error or empty output?",
+      options: [
+        "Pass the empty string to synthesis — it won't affect the final output",
+        "Automatically retry with the same prompt 5 times",
+        "Detect the error, log it, and either retry with modified input or exclude that result with a note",
+        "Terminate the entire workflow immediately"
+      ],
+      correct: 2,
+      explanation: "The orchestrator should detect errors gracefully: log the failure, optionally retry with a modified prompt, and if still failing, exclude that subagent's contribution from synthesis while noting the gap. Passing empty strings to synthesis produces confusing results."
+    }
+  ]
+};
+</script>
+</body>
+</html>

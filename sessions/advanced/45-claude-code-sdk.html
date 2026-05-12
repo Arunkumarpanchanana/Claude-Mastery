@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 45: The Claude Code SDK — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 45</span></div>
+      <h1 class="session-title">The Claude Code SDK</h1>
+      <p class="session-tagline">Programmatically control Claude Code from Python and TypeScript — build CI/CD pipelines, custom tools, and automated workflows on top of Claude Code.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 50 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What is the Claude Code SDK?</h2>
+      <p>The Claude Code SDK lets you control Claude Code programmatically — from Python, TypeScript/JavaScript, or any language that can spawn subprocesses. Instead of typing prompts interactively in a terminal, your code sends prompts to Claude Code and receives structured results.</p>
+
+      <p>This enables powerful use cases: automated code review in CI/CD pipelines, batch refactoring of large codebases, custom developer tools built on Claude Code's capabilities, and headless testing workflows.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>SDK vs CLI vs API:</strong> The Anthropic API (messages.create) gives you raw Claude. The Claude Code CLI gives you Claude with tools (Bash, Read, Write, etc.) interactively. The Claude Code SDK gives you programmatic access to Claude Code's full tool-enabled capability — the best of both worlds.</div>
+      </div>
+
+      <h2>Installation</h2>
+      <pre><code class="language-python"># Install Claude Code CLI first (prerequisite)
+npm install -g @anthropic-ai/claude-code
+
+# Python SDK
+pip install claude-code-sdk
+
+# TypeScript SDK
+npm install @anthropic-ai/claude-code-sdk</code></pre>
+
+      <h2>Basic Usage — Python SDK</h2>
+      <pre><code class="language-python">import asyncio
+from claude_code_sdk import query, ClaudeCodeOptions
+
+async def basic_example():
+    """Simplest possible SDK usage."""
+    result = await query(
+        prompt="What files are in the current directory? List them.",
+        options=ClaudeCodeOptions(
+            max_turns=5,        # Limit agent iterations
+            cwd="/path/to/project"  # Set working directory
+        )
+    )
+
+    # The SDK streams events — iterate to get all output
+    async for event in result:
+        if event.type == "text":
+            print(event.text, end="")
+        elif event.type == "tool_use":
+            print(f"\n[Tool: {event.name}]")
+
+asyncio.run(basic_example())</code></pre>
+
+      <h2>Understanding the Event Stream</h2>
+      <p>The SDK returns an async generator of events. Each event represents something Claude Code did:</p>
+
+      <pre><code class="language-python">import asyncio
+from claude_code_sdk import query, ClaudeCodeOptions
+
+async def inspect_events():
+    """Inspect all event types from a Claude Code session."""
+    events_seen = []
+
+    async for event in await query(
+        prompt="Create a simple hello.py file that prints Hello World.",
+        options=ClaudeCodeOptions(max_turns=3)
+    ):
+        events_seen.append(event.type)
+
+        match event.type:
+            case "text":
+                # Claude's reasoning/explanation
+                print(f"[Claude]: {event.text}")
+
+            case "tool_use":
+                # Claude is calling a tool
+                print(f"[Tool Call]: {event.name}")
+                print(f"  Input: {str(event.input)[:100]}")
+
+            case "tool_result":
+                # Result of a tool call
+                status = "OK" if not event.is_error else "ERROR"
+                print(f"[Tool Result ({status})]: {str(event.content)[:100]}")
+
+            case "result":
+                # Final session result
+                print(f"\n[Session Complete]")
+                print(f"  Stop reason: {event.stop_reason}")
+                print(f"  Total cost: ${event.cost_usd:.4f}")
+                print(f"  Input tokens: {event.usage.input_tokens}")
+                print(f"  Output tokens: {event.usage.output_tokens}")
+
+    print(f"\nEvents seen: {events_seen}")
+
+asyncio.run(inspect_events())</code></pre>
+
+      <h2>SDK vs CLI — When to Use Each</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-terminal"></i> Claude Code CLI</h4>
+          <ul>
+            <li>Interactive development sessions</li>
+            <li>Exploratory coding and debugging</li>
+            <li>When you want to guide Claude interactively</li>
+            <li>Quick one-off tasks</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-code"></i> Claude Code SDK</h4>
+          <ul>
+            <li>CI/CD pipelines (automated code review)</li>
+            <li>Batch processing (refactor 100 files)</li>
+            <li>Building custom developer tools</li>
+            <li>Integrating Claude Code into existing workflows</li>
+            <li>Headless testing environments</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Advanced Options</h2>
+      <pre><code class="language-python">from claude_code_sdk import query, ClaudeCodeOptions
+
+options = ClaudeCodeOptions(
+    max_turns=10,           # Max number of agent iterations
+    cwd="/project",         # Working directory for file operations
+
+    # System prompt additions (appended to Claude Code's default)
+    system_prompt="Always use type hints in Python. Prefer pathlib over os.path.",
+
+    # Allowed/disallowed tools
+    allowed_tools=["Read", "Write", "Bash"],  # Only allow these tools
+    disallowed_tools=["WebSearch"],           # Or block specific tools
+
+    # Model selection
+    model="claude-opus-4-5",  # Override default model
+
+    # Permission mode
+    permission_mode="auto",   # "auto" | "none" | "all"
+    # auto: ask for permissions interactively (default)
+    # none: deny all permission requests
+    # all: grant all permissions (use carefully!)
+)</code></pre>
+
+      <h2>Integration Pattern: CI/CD Code Review</h2>
+      <pre><code class="language-python">import asyncio
+import subprocess
+from claude_code_sdk import query, ClaudeCodeOptions
+
+async def ci_code_review(pr_diff: str) -> dict:
+    """
+    Run automated code review on a PR diff.
+    Returns structured review results.
+    """
+    full_output = []
+    cost = 0.0
+
+    async for event in await query(
+        prompt=f"""Review this PR diff for:
+1. Security vulnerabilities (CRITICAL/HIGH)
+2. Performance issues (HIGH/MEDIUM)
+3. Missing tests for new functions (MEDIUM)
+
+Format each issue as: [SEVERITY] [CATEGORY]: description
+
+PR Diff:
+{pr_diff}
+
+End with SUMMARY: X issues found.""",
+        options=ClaudeCodeOptions(
+            max_turns=3,
+            allowed_tools=["Bash"],  # Allow bash for running tests
+            system_prompt="You are a senior engineer doing code review. Be concise and specific."
+        )
+    ):
+        if event.type == "text":
+            full_output.append(event.text)
+        elif event.type == "result":
+            cost = event.cost_usd or 0.0
+
+    review_text = "".join(full_output)
+
+    # Parse structured output
+    import re
+    issues = re.findall(r'\[(CRITICAL|HIGH|MEDIUM|LOW)\] \[(\w+)\]: (.+)', review_text)
+
+    return {
+        "review": review_text,
+        "issues": [{"severity": s, "category": c, "description": d} for s, c, d in issues],
+        "cost_usd": cost,
+        "blocked": any(s == "CRITICAL" for s, _, _ in issues)
+    }
+
+# Use in CI pipeline
+async def main():
+    # Get diff from git
+    diff = subprocess.check_output(["git", "diff", "main...HEAD"], text=True)
+
+    if not diff:
+        print("No changes to review")
+        return
+
+    print("Running automated code review...")
+    result = await ci_code_review(diff[:5000])  # Truncate for demo
+
+    print(f"\nReview complete (cost: ${result['cost_usd']:.4f})")
+    print(f"Issues found: {len(result['issues'])}")
+    print(f"PR blocked: {result['blocked']}")
+    print(f"\n{result['review']}")
+
+asyncio.run(main())</code></pre>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Build a Batch Refactoring Tool with the Claude Code SDK</h2>
+        <p>Build a tool that uses the Claude Code SDK to batch-refactor Python files — adding type hints to all function signatures in a directory.</p>
+      </div>
+
+      <pre><code class="language-python">#!/usr/bin/env python3
+"""
+batch_refactor.py — Add type hints to Python files using Claude Code SDK.
+Usage: python batch_refactor.py /path/to/python/project
+"""
+import asyncio
+import sys
+from pathlib import Path
+
+# Note: Install with: pip install claude-code-sdk
+try:
+    from claude_code_sdk import query, ClaudeCodeOptions
+    SDK_AVAILABLE = True
+except ImportError:
+    SDK_AVAILABLE = False
+    print("Claude Code SDK not installed. Showing simulation mode.")
+
+async def refactor_file_with_sdk(file_path: Path) -> dict:
+    """Use Claude Code SDK to add type hints to a single Python file."""
+    result = {
+        "file": str(file_path),
+        "success": False,
+        "changes_made": False,
+        "cost_usd": 0.0,
+        "error": None
+    }
+
+    prompt = f"""Add Python type hints to all function signatures in {file_path}.
+
+Rules:
+1. Only add hints to function parameters and return types
+2. Do NOT change any function logic
+3. Use standard types (int, str, list, dict, Optional, etc.)
+4. Import typing module if needed
+5. If a type is ambiguous, use Any from typing
+6. After making changes, verify the file is syntactically valid with: python -m py_compile {file_path}
+
+Report what you changed."""
+
+    try:
+        full_output = []
+        async for event in await query(
+            prompt=prompt,
+            options=ClaudeCodeOptions(
+                max_turns=5,
+                cwd=str(file_path.parent),
+                allowed_tools=["Read", "Write", "Bash"],
+                system_prompt="You are an expert Python type annotation specialist."
+            )
+        ):
+            if event.type == "text":
+                full_output.append(event.text)
+            elif event.type == "tool_use" and event.name == "Write":
+                result["changes_made"] = True
+            elif event.type == "result":
+                result["cost_usd"] = event.cost_usd or 0.0
+                result["success"] = event.stop_reason != "error"
+
+        result["output"] = "".join(full_output)
+    except Exception as e:
+        result["error"] = str(e)
+
+    return result
+
+async def simulate_refactoring(files: list[Path]) -> list[dict]:
+    """Simulate the refactoring flow without actual SDK calls."""
+    import anthropic
+    client = anthropic.Anthropic()
+
+    results = []
+    for file_path in files:
+        if not file_path.exists():
+            results.append({"file": str(file_path), "error": "File not found"})
+            continue
+
+        content = file_path.read_text()
+
+        # Use Anthropic API as a simulation of what SDK would do
+        response = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=1000,
+            system="You are a Python type annotation expert. Add type hints to function signatures.",
+            messages=[{
+                "role": "user",
+                "content": f"""Add type hints to this Python code. Return ONLY the modified code, no explanation:
+
+{content}"""
+            }]
+        )
+
+        modified = response.content[0].text.strip()
+        # Remove markdown code blocks if present
+        if modified.startswith("```"):
+            modified = "\n".join(modified.split("\n")[1:-1])
+
+        results.append({
+            "file": str(file_path),
+            "success": True,
+            "changes_made": modified != content,
+            "modified_content": modified,
+            "cost_usd": (response.usage.input_tokens + response.usage.output_tokens) * 0.000001
+        })
+
+    return results
+
+async def batch_refactor(directory: str, max_concurrent: int = 3):
+    """
+    Batch refactor all Python files in a directory.
+    Processes max_concurrent files at a time.
+    """
+    path = Path(directory)
+    python_files = list(path.rglob("*.py"))
+
+    # Filter out test files, __init__.py, migrations
+    python_files = [
+        f for f in python_files
+        if not any(part in str(f) for part in ["test_", "__pycache__", "migrations", ".venv"])
+    ]
+
+    print(f"Found {len(python_files)} Python files to refactor")
+    print(f"Max concurrent: {max_concurrent}\n")
+
+    all_results = []
+
+    # Process in batches
+    for i in range(0, len(python_files), max_concurrent):
+        batch = python_files[i:i + max_concurrent]
+        print(f"Processing batch {i//max_concurrent + 1}: {[f.name for f in batch]}")
+
+        if SDK_AVAILABLE:
+            tasks = [refactor_file_with_sdk(f) for f in batch]
+        else:
+            print("  (Using simulation mode with Anthropic API)")
+            tasks = [simulate_refactoring([f]) for f in batch]
+
+        batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for result in batch_results:
+            if isinstance(result, Exception):
+                all_results.append({"error": str(result)})
+            elif isinstance(result, list):
+                all_results.extend(result)  # simulation returns list
+            else:
+                all_results.append(result)
+
+    # Summary
+    successful = [r for r in all_results if r.get("success")]
+    changed = [r for r in all_results if r.get("changes_made")]
+    total_cost = sum(r.get("cost_usd", 0) for r in all_results)
+
+    print(f"\n{'='*50}")
+    print(f"REFACTORING COMPLETE")
+    print(f"{'='*50}")
+    print(f"Files processed: {len(all_results)}")
+    print(f"Successful:      {len(successful)}")
+    print(f"Files changed:   {len(changed)}")
+    print(f"Total cost:      ${total_cost:.4f}")
+
+    if changed:
+        print(f"\nFiles with type hints added:")
+        for r in changed:
+            print(f"  ✓ {r['file']}")
+
+    return all_results
+
+# Create sample files for demo
+def create_sample_project(base_dir: Path):
+    base_dir.mkdir(exist_ok=True)
+    (base_dir / "calculator.py").write_text("""
+def add(a, b):
+    return a + b
+
+def multiply(items, factor):
+    return [x * factor for x in items]
+
+def process_data(data, config):
+    result = {}
+    for key, value in data.items():
+        result[key] = value * config.get('multiplier', 1)
+    return result
+""")
+    (base_dir / "utils.py").write_text("""
+def format_name(first, last, prefix):
+    return f"{prefix} {first} {last}".strip()
+
+def parse_config(content):
+    lines = content.strip().split('\\n')
+    config = {}
+    for line in lines:
+        key, _, value = line.partition('=')
+        config[key.strip()] = value.strip()
+    return config
+""")
+
+# Run it
+async def main():
+    sample_dir = Path("/tmp/sample_project")
+    create_sample_project(sample_dir)
+    print(f"Sample project created at {sample_dir}\n")
+    results = await batch_refactor(str(sample_dir), max_concurrent=2)
+
+    # Show a modified file
+    for r in results:
+        if r.get("changes_made") and r.get("modified_content"):
+            print(f"\nModified content of {Path(r['file']).name}:")
+            print(r["modified_content"])
+            break
+
+asyncio.run(main())</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>SDK power demonstrated:</strong> This tool processes multiple files in parallel, uses Claude Code's full tool access (Read/Write/Bash for syntax verification), and produces a cost report. The same pattern works for any batch operation: linting, documentation generation, test writing, or security scanning.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/44-claude-code-hooks.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Claude Code Hooks</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/46-agent-skills.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Agent Skills</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 45,
+  slug: '45-claude-code-sdk',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/46-agent-skills.html',
+  quizData: [
+    {
+      question: "What is the primary advantage of the Claude Code SDK over the raw Anthropic API?",
+      options: [
+        "The SDK is cheaper per token",
+        "The SDK gives Claude access to tools (Bash, Read, Write) — not just raw generation",
+        "The SDK supports longer context windows",
+        "The SDK automatically caches all responses"
+      ],
+      correct: 1,
+      explanation: "The raw Anthropic API gives you a model that generates text. The Claude Code SDK gives you a model that can READ files, WRITE code, RUN bash commands, and use other tools — the full Claude Code capability programmatically."
+    },
+    {
+      question: "What does permission_mode='all' do in ClaudeCodeOptions?",
+      options: [
+        "Grants the user admin permissions to the system",
+        "Automatically approves all permission requests Claude Code makes during the session",
+        "Allows all Claude models to be used regardless of API tier",
+        "Enables all experimental features"
+      ],
+      correct: 1,
+      explanation: "permission_mode='all' tells Claude Code to automatically approve all operations that would normally require user confirmation (like deleting files or running system commands). Use carefully — it removes human oversight."
+    },
+    {
+      question: "What event type should you check to get the cost of a Claude Code SDK session?",
+      options: ["text", "tool_result", "result", "usage"],
+      correct: 2,
+      explanation: "The 'result' event is emitted when the session completes and contains stop_reason, cost_usd, and usage (input/output token counts). It's the final event in the stream."
+    },
+    {
+      question: "Which use case is BEST suited for the Claude Code SDK (vs interactive CLI)?",
+      options: [
+        "Debugging a tricky bug with interactive back-and-forth",
+        "Asking Claude to explain how a function works",
+        "Running automated code reviews on every PR in a CI/CD pipeline",
+        "Having Claude help you brainstorm API design"
+      ],
+      correct: 2,
+      explanation: "CI/CD integration is the quintessential SDK use case: fully automated, no human interaction needed, needs to run on every PR programmatically, and must return structured results. Interactive tasks benefit from the CLI."
+    },
+    {
+      question: "How does the Claude Code SDK handle concurrent file processing?",
+      options: [
+        "It has a built-in pool that processes files automatically",
+        "You use asyncio.gather() or ThreadPoolExecutor to run multiple query() calls in parallel",
+        "You must process files sequentially — concurrent calls are not supported",
+        "Concurrent processing requires a paid enterprise plan"
+      ],
+      correct: 1,
+      explanation: "The SDK's query() is an async function. You create multiple coroutines and run them concurrently with asyncio.gather(). Each coroutine gets its own Claude Code session with its own context and working directory."
+    }
+  ]
+};
+</script>
+</body>
+</html>

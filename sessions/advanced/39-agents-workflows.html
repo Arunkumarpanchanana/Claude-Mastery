@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 39: Agents &amp; Workflows — When to Use Each — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 39</span></div>
+      <h1 class="session-title">Agents &amp; Workflows — When to Use Each</h1>
+      <p class="session-tagline">Understand the critical distinction between deterministic workflows and autonomous agents, and learn a decision framework for choosing the right architecture.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>The Fundamental Distinction</h2>
+      <p>The AI industry often uses "agent" as a catch-all term for any LLM-powered system. Anthropic's framework draws a sharper distinction based on who controls the flow of execution:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-sitemap"></i> Workflows</h4>
+          <p><strong>Deterministic. Predictable. Programmer-controlled.</strong></p>
+          <ul>
+            <li>You define the exact sequence of LLM calls</li>
+            <li>The LLM fills roles within a fixed structure</li>
+            <li>Outputs are predictable and auditable</li>
+            <li>Easier to debug and test</li>
+            <li>Lower failure surface area</li>
+          </ul>
+          <p><em>Example: Translate text → Review translation → Format output (always in this order)</em></p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-robot"></i> Agents</h4>
+          <p><strong>Dynamic. Autonomous. LLM-controlled.</strong></p>
+          <ul>
+            <li>LLM decides what to do next at each step</li>
+            <li>Can take variable numbers of steps</li>
+            <li>Handles truly open-ended tasks</li>
+            <li>Higher capability ceiling</li>
+            <li>Higher failure risk — errors can compound</li>
+          </ul>
+          <p><em>Example: "Research this topic" — agent decides what to search, when to stop, what to write</em></p>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Anthropic's guidance:</strong> "Prefer workflows over agents whenever the task can be clearly defined upfront. Agents are powerful but introduce unpredictability. Reserve them for tasks where flexibility is genuinely necessary."</div>
+      </div>
+
+      <h2>The 4 Core Workflow Patterns</h2>
+      <p>Anthropic identifies four workflow patterns that cover the vast majority of multi-step LLM use cases. Master these before reaching for agents.</p>
+
+      <h3>Pattern 1: Prompt Chaining</h3>
+      <p>The output of one LLM call becomes the input of the next. Each step is a focused, simple task. The chain adds up to a complex capability.</p>
+      <pre><code class="language-python"># Step 1: Extract key points
+# Step 2: Translate those points
+# Step 3: Format as a structured report
+# Each step gets only what it needs — clean separation of concerns</code></pre>
+
+      <h3>Pattern 2: Parallelization</h3>
+      <p>Run multiple independent LLM calls simultaneously. Use when subtasks don't depend on each other. Fan-out then fan-in.</p>
+      <pre><code class="language-python"># Analyze document: section 1, section 2, section 3 → all in parallel
+# Then merge results → 3x faster than sequential</code></pre>
+
+      <h3>Pattern 3: Routing</h3>
+      <p>Classify the input, then route to a specialized handler. Lets you use different prompts, models, or pipelines per input type.</p>
+      <pre><code class="language-python"># Customer message → classify intent → route to:
+#   "billing" → billing_handler()
+#   "technical" → tech_support_handler()
+#   "general" → general_handler()</code></pre>
+
+      <h3>Pattern 4: Orchestration</h3>
+      <p>One LLM orchestrator breaks work into subtasks and delegates to specialized subprompts or workers. The orchestrator synthesizes results.</p>
+      <pre><code class="language-python"># Orchestrator: "Write a competitive analysis"
+# → delegates to: market_researcher(), financial_analyst(), trend_spotter()
+# → synthesizes final report from all three outputs</code></pre>
+
+      <h2>When Agents Are Necessary</h2>
+      <p>Agents shine when:</p>
+      <ul>
+        <li>The number of steps is not known in advance ("keep searching until you find enough evidence")</li>
+        <li>The task requires branching based on real-world results ("if the API fails, try an alternative")</li>
+        <li>The task is exploratory — you can't define the path upfront</li>
+        <li>You need the LLM to observe, plan, and replan dynamically</li>
+      </ul>
+
+      <h2>Decision Framework</h2>
+      <div class="callout callout-warning">
+        <i class="fas fa-question-circle"></i>
+        <div>
+          <strong>Ask these questions in order:</strong>
+          <ol style="margin-top:0.5rem;">
+            <li>Can I complete this with a single, well-crafted prompt? → <strong>Use a single call.</strong></li>
+            <li>Are the steps fixed and known upfront? → <strong>Use a workflow.</strong></li>
+            <li>Do the steps always run in a predictable pattern? → <strong>Use chaining/parallelization/routing.</strong></li>
+            <li>Does the LLM need to decide what to do next at runtime? → <strong>Use an agent.</strong></li>
+          </ol>
+        </div>
+      </div>
+
+      <h2>Tradeoffs Summary</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Factor</th><th>Workflow</th><th>Agent</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Predictability</td><td>High</td><td>Low</td></tr>
+          <tr><td>Debugging</td><td>Easy</td><td>Hard</td></tr>
+          <tr><td>Cost</td><td>Fixed</td><td>Variable (can spiral)</td></tr>
+          <tr><td>Capability</td><td>Limited to defined paths</td><td>Open-ended</td></tr>
+          <tr><td>Failure modes</td><td>Contained</td><td>Can compound</td></tr>
+          <tr><td>Best for</td><td>Production, audited tasks</td><td>Research, exploration</td></tr>
+        </tbody>
+      </table>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Implement a Document Processing Chaining Workflow</h2>
+        <p>Build a 3-step chaining workflow that processes a document: extract key points → assess quality → generate summary report.</p>
+      </div>
+
+      <pre><code class="language-python">import anthropic
+from dataclasses import dataclass
+
+client = anthropic.Anthropic()
+
+DOCUMENT = """
+Climate change is causing significant shifts in global weather patterns.
+Arctic ice is melting at unprecedented rates — the Arctic Ocean could be
+ice-free in summer by 2035. Sea levels are rising 3.6mm per year, threatening
+coastal cities including Miami, Jakarta, and Amsterdam. Coral reefs, which
+support 25% of marine life, are bleaching at twice the historical rate.
+
+On the positive side, renewable energy adoption is accelerating rapidly.
+Solar capacity grew 200% globally between 2018-2023. Wind energy now provides
+15% of EU electricity. Electric vehicle sales reached 14 million in 2023,
+up from 2 million in 2018. Several countries have committed to net-zero
+by 2050, and carbon capture technology is advancing.
+
+Economic impacts are mixed. Climate-related disasters cost $313 billion in 2022.
+However, the clean energy sector created 12 million jobs globally in 2023.
+Green bonds issued in 2023 totaled $1.4 trillion, showing strong investor interest.
+"""
+
+@dataclass
+class WorkflowState:
+    document: str
+    key_points: str = ""
+    quality_assessment: str = ""
+    final_report: str = ""
+
+def step1_extract_key_points(state: WorkflowState) -> WorkflowState:
+    """Step 1: Extract structured key points from the document."""
+    print("\n[Step 1] Extracting key points...")
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=400,
+        messages=[{
+            "role": "user",
+            "content": f"""Extract the 5 most important factual points from this document.
+Format as a numbered list with one sentence per point.
+
+Document:
+{state.document}"""
+        }]
+    )
+    state.key_points = response.content[0].text
+    print(f"Extracted {state.key_points.count(chr(10))+1} points")
+    return state
+
+def step2_assess_quality(state: WorkflowState) -> WorkflowState:
+    """Step 2: Assess the quality and balance of the extracted points."""
+    print("\n[Step 2] Assessing quality and balance...")
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=200,
+        messages=[{
+            "role": "user",
+            "content": f"""Review these extracted points for a document about climate change.
+Assess: (a) factual accuracy, (b) balance between positive/negative, (c) any critical gaps.
+Be concise — 2-3 sentences.
+
+Points:
+{state.key_points}"""
+        }]
+    )
+    state.quality_assessment = response.content[0].text
+    print("Quality assessment complete")
+    return state
+
+def step3_generate_report(state: WorkflowState) -> WorkflowState:
+    """Step 3: Generate a polished executive summary combining all chain outputs."""
+    print("\n[Step 3] Generating final report...")
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=500,
+        messages=[{
+            "role": "user",
+            "content": f"""Create a concise executive summary (3 paragraphs) for a business audience.
+
+Key Points Extracted:
+{state.key_points}
+
+Quality Notes to Address:
+{state.quality_assessment}
+
+The summary should be factual, balanced, and actionable."""
+        }]
+    )
+    state.final_report = response.content[0].text
+    print("Report generated!")
+    return state
+
+# Run the chaining workflow
+state = WorkflowState(document=DOCUMENT)
+state = step1_extract_key_points(state)
+state = step2_assess_quality(state)
+state = step3_generate_report(state)
+
+print("\n" + "="*60)
+print("FINAL REPORT")
+print("="*60)
+print(state.final_report)
+
+print("\n" + "="*60)
+print("WORKFLOW TRACE")
+print("="*60)
+print(f"Step 1 (key points):\n{state.key_points[:200]}...")
+print(f"\nStep 2 (quality):\n{state.quality_assessment}")
+print(f"\nStep 3 (report): [see above]")</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>Why this is better than one big prompt:</strong> Each step uses a focused, simple prompt — Step 1 just extracts, Step 2 just assesses, Step 3 just writes. Step 2 can catch quality issues before they contaminate the final report. You can swap any step independently without affecting others.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/38-reranking-retrieval.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Reranking &amp; Contextual Retrieval</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/40-parallelization-chaining.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Parallelization, Chaining &amp; Routing</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 39,
+  slug: '39-agents-workflows',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/40-parallelization-chaining.html',
+  quizData: [
+    {
+      question: "What is the key difference between a workflow and an agent?",
+      options: [
+        "Workflows use multiple LLMs; agents use only one",
+        "Workflows have programmer-controlled execution order; agents have LLM-controlled execution",
+        "Agents are always faster than workflows",
+        "Workflows can use tools; agents cannot"
+      ],
+      correct: 1,
+      explanation: "In a workflow, the developer defines the sequence of steps and the LLM fills roles within that structure. In an agent, the LLM itself decides what actions to take next at runtime."
+    },
+    {
+      question: "You need to process customer support emails: classify intent, then route to a specialist handler. Which pattern is this?",
+      options: ["Chaining", "Parallelization", "Routing", "Orchestration"],
+      correct: 2,
+      explanation: "This is the routing pattern: classify the input (intent detection) and then route to a specialized handler based on the classification result."
+    },
+    {
+      question: "According to Anthropic's guidance, when should you prefer agents over workflows?",
+      options: [
+        "Whenever the task involves more than 3 steps",
+        "When the number of steps is unknown in advance and the LLM must decide what to do next",
+        "Always — agents are strictly more capable",
+        "When you want lower cost and faster responses"
+      ],
+      correct: 1,
+      explanation: "Agents are appropriate when the task is genuinely open-ended — when the number of steps, tools to use, or path to take cannot be determined upfront by the developer."
+    },
+    {
+      question: "What is the main risk of using agents that doesn't apply to workflows?",
+      options: [
+        "Agents always produce lower quality output",
+        "Agents cannot use external APIs",
+        "Errors can compound across steps since the LLM makes all control-flow decisions",
+        "Agents are limited to 5 API calls"
+      ],
+      correct: 2,
+      explanation: "In an agent, if the LLM makes a wrong decision at step 3, subsequent steps may be built on that wrong foundation. In a workflow, each step is independently defined, limiting error propagation."
+    },
+    {
+      question: "Which workflow pattern uses fan-out (split into parallel tasks) followed by fan-in (merge results)?",
+      options: ["Chaining", "Parallelization", "Routing", "Orchestration"],
+      correct: 1,
+      explanation: "Parallelization splits one task into multiple independent subtasks that run simultaneously (fan-out), then merges the results (fan-in). This is ideal when sections of a task don't depend on each other."
+    }
+  ]
+};
+</script>
+</body>
+</html>

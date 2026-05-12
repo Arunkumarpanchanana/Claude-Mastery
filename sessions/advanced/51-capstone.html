@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 51: Capstone — Ship a Claude-Powered App — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 51</span></div>
+      <h1 class="session-title">Capstone — Ship a Claude-Powered App</h1>
+      <p class="session-tagline">Choose your track, apply everything you've learned, and build a real end-to-end application powered by Claude. This is where mastery becomes tangible.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 90 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Full Capstone Build</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Choose Your Capstone Track</h2>
+      <p>You've completed all 50 sessions of the Claude Mastery course. Now it's time to put it all together. Pick the track that excites you most — or that solves a real problem you face. Each track is a production-worthy project blueprint.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card highlight-card">
+          <h4><i class="fas fa-search"></i> Track 1: AI Research Assistant</h4>
+          <p><strong>Stack:</strong> RAG + Agents + BM25/Semantic Hybrid</p>
+          <ul>
+            <li>Ingests documents (PDFs, URLs, text)</li>
+            <li>Hybrid search with BM25 + embeddings</li>
+            <li>Contextual retrieval + reranking</li>
+            <li>Research agent that cites sources</li>
+            <li>Conversational follow-up questions</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-code-branch"></i> Track 2: Code Review Bot</h4>
+          <p><strong>Stack:</strong> Claude Code + Hooks + Subagents</p>
+          <ul>
+            <li>GitHub webhook integration</li>
+            <li>Multi-subagent review (security, perf, style)</li>
+            <li>PR comment posting via GitHub API</li>
+            <li>Custom Claude Code hooks for CI</li>
+            <li>Team-shared skills for standardization</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-headset"></i> Track 3: Customer Support Bot</h4>
+          <p><strong>Stack:</strong> Tool Use + Routing + Evals</p>
+          <ul>
+            <li>Intent classification + routing</li>
+            <li>Tool use (order lookup, refund, escalate)</li>
+            <li>Conversation memory</li>
+            <li>Quality evals with LLM-as-judge</li>
+            <li>Handoff to human agents</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-file-pdf"></i> Track 4: Document Intelligence</h4>
+          <p><strong>Stack:</strong> PDF Processing + Structured Output</p>
+          <ul>
+            <li>Extract structured data from PDFs/images</li>
+            <li>Batch processing pipeline</li>
+            <li>JSON schema validation of outputs</li>
+            <li>Comparison across documents</li>
+            <li>Report generation</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-network-wired"></i> Track 5: Multi-Agent Pipeline</h4>
+          <p><strong>Stack:</strong> Subagents + MCP + Orchestration</p>
+          <ul>
+            <li>Orchestrator + specialized subagents</li>
+            <li>Custom MCP server for shared tools</li>
+            <li>Parallel + sequential workflow patterns</li>
+            <li>Progress notifications</li>
+            <li>Full end-to-end data pipeline</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Architecture Patterns for Each Track</h2>
+
+      <h3>Track 1: AI Research Assistant Architecture</h3>
+      <pre><code class="language-python"># System components:
+# 1. Ingestion pipeline (offline)
+#    - Accept: PDF, URL, plain text
+#    - Chunk with recursive splitter
+#    - Add contextual retrieval (Claude Haiku)
+#    - Embed with sentence-transformers
+#    - Store in ChromaDB (persistent)
+#    - Also index in BM25 (rank-bm25)
+#
+# 2. Query pipeline (online)
+#    - Hybrid search (BM25 + semantic) → top-20
+#    - Cross-encoder reranking → top-5
+#    - Feed to research agent
+#    - Agent can do follow-up searches
+#    - Agent cites sources in output
+#
+# 3. Conversational layer
+#    - Maintain chat history
+#    - Allow follow-up questions
+#    - System prompt includes cited sources</code></pre>
+
+      <h3>Track 5: Multi-Agent Pipeline Architecture</h3>
+      <pre><code class="language-python"># System components:
+# 1. Orchestrator agent (claude-opus-4-5)
+#    - Receives high-level task
+#    - Breaks into subtasks
+#    - Spawns specialized subagents
+#    - Monitors progress via notifications
+#    - Synthesizes results
+#
+# 2. Specialist subagents (claude-haiku-4-5)
+#    - Data fetcher (MCP tool: fetch_data)
+#    - Analyzer (MCP tool: run_analysis)
+#    - Writer (MCP tool: write_report)
+#    - Validator (MCP tool: check_quality)
+#
+# 3. Shared MCP server
+#    - Provides tools available to all agents
+#    - Handles data storage between agents
+#    - Reports progress via notifications</code></pre>
+
+      <h2>Deployment Options</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Platform</th><th>Best For</th><th>Cost</th><th>Setup Time</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Railway</td><td>Quick demos, hobby projects</td><td>Free tier available</td><td>5 minutes</td></tr>
+          <tr><td>Fly.io</td><td>Small production apps</td><td>Pay per use, cheap</td><td>10 minutes</td></tr>
+          <tr><td>AWS Lambda</td><td>Serverless, event-driven</td><td>Very cheap at low scale</td><td>30 minutes</td></tr>
+          <tr><td>Google Cloud Run</td><td>Containerized, auto-scaling</td><td>Pay per request</td><td>20 minutes</td></tr>
+          <tr><td>Render</td><td>Full-stack web apps</td><td>Free tier, $7/mo prod</td><td>10 minutes</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Deployment recommendation:</strong> Start with Railway or Render for speed. Once you've validated the product, migrate to AWS/GCP for enterprise features. Don't over-engineer deployment before you've validated the idea.</div>
+      </div>
+
+      <h2>Production Checklist</h2>
+      <ul>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>Rate limiting:</strong> Protect your API keys from runaway costs</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>Error handling:</strong> Graceful fallbacks when Claude API is unavailable</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>Prompt caching:</strong> Cache static system prompts for 60-80% cost reduction</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>Logging:</strong> Log all API calls with request IDs for debugging</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>Evals:</strong> At least 20 test cases measuring your core quality metric</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>User feedback:</strong> Thumbs up/down to collect signal for improvement</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>API key rotation:</strong> Store keys in environment variables, never source code</li>
+        <li><i class="fas fa-check" style="color:#22c55e"></i> <strong>Cost monitoring:</strong> Set budget alerts in Anthropic console</li>
+      </ul>
+
+    </div><!-- /learn -->
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Capstone Lab — Pick Your Track</h2>
+        <p>Below is the complete starter code for Track 1 (AI Research Assistant). Use it as a foundation and extend it, or build Track 2-5 from scratch using the patterns from earlier sessions.</p>
+      </div>
+
+      <h3>Track 1 Capstone: AI Research Assistant (Complete Starter)</h3>
+      <pre><code class="language-python">#!/usr/bin/env python3
+"""
+research_assistant.py — Complete AI Research Assistant
+Capstone Track 1: RAG + Hybrid Search + Agent
+
+Requirements:
+    pip install anthropic sentence-transformers faiss-cpu rank-bm25 numpy
+"""
+import json
+import re
+import numpy as np
+import faiss
+import anthropic
+from rank_bm25 import BM25Okapi
+from sentence_transformers import SentenceTransformer, CrossEncoder
+from dataclasses import dataclass, field
+
+# ── Configuration ──────────────────────────────────────────────────────────────
+EMBEDDER_MODEL = "all-MiniLM-L6-v2"
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+CLAUDE_MODEL = "claude-opus-4-5"
+HAIKU_MODEL = "claude-haiku-4-5"
+
+client = anthropic.Anthropic()
+embedder = SentenceTransformer(EMBEDDER_MODEL)
+reranker = CrossEncoder(RERANKER_MODEL)
+
+@dataclass
+class Document:
+    content: str
+    source: str
+    metadata: dict = field(default_factory=dict)
+
+@dataclass
+class Chunk:
+    text: str
+    source: str
+    chunk_id: int
+    contextualized_text: str = ""
+
+class ResearchAssistant:
+    """Full RAG-powered research assistant with hybrid search and reranking."""
+
+    def __init__(self):
+        self.chunks: list[Chunk] = []
+        self.embeddings: np.ndarray | None = None
+        self.faiss_index: faiss.IndexFlatIP | None = None
+        self.bm25: BM25Okapi | None = None
+        self.chat_history: list[dict] = []
+
+    def chunk_document(self, text: str, chunk_size: int = 400, overlap: int = 60) -> list[str]:
+        """Recursively chunk a document."""
+        separators = ["\n\n", "\n", ". ", " "]
+
+        def _split(text, seps):
+            if not seps or len(text) <= chunk_size:
+                return [text.strip()] if text.strip() else []
+            sep = seps[0]
+            parts = text.split(sep)
+            chunks, current = [], ""
+            for part in parts:
+                candidate = current + (sep if current else "") + part
+                if len(candidate) <= chunk_size:
+                    current = candidate
+                else:
+                    if current.strip():
+                        chunks.append(current.strip())
+                    current = part if len(part) <= chunk_size else ""
+                    if len(part) > chunk_size:
+                        chunks.extend(_split(part, seps[1:]))
+            if current.strip():
+                chunks.append(current.strip())
+            return chunks
+
+        return _split(text, separators)
+
+    def add_context_to_chunk(self, document: str, chunk: str, source: str) -> str:
+        """Use Claude Haiku to add situating context."""
+        try:
+            response = client.messages.create(
+                model=HAIKU_MODEL,
+                max_tokens=80,
+                system=[{
+                    "type": "text",
+                    "text": f"You contextualize document chunks. Source: {source}\n\nFull document:\n{document[:3000]}",
+                    "cache_control": {"type": "ephemeral"}
+                }],
+                messages=[{"role": "user", "content": f"Write 1 sentence of context for this chunk:\n\n{chunk}"}]
+            )
+            return f"{response.content[0].text.strip()}\n\n{chunk}"
+        except Exception:
+            return chunk  # Fall back to original chunk on error
+
+    def ingest(self, document: Document, use_contextual_retrieval: bool = True):
+        """Ingest a document into the knowledge base."""
+        print(f"Ingesting: {document.source}")
+        raw_chunks = self.chunk_document(document.content)
+        print(f"  Created {len(raw_chunks)} chunks")
+
+        for i, chunk_text in enumerate(raw_chunks):
+            if use_contextual_retrieval:
+                contextualized = self.add_context_to_chunk(
+                    document.content, chunk_text, document.source
+                )
+            else:
+                contextualized = chunk_text
+
+            self.chunks.append(Chunk(
+                text=chunk_text,
+                source=document.source,
+                chunk_id=len(self.chunks),
+                contextualized_text=contextualized
+            ))
+
+        self._rebuild_indexes()
+        print(f"  Done. Total chunks in knowledge base: {len(self.chunks)}")
+
+    def _rebuild_indexes(self):
+        """Rebuild FAISS and BM25 indexes after ingestion."""
+        texts = [c.contextualized_text for c in self.chunks]
+
+        # Semantic index
+        embeddings = embedder.encode(texts, normalize_embeddings=True).astype('float32')
+        d = embeddings.shape[1]
+        index = faiss.IndexFlatIP(d)
+        index.add(embeddings)
+        self.faiss_index = index
+        self.embeddings = embeddings
+
+        # BM25 index
+        tokenized = [t.lower().split() for t in texts]
+        self.bm25 = BM25Okapi(tokenized)
+
+    def hybrid_search(self, query: str, top_k: int = 5) -> list[Chunk]:
+        """Hybrid BM25 + semantic search with RRF and reranking."""
+        if not self.chunks:
+            return []
+
+        # Semantic
+        q_emb = embedder.encode([query], normalize_embeddings=True).astype('float32')
+        _, sem_ids = self.faiss_index.search(q_emb, min(15, len(self.chunks)))
+        sem_ids = [int(i) for i in sem_ids[0] if i >= 0]
+
+        # BM25
+        scores = self.bm25.get_scores(query.lower().split())
+        bm25_ids = list(np.argsort(scores)[::-1][:15].astype(int))
+
+        # RRF fusion
+        rrf_scores = {}
+        for rank, doc_id in enumerate(sem_ids):
+            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0) + 1.0 / (60 + rank + 1)
+        for rank, doc_id in enumerate(bm25_ids):
+            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0) + 1.0 / (60 + rank + 1)
+
+        candidates = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)[:15]
+        candidate_chunks = [self.chunks[doc_id] for doc_id, _ in candidates]
+
+        # Rerank
+        if len(candidate_chunks) > top_k:
+            pairs = [[query, c.contextualized_text] for c in candidate_chunks]
+            rerank_scores = reranker.predict(pairs)
+            ranked = sorted(zip(candidate_chunks, rerank_scores), key=lambda x: x[1], reverse=True)
+            return [chunk for chunk, _ in ranked[:top_k]]
+
+        return candidate_chunks[:top_k]
+
+    def chat(self, user_message: str) -> str:
+        """Conversational interface with RAG context."""
+        # Retrieve relevant context
+        retrieved = self.hybrid_search(user_message, top_k=4)
+
+        if retrieved:
+            context_parts = [f"[{c.source}]\n{c.text}" for c in retrieved]
+            context = "\n\n---\n\n".join(context_parts)
+            system = f"""You are a research assistant with access to a knowledge base.
+
+Answer questions using the provided context. Always cite the source (shown in brackets).
+If the context doesn't contain enough information, say so clearly and offer to search for more.
+
+Context:
+{context}"""
+        else:
+            system = "You are a helpful research assistant. The knowledge base is empty — ask the user to add documents."
+
+        self.chat_history.append({"role": "user", "content": user_message})
+
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=800,
+            system=system,
+            messages=self.chat_history
+        )
+
+        assistant_message = response.content[0].text
+        self.chat_history.append({"role": "assistant", "content": assistant_message})
+        return assistant_message
+
+# ── Demo ───────────────────────────────────────────────────────────────────────
+def main():
+    assistant = ResearchAssistant()
+
+    # Ingest sample documents
+    doc1 = Document(
+        content="""
+Transformer Architecture and Attention Mechanisms
+
+The transformer architecture, introduced in 'Attention Is All You Need' (Vaswani et al., 2017),
+revolutionized natural language processing. Its core innovation is the self-attention mechanism,
+which allows each token to attend to all other tokens in the sequence simultaneously.
+
+Self-attention computes three vectors for each token: Query (Q), Key (K), and Value (V).
+The attention score between tokens is computed as: softmax(QK^T / sqrt(d_k)) * V
+where d_k is the key dimension. This enables the model to learn which tokens are relevant
+to each other regardless of their position in the sequence.
+
+BERT uses bidirectional attention (sees all tokens) for understanding tasks.
+GPT uses causal attention (only past tokens) for generation tasks.
+Claude is based on a decoder-only transformer architecture similar to GPT.
+""",
+        source="transformer_paper_summary"
+    )
+
+    doc2 = Document(
+        content="""
+RAG Systems: Production Best Practices
+
+Retrieval-Augmented Generation (RAG) combines retrieval systems with language models to
+ground responses in factual documents. Key decisions in production RAG:
+
+1. Chunking Strategy: Recursive chunking at natural boundaries outperforms fixed-size.
+   Typical chunk size: 400-600 tokens with 10-15% overlap.
+
+2. Embedding Models: sentence-transformers/all-MiniLM-L6-v2 for local/free use.
+   Voyage AI or OpenAI embeddings for production quality.
+
+3. Retrieval: Hybrid search (BM25 + semantic) outperforms either alone.
+   BM25 wins on exact keyword matches; semantic wins on paraphrases.
+
+4. Reranking: Cross-encoder reranking on top-20 candidates improves precision 30-50%.
+   Use Cohere Rerank or sentence-transformers CrossEncoder.
+
+5. Contextual Retrieval: Prepend situating context to each chunk before embedding.
+   Anthropic reports 49% reduction in retrieval failures.
+""",
+        source="rag_best_practices"
+    )
+
+    assistant.ingest(doc1, use_contextual_retrieval=True)
+    assistant.ingest(doc2, use_contextual_retrieval=True)
+
+    # Interactive chat loop
+    print("\n" + "="*60)
+    print("AI Research Assistant Ready!")
+    print("Type 'quit' to exit.")
+    print("="*60)
+
+    test_questions = [
+        "How does self-attention work in transformers?",
+        "What chunking strategy is recommended for production RAG?",
+        "What is contextual retrieval and why does it help?"
+    ]
+
+    for q in test_questions:
+        print(f"\nYou: {q}")
+        answer = assistant.chat(q)
+        print(f"Assistant: {answer}")
+        print("-"*50)
+
+if __name__ == "__main__":
+    main()</code></pre>
+
+      <h3>Track 2 Quick Start: Code Review Bot</h3>
+      <pre><code class="language-python">"""
+Track 2 starter: GitHub webhook → multi-subagent review → PR comment
+
+Architecture reference:
+1. FastAPI webhook endpoint (POST /webhook/github)
+2. Verify GitHub signature (X-Hub-Signature-256)
+3. Extract PR diff from GitHub API
+4. Run 3 subagents in parallel (security, performance, style)
+5. Post synthesized review as PR comment via GitHub API
+
+Key sessions to revisit:
+- Session 42-43: Subagents (spawning, designing)
+- Session 44: Claude Code Hooks (for CI integration)
+- Session 40: Parallelization (running subagents concurrently)
+"""
+import anthropic
+import hmac
+import hashlib
+import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+GITHUB_TOKEN = "ghp_..."  # GitHub personal access token
+WEBHOOK_SECRET = "..."     # Your webhook secret
+
+client = anthropic.Anthropic()
+
+def verify_signature(payload: bytes, signature: str) -> bool:
+    expected = "sha256=" + hmac.new(
+        WEBHOOK_SECRET.encode(), payload, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
+
+def run_review_subagent(role: str, prompt: str, diff: str) -> dict:
+    """Run one specialized reviewer."""
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=600,
+        system=f"You are a {role}. Review ONLY for your specialty. Be concise and specific.",
+        messages=[{"role": "user", "content": f"{prompt}\n\nDiff:\n{diff}"}]
+    )
+    return {"role": role, "review": response.content[0].text}
+
+def review_pr(diff: str) -> str:
+    """Orchestrate multi-subagent PR review."""
+    reviewers = [
+        ("Security Specialist", "Find ONLY security vulnerabilities (injection, auth, crypto, secrets)."),
+        ("Performance Analyst", "Find ONLY performance issues (N+1 queries, O(n²) algorithms, blocking I/O)."),
+        ("Code Quality Reviewer", "Find ONLY maintainability issues (missing docs, unclear names, long functions)."),
+    ]
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(run_review_subagent, role, prompt, diff) for role, prompt in reviewers]
+        results = [f.result() for f in as_completed(futures)]
+
+    all_findings = "\n\n".join([f"=== {r['role']} ===\n{r['review']}" for r in results])
+
+    synthesis = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=700,
+        system="Synthesize specialist code reviews into a prioritized, actionable PR review.",
+        messages=[{"role": "user", "content": f"Synthesize:\n{all_findings}"}]
+    )
+    return synthesis.content[0].text
+
+print("Track 2 starter loaded. Add Flask/FastAPI webhook handler to complete.")</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-trophy"></i>
+        <div><strong>Congratulations on completing the Claude Mastery course!</strong> You've built real knowledge from Claude's foundations through advanced RAG pipelines, multi-agent systems, MCP servers, hooks, skills, and cloud deployments. The capstone project is your demonstration that you can take these capabilities and ship something real.
+        <br/><br/>
+        <a href="/Claude-Mastery/certificate.html" style="color:#d97706;font-weight:700;">Claim your Claude Mastery Certificate →</a></div>
+      </div>
+    </div><!-- /lab -->
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/50-google-vertex.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Claude on Google Vertex AI</span>
+      </a>
+      <a href="/Claude-Mastery/certificate.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">You did it!</span>
+        <span class="nav-title">Get Your Certificate</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 51,
+  slug: '51-capstone',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/certificate.html',
+  quizData: [
+    {
+      question: "In the Track 1 Research Assistant, what is the role of contextual retrieval during ingestion?",
+      options: [
+        "To compress chunks for smaller storage size",
+        "To have Claude Haiku prepend a situating sentence to each chunk before embedding, improving retrieval accuracy",
+        "To translate chunks into multiple languages for multilingual search",
+        "To merge small chunks into larger ones for better context"
+      ],
+      correct: 1,
+      explanation: "Contextual retrieval uses Claude Haiku (cheap, fast) to add a 1-2 sentence context to each chunk that situates it within the full document. This significantly improves retrieval since the embedded chunk contains more precise context about what it covers."
+    },
+    {
+      question: "In the Track 2 Code Review Bot, why run three specialist subagents in parallel rather than one general reviewer?",
+      options: [
+        "Three subagents is cheaper than one subagent",
+        "Each specialist stays focused on its domain without distraction, and parallel execution is faster",
+        "GitHub requires multiple reviewers per PR",
+        "One model cannot handle all three types of review simultaneously"
+      ],
+      correct: 1,
+      explanation: "Specialized subagents produce higher quality reviews because they're focused — the security reviewer isn't distracted by style issues. Parallel execution means all three reviews complete in the time of one. The orchestrator then synthesizes the expert findings."
+    },
+    {
+      question: "For a production deployment, which prompt optimization technique has the highest cost ROI?",
+      options: [
+        "Switching from Opus to Haiku for all operations",
+        "Prompt caching for static system prompts — 60-80% cost reduction on cached tokens",
+        "Reducing max_tokens to the minimum",
+        "Using synchronous instead of async API calls"
+      ],
+      correct: 1,
+      explanation: "Prompt caching on static system prompts (like a large document corpus prompt or detailed system instructions) can reduce costs by 60-80% for those tokens. It's one configuration change with immediate, significant impact on high-volume applications."
+    },
+    {
+      question: "Which capstone track would be most appropriate for a legal firm wanting to query 10,000 case files?",
+      options: [
+        "Track 2: Code Review Bot",
+        "Track 5: Multi-Agent Pipeline",
+        "Track 1: AI Research Assistant (with RAG over the case file corpus)",
+        "Track 3: Customer Support Bot"
+      ],
+      correct: 2,
+      explanation: "Track 1 (AI Research Assistant) is purpose-built for this: ingest 10K documents, build a hybrid BM25+semantic search index with contextual retrieval, and enable conversational queries that cite specific cases. Exact keyword matching (case numbers, statute citations) via BM25 is especially important for legal search."
+    },
+    {
+      question: "In the production checklist, why is it important to set up evals before shipping?",
+      options: [
+        "Evals are required by Anthropic's terms of service",
+        "Evals let you measure quality objectively so you can detect regressions when you change prompts or models",
+        "Evals automatically fix broken prompts",
+        "Evals reduce API costs by caching common query patterns"
+      ],
+      correct: 1,
+      explanation: "Without evals, you can't tell if a prompt change improved or degraded quality. A baseline of 20+ test cases measuring your core metric (retrieval accuracy, answer correctness, etc.) lets you confidently iterate. It also catches quality regressions when upgrading Claude model versions."
+    }
+  ]
+};
+
+// Special handling for last session — certificate link in quiz completion
+document.addEventListener('DOMContentLoaded', function() {
+  // Override quiz completion to show certificate link
+  const quizContainer = document.getElementById('quiz-container');
+  if (quizContainer) {
+    const observer = new MutationObserver(function() {
+      const resultArea = quizContainer.querySelector('.quiz-result, .quiz-complete');
+      if (resultArea && !resultArea.querySelector('.cert-link')) {
+        const certLink = document.createElement('div');
+        certLink.className = 'cert-link';
+        certLink.style.cssText = 'margin-top:2rem;text-align:center;padding:1.5rem;background:#fef3c7;border-radius:12px;border:2px solid #d97706;';
+        certLink.innerHTML = '<p style="font-size:1.1rem;font-weight:700;color:#92400e;margin-bottom:0.75rem;">You have completed all 51 sessions!</p><a href="/Claude-Mastery/certificate.html" style="display:inline-block;padding:0.75rem 2rem;background:#d97706;color:white;border-radius:8px;font-weight:700;text-decoration:none;">Get Your Claude Mastery Certificate</a>';
+        resultArea.appendChild(certLink);
+      }
+    });
+    observer.observe(quizContainer, { childList: true, subtree: true });
+  }
+});
+</script>
+</body>
+</html>

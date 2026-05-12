@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 13: Diligence &amp; Responsible AI Use — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 13</span></div>
+      <h1 class="session-title">Diligence &amp; Responsible AI Use</h1>
+      <p class="session-tagline">Build the privacy-aware, accountability-conscious habits that make AI use genuinely responsible — in your work and life.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 25 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Policy &amp; Habits Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Privacy and Data in AI Interactions</h2>
+      <p>When you use Claude, everything you type goes to Anthropic's servers. This is true for any cloud-based AI service. What you type in the chat box is not private in the way a conversation with a therapist or lawyer is. Anthropic has a privacy policy — but you should understand what it means in practice.</p>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div><strong>Data you should NOT share in Claude prompts:</strong>
+        <ul style="margin-top:0.5rem">
+          <li>Personally identifiable information about others (client names, SSNs, medical records)</li>
+          <li>Confidential business information (trade secrets, unreleased financials, M&amp;A details)</li>
+          <li>Login credentials, API keys, passwords</li>
+          <li>Personal health or financial information you want kept private</li>
+          <li>Information under NDA or attorney-client privilege</li>
+        </ul>
+        </div>
+      </div>
+
+      <p>The practical rule: before typing anything into Claude, ask yourself "Would I be comfortable if this appeared in a data breach or a training set?" If not, either anonymize it or don't include it.</p>
+
+      <h2>Anonymization: Sharing Without Exposing</h2>
+      <p>Most tasks that feel like they require private data can be accomplished with anonymized versions. Learning to anonymize well lets you use Claude effectively while protecting sensitive information.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-xmark"></i> Risky (real data)</h4>
+          <pre style="font-size:0.8rem;background:#fee2e2;padding:0.75rem;border-radius:0.5rem;">Help me write a performance review for Sarah Johnson who works as a Senior Engineer at Acme Corp and makes $145,000. Her SSN is 123-45-6789 and she had a disciplinary incident in March.</pre>
+        </div>
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Safe (anonymized)</h4>
+          <pre style="font-size:0.8rem;background:#dcfce7;padding:0.75rem;border-radius:0.5rem;">Help me write a performance review for a Senior Engineer. Their achievements: [list]. Growth areas: [list]. There was one disciplinary incident to address constructively. Tone: professional and fair.</pre>
+        </div>
+      </div>
+
+      <p>The anonymized version is actually a better prompt — it gives Claude what it needs (role, achievements, growth areas, tone) without exposing private data.</p>
+
+      <h2>Human Oversight and Accountability</h2>
+      <p>The most important principle of responsible AI use: <strong>the human is always accountable for the outcome.</strong> Claude is a tool. If a Claude-drafted email causes harm, you sent it. If Claude-generated code crashes a system, you deployed it. If Claude-written advice leads someone astray, you gave it.</p>
+
+      <p>This accountability principle shapes how much oversight you apply:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Low stakes: review once, use</h4>
+            <p>A draft email to a colleague, a brainstormed list, an explanation for yourself. Read it, make sure it's appropriate, use it. The cost of error is low.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Medium stakes: review carefully, edit, use</h4>
+            <p>A report for management, code that goes into a shared codebase, advice you'll share with others. Review thoroughly, edit substantially, fact-check key claims.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>High stakes: expert review before use</h4>
+            <p>Medical information you'll act on, legal documents, financial advice, safety-critical code. Have a qualified human expert review before any action. Claude helps you prepare; the expert validates.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Attribution and Intellectual Honesty</h2>
+      <p>When AI substantially produces your work, there are emerging norms around attribution — and these norms differ by context:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-graduation-cap"></i> Academic contexts</h4>
+          <p>Most institutions have AI use policies. Submitting AI-generated work as your own is typically academic dishonesty. When in doubt, disclose. Some assignments permit AI assistance with attribution.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-briefcase"></i> Professional contexts</h4>
+          <p>Norms are still forming. Generally: using AI for first drafts is accepted; using AI to represent views you don't hold is problematic. Check your organization's policy.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-pen"></i> Creative/publishing contexts</h4>
+          <p>Many publishers require AI disclosure. Using AI as an editing tool is different from AI generating the work. Know the requirements of your platform.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>The attribution rule of thumb:</strong> When AI substantially shaped the ideas, structure, or words — not just grammar — disclosure is generally appropriate. When AI was a tool (like spell-check) that you directed and substantially edited, attribution becomes less critical. When uncertain, err toward transparency.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Building Your Responsible AI Habits</h2>
+        <p>Develop a personal AI use policy and practice the privacy-protective habits that make AI use sustainable and trustworthy.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Audit your current AI use for privacy risks</h3></div>
+          <p>Think about the last 5-10 times you used Claude or another AI tool. For each, ask:</p>
+          <ul>
+            <li>Did I include any real names of people who didn't consent?</li>
+            <li>Did I include any confidential company information?</li>
+            <li>Did I include any sensitive personal data?</li>
+          </ul>
+          <p>If yes: how would you anonymize that input next time? Write down the anonymization version.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Practice anonymization</h3></div>
+          <p>Take a real prompt you want to use that involves private data. Rewrite it with all sensitive information replaced by generic placeholders, then test it with Claude. Does it produce what you need without the sensitive data?</p>
+          <pre><code class="language-text">Original: "Review this email from my client John Smith at ABC Corp about their contract renewal..."
+
+Anonymized: "Review this email from a client about a contract renewal. [paste email with names removed or replaced with [CLIENT] and [COMPANY]]"</code></pre>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Rate your recent AI tasks by stakes</h3></div>
+          <p>List 5 things you've used Claude for recently. Rate each by stakes level:</p>
+          <ul>
+            <li>Low stakes (error has minor consequences)</li>
+            <li>Medium stakes (error is embarrassing or wastes time)</li>
+            <li>High stakes (error has serious professional or personal consequences)</li>
+          </ul>
+          <p>For your highest-stakes item: did you apply appropriate oversight? What oversight would be appropriate for that task going forward?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Write your personal AI use policy</h3></div>
+          <p>Ask Claude to help you draft a 1-page personal AI use policy:</p>
+          <pre><code class="language-text">Help me write a short personal AI use policy for my work as a [your role]. It should cover:
+1. What types of data I won't share with AI tools
+2. What oversight I'll apply based on stakes level
+3. How I'll handle attribution in my context
+4. Any domain-specific considerations (e.g., if in healthcare, law, education)
+Keep it practical and specific, not generic.</code></pre>
+          <p>Then review and edit it. This document, once finalized, guides your AI use sustainably.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Check your organization's AI policy</h3></div>
+          <p>Does your employer, school, or professional association have an AI use policy? If yes, read it. If no, should it? Note any areas where your personal policy and your organization's policy may need alignment.</p>
+          <p>Ask Claude: "What are the key elements that a good organizational AI use policy should cover?" Use this to evaluate or advocate for a better policy where you work.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/12-discernment.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Discernment — Evaluating Outputs</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/14-projects-artifacts.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Projects, Artifacts &amp; Organization</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 13,
+  slug: '13-diligence',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/14-projects-artifacts.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the key accountability principle for AI-assisted work?',
+      options: [
+        { text: 'Claude is accountable if it produces incorrect output', correct: false },
+        { text: 'Anthropic is responsible for anything Claude produces', correct: false },
+        { text: 'The human who uses Claude\'s output is always accountable for the outcome', correct: true },
+        { text: 'Accountability is shared 50/50 between the user and Anthropic', correct: false }
+      ],
+      explanation: 'The human is always accountable for the outcome. If you send a Claude-drafted email, you sent it. If you deploy Claude-written code, you deployed it. AI is a tool — the accountability for how it\'s used stays with the human user.'
+    },
+    {
+      id: 'q2',
+      type: 'multi',
+      points: 2,
+      question: 'Which types of data should you NOT include in Claude prompts? (Select all that apply)',
+      options: [
+        { text: 'Other people\'s personally identifiable information without consent', correct: true },
+        { text: 'Confidential business information like unreleased financials', correct: true },
+        { text: 'General industry trends and public information', correct: false },
+        { text: 'API keys or passwords', correct: true },
+        { text: 'Information covered by NDA', correct: true }
+      ],
+      explanation: 'Never share: PII about others, confidential business data, credentials, or NDA-protected information. Public information and general context are fine to include. When uncertain, anonymize.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'Anonymizing private data before including it in a Claude prompt typically makes the prompt less effective.',
+      correctAnswer: false,
+      explanation: 'Anonymizing data usually makes prompts equally or more effective. Claude doesn\'t need real names to help with most tasks — it needs role descriptions, context, and goals. Anonymized prompts protect privacy without sacrificing output quality.'
+    },
+    {
+      id: 'q4',
+      type: 'mcq',
+      points: 1,
+      question: 'For a high-stakes task (e.g., medical information you\'ll act on), what is the appropriate level of oversight?',
+      options: [
+        { text: 'Trust Claude\'s output if it sounds confident and detailed', correct: false },
+        { text: 'Have a qualified human expert review before taking any action', correct: true },
+        { text: 'Ask Claude the same question three times and go with the majority answer', correct: false },
+        { text: 'Only use Claude for low-stakes tasks — avoid high-stakes ones entirely', correct: false }
+      ],
+      explanation: 'For high-stakes tasks, Claude can help you prepare, research, and draft — but a qualified human expert must validate before action. Claude accelerates your work; the expert provides the accountability gate.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'When is AI attribution/disclosure most clearly appropriate?',
+      options: [
+        { text: 'Only when required by law', correct: false },
+        { text: 'When AI substantially shaped the ideas, structure, or words — not just grammar and polish', correct: true },
+        { text: 'Never — AI is just a tool like spell-check', correct: false },
+        { text: 'Only in academic contexts, not professional ones', correct: false }
+      ],
+      explanation: 'When AI substantially shaped the ideas, structure, or words, disclosure is appropriate in most contexts. Using AI as an editing or polishing tool (like spell-check) is different from AI generating the substance of the work. When uncertain, err toward transparency.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

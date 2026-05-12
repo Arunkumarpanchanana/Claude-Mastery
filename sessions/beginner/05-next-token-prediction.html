@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 05: Next Token Prediction — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 05</span></div>
+      <h1 class="session-title">Next Token Prediction</h1>
+      <p class="session-tagline">Go deeper on tokenization and probabilistic prediction to understand why Claude makes errors, surprises you, and why that's fundamental to how LLMs work.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Token Experiment Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What is a Token?</h2>
+      <p>Before Claude can predict the next word, it must first convert text into <em>tokens</em> — the atomic units the model actually processes. Tokens are not the same as words. They're subword units determined by a tokenizer trained on the same corpus as the model.</p>
+
+      <p>Some examples of how text tokenizes:</p>
+      <ul>
+        <li><code>"hello"</code> → 1 token</li>
+        <li><code>"unhelpfulness"</code> → 3-4 tokens: <code>un</code> | <code>help</code> | <code>ful</code> | <code>ness</code></li>
+        <li><code>"Claude"</code> → 1 token (it's in the vocabulary)</li>
+        <li><code>"antidisestablishmentarianism"</code> → 6+ tokens</li>
+        <li>Code and non-English text often tokenize less efficiently (more tokens per character)</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Why subwords?</strong> A whole-word vocabulary would need millions of entries and couldn't handle new words. A character-level vocabulary loses important word-level patterns. Subword tokenization (BPE, SentencePiece) is a sweet spot — common words are single tokens; rare words are split into common pieces.</div>
+      </div>
+
+      <p>This has real practical implications:</p>
+      <ul>
+        <li><strong>Counting is hard for Claude</strong> — it doesn't see letters, it sees tokens. Asking it to count letters in a word requires it to reason about subword splits, which it often gets wrong.</li>
+        <li><strong>Token costs matter</strong> — APIs charge by token. Verbose prompts cost more. This matters when you're building applications.</li>
+        <li><strong>Context limits are in tokens</strong> — "200K context window" means 200,000 tokens, roughly 150,000 words.</li>
+      </ul>
+
+      <h2>The Prediction Mechanism</h2>
+      <p>After tokenization, each token is converted to a vector — a list of hundreds or thousands of numbers that encode its meaning and relationships. These vectors pass through many layers of transformer attention, where tokens can influence each other and build up increasingly abstract representations.</p>
+
+      <p>At the final layer, the model produces a vector for "what comes next" — which is then decoded into probabilities over the entire vocabulary. The highest-probability token gets chosen (or sampled, with some randomness).</p>
+
+      <p>What makes this remarkable: the model learned these probability distributions purely from observing which tokens followed which other tokens in billions of training examples. Through this statistical learning, it internalized:</p>
+      <ul>
+        <li>Grammar and syntax</li>
+        <li>World knowledge and facts</li>
+        <li>Reasoning patterns and problem-solving structures</li>
+        <li>Style, tone, and genre conventions</li>
+      </ul>
+
+      <div class="compare-grid">
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> What emerges from token prediction</h4>
+          <ul>
+            <li>Language understanding across 100+ languages</li>
+            <li>Code generation in dozens of programming languages</li>
+            <li>Mathematical reasoning (with limitations)</li>
+            <li>Analogy and metaphor</li>
+            <li>Summarization and translation</li>
+          </ul>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-triangle-exclamation"></i> What breaks down</h4>
+          <ul>
+            <li>Precise counting (letters, characters)</li>
+            <li>Multi-digit arithmetic without a calculator</li>
+            <li>Spatial reasoning and visual puzzles</li>
+            <li>Tracking complex state over very long outputs</li>
+            <li>Facts that weren't in the training data</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Why Errors Are Probabilistic, Not Random</h2>
+      <p>When Claude makes an error, it's not random noise — it's a systematic bias. The model predicts whatever token was statistically most likely given the context, and sometimes that's wrong in predictable ways:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Plausibility bias</h4>
+            <p>If a false fact sounds plausible and was stated confidently in many training documents, the model may repeat it. Popular misconceptions in training data become popular misconceptions in outputs.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Recency and prominence bias</h4>
+            <p>Information that appeared more frequently in training data gets stronger statistical encoding. Well-documented topics are more reliable than obscure ones.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Format completion</h4>
+            <p>If the context looks like "a list of 5 items," the model will try to generate a 5th item even if it has to invent one. The format creates pressure that can override factual accuracy.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Sycophancy pull</h4>
+            <p>RLHF training optimizes for human approval ratings. Humans often rate confident, fluent, agreeable responses highly even if they're wrong — creating a learned bias toward confident-sounding outputs.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Practical upshot:</strong> Claude's errors follow patterns. You can compensate by: asking it to show its work (harder to confabulate step by step), expressing doubt about suspicious claims, asking for citations you'll verify, and using Claude for drafts + fact-checking with other tools.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Token-Level Thinking Experiments</h2>
+        <p>Explore how tokenization shapes Claude's strengths and weaknesses through hands-on experiments.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Letter counting challenge</h3></div>
+          <p>Ask Claude:</p>
+          <pre><code class="language-text">How many times does the letter 'r' appear in the word "strawberry"?</code></pre>
+          <p>The correct answer is 3. Did Claude get it right? This is a famous failure mode — because Claude sees tokens, not individual letters, letter-counting is harder than it looks. Try it with other words.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Arithmetic stress test</h3></div>
+          <p>Ask:</p>
+          <pre><code class="language-text">Without using a calculator: what is 847 × 293?</code></pre>
+          <p>Verify the answer (it's 248,171). How did Claude do? Now ask it to do the same calculation step-by-step with long multiplication. Does showing the work improve accuracy?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Format completion bias</h3></div>
+          <p>Ask Claude:</p>
+          <pre><code class="language-text">Give me a list of the 10 longest rivers in the world, in order.</code></pre>
+          <p>Then fact-check the list. The top few are usually right (Nile, Amazon, Yangtze), but the 8th-10th entries are where errors creep in — the format pressure of "give me 10" forces it to complete the list even with shaky data.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Show-your-work vs direct answer</h3></div>
+          <p>Compare these two versions:</p>
+          <pre><code class="language-text">Version 1: "Is it ever ethical to break a promise?"
+
+Version 2: "Is it ever ethical to break a promise? Think through this carefully, considering different scenarios and ethical frameworks before giving your answer."</code></pre>
+          <p>The second version should produce a more nuanced and accurate answer. "Show your work" prompting helps because each reasoning step is a new token prediction that can self-correct the previous step.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Rare vs common knowledge</h3></div>
+          <p>Test Claude on very specific obscure knowledge vs widely-reported facts:</p>
+          <pre><code class="language-text">Who won the Nobel Prize in Physics in 2023?</code></pre>
+          <p>vs.</p>
+          <pre><code class="language-text">What was the name of the mayor of Gdańsk, Poland in 1987?</code></pre>
+          <p>Notice how confidence and accuracy diverge between well-documented and obscure topics — this is the frequency-in-training-data effect in action.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/04-claude-character.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">How Claude Gets Its Character</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/06-knowledge-limitations.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Knowledge &amp; Limitations</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 5,
+  slug: '05-next-token-prediction',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/06-knowledge-limitations.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'Why does Claude often struggle with counting letters in a word?',
+      options: [
+        { text: 'Claude was not trained on spelling data', correct: false },
+        { text: 'Claude processes tokens (subword units), not individual letters', correct: true },
+        { text: 'Counting is intentionally disabled for privacy', correct: false },
+        { text: 'Letters are too small for the model to process', correct: false }
+      ],
+      explanation: 'Claude sees tokens, not letters. A word like "strawberry" is one token, so counting its letters requires Claude to reason about internal character structure — which it must do indirectly and often gets wrong.'
+    },
+    {
+      id: 'q2',
+      type: 'mcq',
+      points: 1,
+      question: 'What is a "token" in the context of language models?',
+      options: [
+        { text: 'Always a single word', correct: false },
+        { text: 'Always a single character', correct: false },
+        { text: 'A subword unit — could be a full word, part of a word, or punctuation', correct: true },
+        { text: 'A sentence in the training data', correct: false }
+      ],
+      explanation: 'Tokens are subword units. Common words like "the" or "hello" are single tokens. Rare or long words split into multiple tokens. Spaces and punctuation are also tokens. Subword tokenization balances vocabulary size with coverage.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'Claude\'s errors are random — there is no pattern to them.',
+      correctAnswer: false,
+      explanation: 'Claude\'s errors follow predictable patterns: plausibility bias (repeating confident-sounding falsehoods), format completion bias (inventing items to fill lists), frequency bias (more reliable on well-documented topics), and sycophancy (over-confidence to match expectations).'
+    },
+    {
+      id: 'q4',
+      type: 'mcq',
+      points: 2,
+      question: 'Why does asking Claude to "show its work" often improve accuracy?',
+      options: [
+        { text: 'It gives Claude more tokens to express itself', correct: false },
+        { text: 'Each reasoning step is a new prediction that can self-correct earlier steps', correct: true },
+        { text: 'Anthropic designed a special mode for step-by-step reasoning', correct: false },
+        { text: 'It forces Claude to search the internet', correct: false }
+      ],
+      explanation: 'When Claude reasons step-by-step, each token is predicted in the context of the previous reasoning steps. This allows later predictions to correct errors in earlier steps — a form of in-context self-correction that direct answers don\'t allow.'
+    },
+    {
+      id: 'q5',
+      type: 'multi',
+      points: 2,
+      question: 'Which tasks does Claude typically struggle with due to its token-prediction architecture? (Select all that apply)',
+      options: [
+        { text: 'Counting specific letters in a word', correct: true },
+        { text: 'Writing a well-structured essay', correct: false },
+        { text: 'Multi-digit arithmetic without a calculator', correct: true },
+        { text: 'Summarizing a document', correct: false },
+        { text: 'Tracking precise facts about very obscure topics', correct: true }
+      ],
+      explanation: 'Letter counting, complex arithmetic, and obscure facts are challenging because: (1) tokens obscure character structure, (2) arithmetic requires exact computation not statistical approximation, and (3) rare facts have weak statistical encoding from limited training examples.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

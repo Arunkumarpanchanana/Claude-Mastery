@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 24: XML Tags, Examples & Prompt Structure — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 24</span></div>
+      <h1 class="session-title">XML Tags, Examples & Prompt Structure</h1>
+      <p class="session-tagline">Structure your prompts like a pro — XML tags help Claude parse complex context, and few-shot examples are the fastest way to transfer your intent.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 35 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="why-xml-tags">Why XML Tags Work</h2>
+      <p>Claude was trained on a massive amount of structured text including HTML, XML, and documentation. XML-style tags create unambiguous boundaries between sections of a prompt, making it much easier for Claude to parse:</p>
+      <ul>
+        <li>Which part is the instruction vs. the data to process</li>
+        <li>Where examples begin and end</li>
+        <li>What is context vs. what is the task</li>
+        <li>Where user-provided content starts (important for injection prevention)</li>
+      </ul>
+
+      <h2 id="common-xml-tags">Common XML Tag Patterns</h2>
+
+      <pre><code class="language-python">prompt = """
+&lt;instructions&gt;
+You are a customer support agent. Classify the following ticket
+into exactly one category: billing, technical, feature-request, or other.
+Return only the category label — nothing else.
+&lt;/instructions&gt;
+
+&lt;examples&gt;
+&lt;example&gt;
+&lt;ticket&gt;I can't log into my account and I've reset my password twice.&lt;/ticket&gt;
+&lt;category&gt;technical&lt;/category&gt;
+&lt;/example&gt;
+
+&lt;example&gt;
+&lt;ticket&gt;I was charged twice for my subscription this month.&lt;/ticket&gt;
+&lt;category&gt;billing&lt;/category&gt;
+&lt;/example&gt;
+&lt;/examples&gt;
+
+&lt;ticket&gt;{user_ticket}&lt;/ticket&gt;
+"""
+</code></pre>
+
+      <h2 id="few-shot-examples">Few-Shot Examples</h2>
+      <p>Few-shot examples are input/output pairs that show Claude the exact pattern you want. They're the most efficient way to specify format, style, and behavior that's hard to describe in words.</p>
+
+      <p><strong>Rules for good few-shot examples:</strong></p>
+      <ul>
+        <li>Use 2-5 examples — more isn't always better</li>
+        <li>Cover edge cases in your examples, not just the easy case</li>
+        <li>Make examples representative of your real input distribution</li>
+        <li>Use consistent formatting across all examples</li>
+        <li>Place examples before the actual input to classify/process</li>
+      </ul>
+
+      <h2 id="document-tag">Wrapping User Content in Tags</h2>
+      <p>When you inject user-provided content into a prompt, wrap it in a tag. This prevents prompt injection — if the user writes "ignore previous instructions", it's clearly just document content:</p>
+
+      <pre><code class="language-python">def summarize_document(doc_text: str) -> str:
+    prompt = f"""Summarize the following document in 3 bullet points.
+
+&lt;document&gt;
+{doc_text}
+&lt;/document&gt;
+
+Summary:"""
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.content[0].text
+</code></pre>
+
+      <h2 id="structured-prompt-template">Structured Prompt Template Pattern</h2>
+      <p>A reusable template with clear sections for different components:</p>
+
+      <pre><code class="language-python">PROMPT_TEMPLATE = """&lt;role&gt;
+{role}
+&lt;/role&gt;
+
+&lt;context&gt;
+{context}
+&lt;/context&gt;
+
+&lt;instructions&gt;
+{instructions}
+&lt;/instructions&gt;
+
+&lt;examples&gt;
+{examples}
+&lt;/examples&gt;
+
+&lt;input&gt;
+{user_input}
+&lt;/input&gt;"""
+
+
+def build_prompt(role: str, context: str, instructions: str,
+                 examples: str, user_input: str) -> str:
+    return PROMPT_TEMPLATE.format(
+        role=role,
+        context=context,
+        instructions=instructions,
+        examples=examples,
+        user_input=user_input
+    )
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Tip:</strong> XML tags are especially useful in system prompts where you need to separate multiple sections — persona, constraints, available tools, background knowledge, and output format can each have their own tag.
+      </div>
+
+      <h2 id="tag-naming">Tag Naming Conventions</h2>
+      <p>There are no reserved tag names — use descriptive ones that map to the content. Common conventions:</p>
+      <ul>
+        <li><code>&lt;instructions&gt;</code> — what to do</li>
+        <li><code>&lt;context&gt;</code> — background information</li>
+        <li><code>&lt;document&gt;</code> or <code>&lt;text&gt;</code> — content to process</li>
+        <li><code>&lt;example&gt;</code> — a single few-shot example</li>
+        <li><code>&lt;examples&gt;</code> — container for all examples</li>
+        <li><code>&lt;output_format&gt;</code> — format specification</li>
+        <li><code>&lt;thinking&gt;</code> — where you want Claude to reason</li>
+      </ul>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build a Prompt Template with XML Structure</h2>
+      <p>Build a reusable ticket classifier that uses XML tags and few-shot examples.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+xml_prompt_lab.py — Few-shot classification with XML tags
+"""
+import anthropic
+
+client = anthropic.Anthropic()
+
+# --- Define examples ---
+EXAMPLES = [
+    {
+        "input": "I was charged twice for my Pro subscription this month.",
+        "output": '{"category": "billing", "urgency": "high"}'
+    },
+    {
+        "input": "The export to CSV feature doesn't include the timestamp column.",
+        "output": '{"category": "bug", "urgency": "medium"}'
+    },
+    {
+        "input": "Would love to see a dark mode option in the settings.",
+        "output": '{"category": "feature-request", "urgency": "low"}'
+    },
+    {
+        "input": "I can't figure out how to add a team member to my workspace.",
+        "output": '{"category": "support", "urgency": "low"}'
+    },
+]
+
+
+def build_examples_xml(examples: list[dict]) -> str:
+    """Convert example list to XML format."""
+    parts = []
+    for ex in examples:
+        parts.append(f"""&lt;example&gt;
+  &lt;ticket&gt;{ex['input']}&lt;/ticket&gt;
+  &lt;classification&gt;{ex['output']}&lt;/classification&gt;
+&lt;/example&gt;""")
+    return "\n".join(parts)
+
+
+def classify_ticket(ticket: str) -> dict:
+    """Classify a support ticket using XML-structured few-shot prompt."""
+    examples_xml = build_examples_xml(EXAMPLES)
+
+    prompt = f"""&lt;instructions&gt;
+Classify the support ticket into one category: billing, bug, feature-request, or support.
+Also assign urgency: high, medium, or low.
+Return ONLY a JSON object: {{"category": "...", "urgency": "..."}}
+No explanation. No markdown.
+&lt;/instructions&gt;
+
+&lt;examples&gt;
+{examples_xml}
+&lt;/examples&gt;
+
+&lt;ticket&gt;
+{ticket}
+&lt;/ticket&gt;"""
+
+    import json
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=64,
+        temperature=0,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return json.loads(response.content[0].text.strip())
+
+
+# --- Test the classifier ---
+test_tickets = [
+    "My invoice shows $99 but I'm on the $49/month plan.",
+    "The API endpoint /users returns a 500 error intermittently.",
+    "It would be great if we could schedule reports to run weekly.",
+    "How do I reset my password?",
+    "You charged my card three times today and I need a refund immediately!",
+]
+
+print("Support Ticket Classifier")
+print("=" * 50)
+for ticket in test_tickets:
+    result = classify_ticket(ticket)
+    print(f"\nTicket  : {ticket[:60]}...")
+    print(f"Category: {result['category']}")
+    print(f"Urgency : {result['urgency']}")
+</code></pre>
+
+      <h3>Why this works better without XML</h3>
+      <p>Try removing the XML tags and observe — Claude may misidentify where the examples end and the real input begins, especially if tickets contain phrases like "instructions" or "example".</p>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/23-prompt-engineering.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Prompt Engineering — Clear & Direct</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/25-prompt-evaluation.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Prompt Evaluation & Eval Workflows</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 24,
+  slug: '24-xml-tags-examples',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/25-prompt-evaluation.html',
+  quizData: [
+    {
+      question: "What is the primary benefit of using XML tags in prompts?",
+      options: ["They reduce token count", "They create unambiguous boundaries between prompt sections", "They enable streaming", "They're required by the Anthropic API"],
+      correct: 1,
+      explanation: "XML tags create clear, unambiguous separations between instructions, examples, and input content, making it much easier for Claude to parse complex prompts correctly."
+    },
+    {
+      question: "Why should user-provided content always be wrapped in XML tags?",
+      options: ["To reduce token usage", "To prevent prompt injection — attacker-controlled text is clearly bounded as data, not instructions", "To enable structured output", "XML tags are required for all dynamic content"],
+      correct: 1,
+      explanation: "Wrapping user input in tags like <document> prevents prompt injection attacks where malicious input could look like instructions to Claude."
+    },
+    {
+      question: "How many few-shot examples are typically recommended?",
+      options: ["At least 10 for best results", "Exactly 1", "2-5 examples covering representative cases", "As many as the context window allows"],
+      correct: 2,
+      explanation: "2-5 well-chosen examples are typically optimal. More examples aren't always better — they add cost and may add noise if not carefully curated."
+    },
+    {
+      question: "In a few-shot prompt, where should examples be placed relative to the actual input?",
+      options: ["After the input to be processed", "Before the input to be processed", "In the system prompt only", "After the response format specification"],
+      correct: 1,
+      explanation: "Examples should come before the actual input. This ensures Claude sees the pattern before encountering the real task."
+    },
+    {
+      question: "Which is NOT a valid use of XML tags in prompts?",
+      options: ["<instructions> for task instructions", "<context> for background info", "<document> for user-provided text", "<temperature> for controlling randomness"],
+      correct: 3,
+      explanation: "Temperature is an API parameter, not a prompt XML tag. All other options (instructions, context, document) are valid custom XML tag patterns for structuring prompts."
+    }
+  ]
+};
+</script>
+</body>
+</html>

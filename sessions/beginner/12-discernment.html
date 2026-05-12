@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 12: Discernment — Evaluating Outputs — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 12</span></div>
+      <h1 class="session-title">Discernment — Evaluating Outputs</h1>
+      <p class="session-tagline">Develop the critical eye that separates excellent AI outputs from plausible-sounding mistakes — and build habits for systematic evaluation.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Critical Evaluation Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Why Discernment Is Non-Negotiable</h2>
+      <p>Claude produces fluent, confident-sounding text. This is both its greatest strength and its biggest risk. Fluency can mask errors, and confidence can make wrong answers convincing. Discernment — the ability to evaluate outputs critically — is the skill that keeps you from being misled by your own AI assistant.</p>
+
+      <p>The failure mode to avoid: <strong>outsourcing your judgment.</strong> Using Claude as a first draft is smart. Using Claude's first draft as final output without review is a different story. Discernment is the practice of staying in the loop.</p>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div><strong>The fluency trap:</strong> Humans are wired to trust fluent, well-structured text. Claude's outputs often sound more authoritative than they deserve to — especially in domains where you don't have deep expertise. The more you trust something because it "sounds right," the more important Discernment becomes.</div>
+      </div>
+
+      <h2>The Discernment Framework</h2>
+      <p>When evaluating any Claude output, ask yourself four questions:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Does it answer what I actually asked?</h4>
+            <p>Claude sometimes answers a slightly different question than the one you asked — especially with ambiguous prompts. Before evaluating quality, verify that the output is actually addressing your real need. If it isn't, that's a Description problem (refine your prompt), not necessarily a Claude error.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Are the specific facts verifiable?</h4>
+            <p>Identify every specific, verifiable claim: statistics, dates, names, quotes, technical specifications. These are your fact-check targets. Don't fact-check everything — focus on claims where being wrong would matter.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Is the reasoning sound?</h4>
+            <p>Even when facts are right, logic can be wrong. Check: Do the conclusions follow from the premises? Is anything assumed without evidence? Are important alternative perspectives missing?</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>What's missing?</h4>
+            <p>Claude answers what you asked but may omit important things you didn't ask about. Especially critical: does the output reflect any important risks, caveats, or counterarguments that a responsible answer should include?</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Red Flags to Watch For</h2>
+      <p>Learn to recognize the patterns that signal Claude is on shaky ground:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-flag"></i> Specificity without basis</h4>
+          <p>"Studies show 73% of people..." or "According to research from Harvard..." — highly specific claims that don't cite actual sources are often generated. The more precise the stat, the more you should verify it.</p>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-flag"></i> Very recent information</h4>
+          <p>Any claim about events, products, or developments from the last year or two should trigger verification. Claude's training has a cutoff, and it may confidently describe things that have changed.</p>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-flag"></i> Lists that seem suspiciously complete</h4>
+          <p>"The 10 most important..." or "All the key factors..." — when Claude fills a list, later items are more likely to be padded or invented. Verify the less-obvious entries.</p>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-flag"></i> Unusual claims in your domain</h4>
+          <p>If you're an expert and something Claude says doesn't ring true, trust your instinct. Claude is most reliable when you can evaluate it — don't defer to it in your own area of expertise.</p>
+        </div>
+      </div>
+
+      <h2>The Description-Discernment Loop</h2>
+      <p>Discernment feeds back into Description. When you find something wrong or missing in Claude's output, that tells you something about your prompt — and about how to write better prompts for this type of task in the future.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">→</div>
+          <div class="step-content">
+            <h4>Evaluate → Identify the gap → Improve the prompt → Re-evaluate</h4>
+            <p>If Claude consistently misses a type of content, add that to your prompt template as a required component. If it's always too long, add length constraints. Each Discernment cycle makes your Description better.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Meta-discernment technique:</strong> Ask Claude to critique its own output: "What are the weaknesses or limitations of the response you just gave? What did you leave out that might be important?" This surfaces issues Claude itself recognizes but didn't address in the original response.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Discernment in Practice</h2>
+        <p>Practice systematic evaluation of Claude outputs across different content types. Build a personal discernment checklist.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Get a complex output to evaluate</h3></div>
+          <p>Ask Claude something in a domain where you have moderate knowledge:</p>
+          <pre><code class="language-text">Explain the five most important factors that determine whether a startup succeeds or fails. Be specific and give examples.</code></pre>
+          <p>Get the output, then apply the 4-question Discernment framework to it. Does it answer your question? Are facts verifiable? Is reasoning sound? What's missing?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Apply meta-discernment</h3></div>
+          <p>After getting the startup answer, ask Claude:</p>
+          <pre><code class="language-text">What are the weaknesses in the response you just gave? What important factors did you leave out or oversimplify? Where might a domain expert disagree with you?</code></pre>
+          <p>Compare what Claude self-identifies as weak against what you identified. Does it catch the same things? Does it add new concerns you missed?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Hunt for red flags</h3></div>
+          <p>Ask Claude a question designed to surface red flag patterns:</p>
+          <pre><code class="language-text">What are the 10 most influential business books of all time, and what is the key insight from each?</code></pre>
+          <p>Check: Are all 10 books real? Are the "key insights" accurate to what those books actually argue? The top 5 will likely be solid; check entries 7-10 carefully.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Evaluate in your own domain</h3></div>
+          <p>Ask Claude something in an area where you have genuine expertise. Evaluate how accurate it is. Notice:</p>
+          <ul>
+            <li>Does it get the fundamentals right?</li>
+            <li>Does it miss nuances that experts would know?</li>
+            <li>Does it use terminology correctly?</li>
+            <li>Does it oversimplify in ways that could mislead non-experts?</li>
+          </ul>
+          <p>Your expert evaluation in this area is more reliable than Claude's output. This is a calibration exercise.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Build your Discernment checklist</h3></div>
+          <p>Write a personal discernment checklist for the types of outputs you use Claude for most often. Example:</p>
+          <ul>
+            <li>For writing: Does it match my voice? Is the logic clear? Is anything factually claimed that I need to verify?</li>
+            <li>For code: Did I read every line? Did I test it? Are there edge cases it didn't handle?</li>
+            <li>For research: Are sources cited? Are statistics real? Is the framing balanced?</li>
+          </ul>
+          <p>Customize for your actual use cases. A personal checklist makes Discernment a habit, not a burden.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/11-description-prompts.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Description — Writing Great Prompts</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/13-diligence.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Diligence &amp; Responsible AI Use</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 12,
+  slug: '12-discernment',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/13-diligence.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the "fluency trap" in the context of AI outputs?',
+      options: [
+        { text: 'When Claude\'s responses are too complex to read easily', correct: false },
+        { text: 'The tendency to trust well-structured, confident-sounding text more than it deserves', correct: true },
+        { text: 'When Claude uses too many foreign words', correct: false },
+        { text: 'The risk of Claude being too casual in professional contexts', correct: false }
+      ],
+      explanation: 'The fluency trap is the human tendency to trust fluent, authoritative-sounding text — which Claude produces even when wrong. The more convincing something sounds, the more important it is to evaluate it critically.'
+    },
+    {
+      id: 'q2',
+      type: 'multi',
+      points: 2,
+      question: 'Which of these are red flags that should trigger extra verification of Claude\'s output? (Select all that apply)',
+      options: [
+        { text: 'Very specific statistics like "73% of people..."', correct: true },
+        { text: 'Claims about events from the last year or two', correct: true },
+        { text: 'Explanations of well-established historical facts', correct: false },
+        { text: 'Items 8-10 in a "top 10" list', correct: true },
+        { text: 'Claims that contradict your own domain expertise', correct: true }
+      ],
+      explanation: 'Red flags: specific stats without sources (often generated), recent information (post-cutoff), later items in complete-seeming lists (padding), and domain claims that don\'t match expert knowledge. Historical facts about well-documented topics are generally more reliable.'
+    },
+    {
+      id: 'q3',
+      type: 'mcq',
+      points: 1,
+      question: 'What is "meta-discernment" in the context of Claude?',
+      options: [
+        { text: 'Using a different AI to evaluate Claude\'s output', correct: false },
+        { text: 'Asking Claude to identify the weaknesses and gaps in its own response', correct: true },
+        { text: 'Checking if Claude\'s response is longer than needed', correct: false },
+        { text: 'Comparing Claude\'s answer to Google Search results', correct: false }
+      ],
+      explanation: 'Meta-discernment means asking Claude to critique its own output — "What did you leave out? What are the weaknesses in your answer?" Claude often identifies issues it didn\'t address in the original response, giving you additional evaluation targets.'
+    },
+    {
+      id: 'q4',
+      type: 'truefalse',
+      points: 1,
+      question: 'If Claude\'s output is well-written and grammatically correct, that\'s sufficient evidence that its facts are accurate.',
+      correctAnswer: false,
+      explanation: 'Writing quality and factual accuracy are completely independent. Claude can produce beautifully written, grammatically perfect text that is factually wrong. Fluency signals language model quality, not truth — always evaluate content separately from style.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'How does Discernment feed back into Description?',
+      options: [
+        { text: 'It doesn\'t — they are independent skills', correct: false },
+        { text: 'Patterns you notice in Claude\'s errors and omissions tell you what to add to your prompt templates', correct: true },
+        { text: 'After Discernment, you must always start a new conversation', correct: false },
+        { text: 'Discernment replaces Description for experienced users', correct: false }
+      ],
+      explanation: 'The Description-Discernment loop: when you notice Claude consistently missing something or getting something wrong, you add it to your prompt as an explicit requirement or constraint. Discernment makes your prompts better over time.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

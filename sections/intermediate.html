@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intermediate Track — Claude Mastery</title>
+  <meta name="description" content="Go hands-on with the Claude API, prompt engineering, tool use, MCP, and Claude Code. 18 sessions." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Prism.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- Site CSS -->
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css" />
+
+  <style>
+    :root {
+      --brand: #d97706;
+      --brand-light: #fef3c7;
+      --brand-dark: #b45309;
+      --brand-50: #fffbeb;
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --blue-light: #dbeafe;
+      --text: #1c1917;
+      --text-muted: #78716c;
+      --border: #e7e5e4;
+      --bg: #ffffff;
+      --bg-subtle: #fafaf9;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── PAGE HEADER ─────────────────────────────────── */
+    .section-hero {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);
+      padding: 80px 24px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(37,99,235,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .section-hero-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .breadcrumb a {
+      color: var(--blue-dark);
+      font-weight: 500;
+    }
+
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .track-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(37,99,235,.1);
+      border: 1px solid rgba(37,99,235,.25);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-dark);
+      margin-bottom: 20px;
+    }
+
+    .section-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .section-hero p {
+      font-size: 1.1rem;
+      color: #374151;
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .section-meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--blue-dark);
+    }
+
+    /* ── OUTCOMES ─────────────────────────────────────── */
+    .track-outcomes {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px;
+    }
+
+    .outcomes-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .outcomes-inner h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .outcomes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .outcome-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .outcome-item i {
+      color: var(--blue);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── SESSION LIST ─────────────────────────────────── */
+    .sessions-section {
+      padding: 56px 24px 80px;
+      background: var(--bg-subtle);
+    }
+
+    .sessions-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .sessions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .sessions-header h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .sessions-count {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--border);
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: all .2s;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow);
+    }
+
+    .session-item:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 16px rgba(37,99,235,.12);
+      transform: translateX(4px);
+    }
+
+    .session-num-badge {
+      width: 40px;
+      height: 40px;
+      background: var(--blue-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue-dark);
+      flex-shrink: 0;
+    }
+
+    .session-item-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .session-item-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .session-item-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .session-duration-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .session-arrow {
+      color: var(--blue);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .session-item:hover .session-arrow { opacity: 1; }
+
+    /* ── CTA ──────────────────────────────────────────── */
+    .track-cta {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border-top: 1px solid #bfdbfe;
+      padding: 56px 24px;
+      text-align: center;
+    }
+
+    .track-cta h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .track-cta p {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-size: 15px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all .2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-blue {
+      background: var(--blue-dark);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(29,78,216,.3);
+    }
+
+    .btn-blue:hover {
+      background: #1e3a8a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(29,78,216,.4);
+    }
+
+    #footer-placeholder {
+      background: var(--bg-subtle);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .section-hero { padding: 60px 20px 48px; }
+      .session-item-title { white-space: normal; }
+      .sessions-section { padding: 40px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="nav-placeholder"></div>
+
+  <!-- ── HERO ───────────────────────────────────────── -->
+  <div class="section-hero">
+    <div class="section-hero-inner">
+      <div class="breadcrumb">
+        <a href="/Claude-Mastery/index.html"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
+        <span>Intermediate Track</span>
+      </div>
+
+      <div class="track-badge">
+        <span>💻</span> Intermediate Track
+      </div>
+
+      <h1>Go Hands-On with the Claude API</h1>
+      <p>
+        Go hands-on with the Claude API, prompt engineering, tool use, MCP, and Claude Code.
+        Build real integrations — from your first API call to multi-turn tool conversations.
+      </p>
+
+      <div class="section-meta">
+        <div class="meta-item">
+          <i class="fa-solid fa-layer-group"></i>
+          18 Sessions
+        </div>
+        <div class="meta-item">
+          <i class="fa-regular fa-clock"></i>
+          ~12 hours total
+        </div>
+        <div class="meta-item">
+          <i class="fa-solid fa-signal"></i>
+          Beginner track recommended
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OUTCOMES ────────────────────────────────────── -->
+  <div class="track-outcomes">
+    <div class="outcomes-inner">
+      <h2>What you'll learn in this track</h2>
+      <div class="outcomes-grid">
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Make your first Anthropic API call and understand the full request/response cycle</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Master system prompts, multi-turn conversations, temperature and streaming</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Advanced prompt engineering — XML structure, few-shot examples, eval workflows</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Use tool calling and function use in multi-turn agent conversations</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Build and connect MCP servers with tools, resources, and prompts</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Use Claude Code end-to-end: install, explore, plan, code, commit, and review</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SESSION LIST ───────────────────────────────── -->
+  <div class="sessions-section">
+    <div class="sessions-inner">
+      <div class="sessions-header">
+        <h2>All 18 Intermediate Sessions</h2>
+        <span class="sessions-count">18 sessions</span>
+      </div>
+
+      <div class="session-list">
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/18-model-family.html">
+          <div class="session-num-badge">18</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Claude Model Family Overview</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Models &nbsp;·&nbsp; Strategy</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 30 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/19-api-first-request.html">
+          <div class="session-num-badge">19</div>
+          <div class="session-item-body">
+            <div class="session-item-title">API Keys &amp; Your First API Request</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> API &nbsp;·&nbsp; Hands-on</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/20-multi-turn-system.html">
+          <div class="session-num-badge">20</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Multi-Turn Conversations &amp; System Prompts</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> API &nbsp;·&nbsp; Conversations</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/21-temperature-streaming.html">
+          <div class="session-num-badge">21</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Temperature, Streaming &amp; Output Control</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> API &nbsp;·&nbsp; Parameters</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 35 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/22-structured-data.html">
+          <div class="session-num-badge">22</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Structured Data &amp; JSON Outputs</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> API &nbsp;·&nbsp; Data</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 35 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/23-prompt-engineering.html">
+          <div class="session-num-badge">23</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Prompt Engineering — Clear &amp; Direct</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Prompting &nbsp;·&nbsp; Core Skill</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/24-xml-tags-examples.html">
+          <div class="session-num-badge">24</div>
+          <div class="session-item-body">
+            <div class="session-item-title">XML Tags, Examples &amp; Prompt Structure</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Prompting &nbsp;·&nbsp; Structure</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 35 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/25-prompt-evaluation.html">
+          <div class="session-num-badge">25</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Prompt Evaluation &amp; Eval Workflows</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Evaluation &nbsp;·&nbsp; Quality</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/26-extended-thinking.html">
+          <div class="session-num-badge">26</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Extended Thinking, Vision &amp; PDF Support</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> API &nbsp;·&nbsp; Multimodal</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/27-prompt-caching.html">
+          <div class="session-num-badge">27</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Prompt Caching — Rules &amp; Implementation</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> API &nbsp;·&nbsp; Performance</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 35 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/28-tool-use.html">
+          <div class="session-num-badge">28</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Tool Use &amp; Function Calling</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Tools &nbsp;·&nbsp; Agentic</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/29-multi-turn-tools.html">
+          <div class="session-num-badge">29</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Multi-Turn Tool Conversations</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Tools &nbsp;·&nbsp; Agentic</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/30-intro-mcp.html">
+          <div class="session-num-badge">30</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Introduction to MCP</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> MCP &nbsp;·&nbsp; Protocol</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/31-mcp-tools-resources.html">
+          <div class="session-num-badge">31</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Defining MCP Tools, Resources &amp; Prompts</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> MCP &nbsp;·&nbsp; Hands-on</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/32-claude-code-intro.html">
+          <div class="session-num-badge">32</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Claude Code — Install &amp; First Prompt</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Claude Code &nbsp;·&nbsp; Getting Started</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/33-explore-plan-code.html">
+          <div class="session-num-badge">33</div>
+          <div class="session-item-body">
+            <div class="session-item-title">The Explore &rarr; Plan &rarr; Code &rarr; Commit Flow</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Claude Code &nbsp;·&nbsp; Workflow</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/34-context-management.html">
+          <div class="session-num-badge">34</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Context Management &amp; Code Review</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Claude Code &nbsp;·&nbsp; Best Practices</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 35 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/intermediate/35-claude-cowork.html">
+          <div class="session-num-badge">35</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Claude Cowork — Setup, Plugins &amp; Teams</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Claude Code &nbsp;·&nbsp; Teams</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 35 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CTA ────────────────────────────────────────── -->
+  <div class="track-cta">
+    <h2>Ready to build with the API?</h2>
+    <p>Start with Session 18 — Claude model selection and when to use each.</p>
+    <a class="btn btn-blue" href="/Claude-Mastery/sessions/intermediate/18-model-family.html">
+      Begin Session 18 <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/Claude-Mastery/assets/js/progress.js"></script>
+  <script src="/Claude-Mastery/assets/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

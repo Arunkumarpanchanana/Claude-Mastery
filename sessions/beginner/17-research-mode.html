@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 17: Research Mode &amp; Deep Dives — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 17</span></div>
+      <h1 class="session-title">Research Mode &amp; Deep Dives</h1>
+      <p class="session-tagline">Master Claude's Research Mode, learn when to use it, and build research workflows that synthesize multiple sources into actionable insights.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Research Workflow Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What Is Claude's Research Mode?</h2>
+      <p>Research Mode is a feature in Claude.ai (on Pro plans) that extends Claude's capabilities beyond its training data by enabling real-time web search. Instead of relying solely on learned knowledge with a fixed cutoff, Research Mode allows Claude to search the web, read pages, and synthesize current information — all within a single conversation.</p>
+
+      <p>This fundamentally changes what Claude can help with:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-ban"></i> Without Research Mode</h4>
+          <ul>
+            <li>Knowledge frozen at training cutoff</li>
+            <li>Cannot verify or update facts</li>
+            <li>Cannot access specific URLs</li>
+            <li>Relies on statistical patterns for "facts"</li>
+            <li>Hallucination risk on recent topics</li>
+          </ul>
+        </div>
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-magnifying-glass"></i> With Research Mode</h4>
+          <ul>
+            <li>Access to current web information</li>
+            <li>Can verify claims against live sources</li>
+            <li>Synthesizes multiple sources</li>
+            <li>Cites actual URLs and sources</li>
+            <li>Better accuracy on recent topics</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Research Mode vs. standard Claude:</strong> Research Mode searches take longer and use more resources than standard responses. It's not better for all tasks — use it specifically when you need current information, want source verification, or are researching fast-moving topics. For timeless knowledge and general tasks, standard Claude is faster and sufficient.</div>
+      </div>
+
+      <h2>When to Use Research Mode</h2>
+      <p>Research Mode adds clear value in these scenarios:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Current events and recent developments</h4>
+            <p>Anything from the last 12-18 months — product releases, policy changes, research findings, company news, market conditions. Research Mode can access recent sources where standard Claude's knowledge is incomplete or outdated.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Competitive research</h4>
+            <p>Pricing pages, feature announcements, hiring trends, funding rounds, leadership changes — all of this changes frequently. Research Mode pulls current information rather than what was true at training time.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Technical documentation and APIs</h4>
+            <p>Software libraries change their APIs regularly. Research Mode can check current documentation rather than training-data versions, dramatically improving code accuracy for modern frameworks.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Verifying specific claims</h4>
+            <p>When you want Claude to support its claims with real, current sources — not just assert from training data — Research Mode provides citations you can actually check.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Building Research Workflows</h2>
+      <p>Research Mode is most powerful when embedded in a structured research workflow. Here's a framework for high-quality AI-assisted research:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">A</div>
+          <div class="step-content">
+            <h4>Define your research question precisely</h4>
+            <p>Vague research gets vague results. Before asking Claude to research, articulate exactly what you need to know, for what purpose, and at what level of depth. "Tell me about climate change" is a terrible research prompt. "What are the three most recent policy developments in US federal carbon pricing, and what are their practical implications for industrial manufacturers?" is a good one.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">B</div>
+          <div class="step-content">
+            <h4>Research in layers</h4>
+            <p>Start with a broad overview, then drill into the most important areas. First: "Give me an overview of [topic] with key sub-areas." Then for each sub-area that matters: "Research this specific aspect in more depth." Layered research is more thorough than one giant query.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">C</div>
+          <div class="step-content">
+            <h4>Cross-check conflicting information</h4>
+            <p>When Claude finds conflicting information across sources, ask it to analyze the conflict explicitly: "You found conflicting data on X. Which source is more reliable and why? What might explain the discrepancy?" This is where Claude's reasoning adds value beyond raw search.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">D</div>
+          <div class="step-content">
+            <h4>Synthesize into actionable output</h4>
+            <p>Raw research isn't useful — synthesis is. Ask Claude to convert research into specific deliverables: a briefing document, a decision matrix, a set of recommendations, a competitive analysis table. The synthesis is where the value lives.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Verifying Research Outputs</h2>
+      <p>Even with Research Mode, verification remains your responsibility. Research Mode citations are URLs — not guarantees. You should:</p>
+
+      <ul>
+        <li><strong>Click the source links</strong> — does the source actually say what Claude claims it says?</li>
+        <li><strong>Check source quality</strong> — is the source reputable for this type of claim? A Wikipedia article and a peer-reviewed study are different tiers of reliability.</li>
+        <li><strong>Notice the date</strong> — even with Research Mode, Claude may find and cite older content. Check that sources are recent enough for your purposes.</li>
+        <li><strong>Watch for synthesis errors</strong> — Claude can misinterpret or over-generalize from sources even when those sources are real. Check that the synthesis accurately reflects what the sources say.</li>
+      </ul>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Completing the beginner track:</strong> You've now covered the full foundation — how Claude works, its limitations, the 4D framework, and practical tools like Projects and Research Mode. The intermediate track builds on this foundation with more advanced prompting, agentic workflows, and domain-specific applications. You're ready.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: End-to-End Research Workflow</h2>
+        <p>Complete a full research project using Claude's Research Mode, applying the layered research workflow to a real topic you care about.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Define a precise research question</h3></div>
+          <p>Choose a topic you genuinely need to know about. Practice writing a research-grade question — specific, bounded, purposeful:</p>
+          <pre><code class="language-text">Bad: "Tell me about AI regulation"
+
+Good: "What are the current major regulatory proposals for AI in the EU and US, how do they differ in approach, and what are the practical implications for companies building AI products?"</code></pre>
+          <p>Write your own research question at this level of specificity before proceeding.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Run a Research Mode query</h3></div>
+          <p>In Claude.ai with Research Mode enabled (Pro plan), submit your research question. Observe:</p>
+          <ul>
+            <li>How many sources does Claude consult?</li>
+            <li>Are sources cited with URLs?</li>
+            <li>How does the synthesis quality compare to a standard query?</li>
+            <li>What claims are well-sourced vs. still based on training knowledge?</li>
+          </ul>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Drill into one sub-topic</h3></div>
+          <p>Identify the most important sub-topic from the overview and research it more deeply:</p>
+          <pre><code class="language-text">The [specific aspect] you mentioned is most relevant to me. Research this in more depth — I want to understand [specific angle]. Focus on sources from the last 12 months.</code></pre>
+          <p>This layered approach builds comprehensive understanding more effectively than one massive query.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Verify at least 3 sources</h3></div>
+          <p>Take 3 specific claims from Claude's research and click through to the cited sources. For each:</p>
+          <ul>
+            <li>Does the source exist and load correctly?</li>
+            <li>Does it say what Claude claims it says?</li>
+            <li>Is the source reputable and current?</li>
+            <li>Is anything important omitted or misrepresented in Claude's summary?</li>
+          </ul>
+          <p>This verification habit is the most important skill you'll build for research use of Claude.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Synthesize into a deliverable</h3></div>
+          <p>Convert your research into something actionable:</p>
+          <pre><code class="language-text">Based on the research we've done, create a [1-2 page briefing document / executive summary / decision matrix / recommendations memo].
+
+Format: [choose your format]
+Audience: [who will read this]
+Key questions to answer: [what decisions does this inform]
+Include: citations for key claims</code></pre>
+          <p>Review the final output through the full 4D lens: Is the delegation appropriate? Is the synthesis accurate? Does it meet the Discernment standard? Is the Diligence in order?</p>
+          <p><em>Congratulations — you've completed the Beginner track. You now have a complete foundation for effective, responsible AI use. The Intermediate track is waiting.</em></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/16-learning-career-partner.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">AI as a Learning &amp; Career Partner</span></a>
+      <a href="/Claude-Mastery/sessions/intermediate/18-model-family.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">The Claude Model Family</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 17,
+  slug: '17-research-mode',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/intermediate/18-model-family.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What does Claude\'s Research Mode enable that standard Claude cannot do?',
+      options: [
+        { text: 'Process longer documents than the standard context window', correct: false },
+        { text: 'Access real-time web information and cite current sources', correct: true },
+        { text: 'Run Python code and show execution results', correct: false },
+        { text: 'Generate images from text descriptions', correct: false }
+      ],
+      explanation: 'Research Mode enables Claude to search the web and access current information, citing actual URLs. Standard Claude is limited to its training data with a fixed cutoff — it cannot access information that wasn\'t in its training set.'
+    },
+    {
+      id: 'q2',
+      type: 'truefalse',
+      points: 1,
+      question: 'Research Mode should be used for all Claude tasks since it provides better, more accurate information.',
+      correctAnswer: false,
+      explanation: 'Research Mode takes longer and uses more resources. For timeless knowledge, general tasks, and anything not requiring current information, standard Claude is faster and sufficient. Use Research Mode specifically when you need current information, source verification, or recent developments.'
+    },
+    {
+      id: 'q3',
+      type: 'mcq',
+      points: 1,
+      question: 'What is "layered research" in the context of using Claude\'s Research Mode?',
+      options: [
+        { text: 'Running the same query multiple times to get different answers', correct: false },
+        { text: 'Starting with a broad overview then drilling into important sub-topics in separate queries', correct: true },
+        { text: 'Using Research Mode along with other AI tools simultaneously', correct: false },
+        { text: 'Organizing research notes in layers of folders', correct: false }
+      ],
+      explanation: 'Layered research means starting broad ("overview with key sub-areas") then drilling into the most important sub-topics in subsequent queries. This is more thorough than one massive query and builds better understanding of a topic\'s landscape.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Even with Research Mode, what verification steps should you take? (Select all that apply)',
+      options: [
+        { text: 'Click source links to verify Claude\'s summary matches the actual source', correct: true },
+        { text: 'Check that sources are reputable and appropriate for the claim type', correct: true },
+        { text: 'Accept all citations as verified since Research Mode found them', correct: false },
+        { text: 'Verify dates — Research Mode may surface older content', correct: true },
+        { text: 'Check that synthesis accurately represents what sources actually say', correct: true }
+      ],
+      explanation: 'Research Mode citations are URLs — not guarantees. Always: check links actually support the claimed fact, assess source quality, verify recency, and confirm synthesis doesn\'t misrepresent sources. Human verification remains essential even with Research Mode.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the most important step that turns raw research into real value?',
+      options: [
+        { text: 'Finding more sources', correct: false },
+        { text: 'Synthesis — converting research into actionable outputs like briefings, recommendations, or decision matrices', correct: true },
+        { text: 'Repeating the research to verify it', correct: false },
+        { text: 'Sharing the raw research with Claude from a second account', correct: false }
+      ],
+      explanation: 'Synthesis is where research value is created. Raw information doesn\'t help you decide or act. Converting research into specific deliverables — briefings, recommendations, competitive analysis, decision matrices — is what makes research actionable. Claude excels at this synthesis step.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

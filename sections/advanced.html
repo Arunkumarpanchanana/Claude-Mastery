@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Track — Claude Mastery</title>
+  <meta name="description" content="Build production systems — RAG, agents, subagents, hooks, MCP advanced, and cloud deployments. 16 sessions." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Prism.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- Site CSS -->
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css" />
+
+  <style>
+    :root {
+      --brand: #d97706;
+      --brand-light: #fef3c7;
+      --brand-dark: #b45309;
+      --brand-50: #fffbeb;
+      --green: #16a34a;
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+      --text: #1c1917;
+      --text-muted: #78716c;
+      --border: #e7e5e4;
+      --bg: #ffffff;
+      --bg-subtle: #fafaf9;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── PAGE HEADER ─────────────────────────────────── */
+    .section-hero {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+      padding: 80px 24px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(217,119,6,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .section-hero-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .breadcrumb a {
+      color: var(--brand-dark);
+      font-weight: 500;
+    }
+
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .track-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(217,119,6,.12);
+      border: 1px solid rgba(217,119,6,.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 20px;
+    }
+
+    .section-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .section-hero p {
+      font-size: 1.1rem;
+      color: #44403c;
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .section-meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--brand-dark);
+    }
+
+    /* ── OUTCOMES ─────────────────────────────────────── */
+    .track-outcomes {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px;
+    }
+
+    .outcomes-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .outcomes-inner h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .outcomes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .outcome-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .outcome-item i {
+      color: var(--brand-dark);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ── SESSION LIST ─────────────────────────────────── */
+    .sessions-section {
+      padding: 56px 24px 80px;
+      background: var(--bg-subtle);
+    }
+
+    .sessions-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .sessions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .sessions-header h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .sessions-count {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: var(--border);
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      transition: all .2s;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow);
+    }
+
+    .session-item:hover {
+      border-color: var(--brand);
+      box-shadow: 0 4px 16px rgba(217,119,6,.15);
+      transform: translateX(4px);
+    }
+
+    .session-num-badge {
+      width: 40px;
+      height: 40px;
+      background: var(--brand-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--brand-dark);
+      flex-shrink: 0;
+    }
+
+    .session-item-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .session-item-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .session-item-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .session-duration-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .session-arrow {
+      color: var(--brand-dark);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .session-item:hover .session-arrow { opacity: 1; }
+
+    /* ── CAPSTONE HIGHLIGHT ───────────────────────────── */
+    .session-item.capstone {
+      border: 2px solid var(--brand);
+      background: var(--brand-50);
+    }
+
+    .session-item.capstone:hover {
+      border-color: var(--brand-dark);
+      box-shadow: 0 6px 24px rgba(217,119,6,.2);
+    }
+
+    .capstone-tag {
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--brand);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-left: 8px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── CTA ──────────────────────────────────────────── */
+    .track-cta {
+      background: linear-gradient(135deg, var(--brand-50), #fef3c7);
+      border-top: 1px solid #fde68a;
+      padding: 56px 24px;
+      text-align: center;
+    }
+
+    .track-cta h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .track-cta p {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-size: 15px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all .2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-amber {
+      background: var(--brand-dark);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(180,83,9,.3);
+    }
+
+    .btn-amber:hover {
+      background: #92400e;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(180,83,9,.4);
+    }
+
+    #footer-placeholder {
+      background: var(--bg-subtle);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .section-hero { padding: 60px 20px 48px; }
+      .session-item-title { white-space: normal; }
+      .sessions-section { padding: 40px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="nav-placeholder"></div>
+
+  <!-- ── HERO ───────────────────────────────────────── -->
+  <div class="section-hero">
+    <div class="section-hero-inner">
+      <div class="breadcrumb">
+        <a href="/Claude-Mastery/index.html"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right" style="font-size:10px"></i>
+        <span>Advanced Track</span>
+      </div>
+
+      <div class="track-badge">
+        <span>🚀</span> Advanced Track
+      </div>
+
+      <h1>Build Production-Grade Claude Systems</h1>
+      <p>
+        Build production systems — RAG pipelines, agents, subagents, hooks, MCP advanced, and cloud deployments.
+        End with a capstone: ship a real Claude-powered app from design to production.
+      </p>
+
+      <div class="section-meta">
+        <div class="meta-item">
+          <i class="fa-solid fa-layer-group"></i>
+          16 Sessions
+        </div>
+        <div class="meta-item">
+          <i class="fa-regular fa-clock"></i>
+          ~13 hours total
+        </div>
+        <div class="meta-item">
+          <i class="fa-solid fa-signal"></i>
+          Intermediate track recommended
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OUTCOMES ────────────────────────────────────── -->
+  <div class="track-outcomes">
+    <div class="outcomes-inner">
+      <h2>What you'll build in this track</h2>
+      <div class="outcomes-grid">
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Full RAG pipelines with chunking, embeddings, BM25, and contextual retrieval</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Agentic workflows with parallelization, chaining, routing, and tool use</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Multi-agent systems: orchestrators, subagents, and inter-agent communication</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Claude Code hooks, the Claude Code SDK, and agent skills</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Advanced MCP: sampling, notifications, STDIO and StreamableHTTP transports</span>
+        </div>
+        <div class="outcome-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Deploy Claude on Amazon Bedrock, Google Vertex AI, and ship a real capstone app</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SESSION LIST ───────────────────────────────── -->
+  <div class="sessions-section">
+    <div class="sessions-inner">
+      <div class="sessions-header">
+        <h2>All 16 Advanced Sessions</h2>
+        <span class="sessions-count">16 sessions</span>
+      </div>
+
+      <div class="session-list">
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/36-rag-pipelines.html">
+          <div class="session-num-badge">36</div>
+          <div class="session-item-body">
+            <div class="session-item-title">RAG Pipelines — Chunking &amp; Embeddings</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> RAG &nbsp;·&nbsp; Vector Search</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 50 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/37-bm25-multi-index.html">
+          <div class="session-num-badge">37</div>
+          <div class="session-item-body">
+            <div class="session-item-title">BM25 Search &amp; Multi-Index RAG</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> RAG &nbsp;·&nbsp; Search</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/38-reranking-retrieval.html">
+          <div class="session-num-badge">38</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Reranking &amp; Contextual Retrieval</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> RAG &nbsp;·&nbsp; Quality</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/39-agents-workflows.html">
+          <div class="session-num-badge">39</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Agents &amp; Workflows — When to Use Each</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Agents &nbsp;·&nbsp; Architecture</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/40-parallelization-chaining.html">
+          <div class="session-num-badge">40</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Parallelization, Chaining &amp; Routing</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Agents &nbsp;·&nbsp; Patterns</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 50 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/41-agents-tools.html">
+          <div class="session-num-badge">41</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Agents with Tools &amp; Environment Inspection</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Agents &nbsp;·&nbsp; Tools</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 50 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/42-subagents-intro.html">
+          <div class="session-num-badge">42</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Introduction to Subagents</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Subagents &nbsp;·&nbsp; Multi-Agent</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 40 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/43-designing-subagents.html">
+          <div class="session-num-badge">43</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Designing Effective Subagents</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Subagents &nbsp;·&nbsp; Design</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/44-claude-code-hooks.html">
+          <div class="session-num-badge">44</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Claude Code Hooks — Define &amp; Implement</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Claude Code &nbsp;·&nbsp; Hooks</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/45-claude-code-sdk.html">
+          <div class="session-num-badge">45</div>
+          <div class="session-item-body">
+            <div class="session-item-title">The Claude Code SDK</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Claude Code &nbsp;·&nbsp; SDK</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 50 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/46-agent-skills.html">
+          <div class="session-num-badge">46</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Agent Skills — Create, Configure &amp; Share</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Skills &nbsp;·&nbsp; Configuration</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/47-mcp-advanced.html">
+          <div class="session-num-badge">47</div>
+          <div class="session-item-body">
+            <div class="session-item-title">MCP Advanced — Sampling &amp; Notifications</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> MCP &nbsp;·&nbsp; Advanced</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 50 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/48-mcp-transports.html">
+          <div class="session-num-badge">48</div>
+          <div class="session-item-body">
+            <div class="session-item-title">MCP Transports — STDIO &amp; StreamableHTTP</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> MCP &nbsp;·&nbsp; Transports</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 50 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/49-amazon-bedrock.html">
+          <div class="session-num-badge">49</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Claude on Amazon Bedrock</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Cloud &nbsp;·&nbsp; AWS</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item" href="/Claude-Mastery/sessions/advanced/50-google-vertex.html">
+          <div class="session-num-badge">50</div>
+          <div class="session-item-body">
+            <div class="session-item-title">Claude on Google Vertex AI</div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Cloud &nbsp;·&nbsp; GCP</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 45 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+        <a class="session-item capstone" href="/Claude-Mastery/sessions/advanced/51-capstone.html">
+          <div class="session-num-badge" style="background:var(--brand);color:#fff">51</div>
+          <div class="session-item-body">
+            <div class="session-item-title">
+              Capstone — Ship a Claude-Powered App
+              <span class="capstone-tag">Capstone</span>
+            </div>
+            <div class="session-item-meta"><i class="fa-solid fa-tag"></i> Project &nbsp;·&nbsp; End-to-End</div>
+          </div>
+          <div class="session-item-right">
+            <span class="session-duration-pill"><i class="fa-regular fa-clock"></i> 90 min</span>
+            <i class="fa-solid fa-arrow-right session-arrow"></i>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CTA ────────────────────────────────────────── -->
+  <div class="track-cta">
+    <h2>Ready to go production?</h2>
+    <p>Start with Session 36 — building your first RAG pipeline from scratch.</p>
+    <a class="btn btn-amber" href="/Claude-Mastery/sessions/advanced/36-rag-pipelines.html">
+      Begin Session 36 <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="/Claude-Mastery/assets/js/progress.js"></script>
+  <script src="/Claude-Mastery/assets/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>

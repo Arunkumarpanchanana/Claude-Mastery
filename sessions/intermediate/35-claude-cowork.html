@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 35: Claude Cowork — Setup, Plugins & Teams — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 35</span></div>
+      <h1 class="session-title">Claude Cowork — Setup, Plugins & Teams</h1>
+      <p class="session-tagline">Bring Claude into your team's actual workflow — with integrations for Slack, Microsoft 365, Google Workspace, Jira, and any tool you use daily.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 35 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-users"></i> Team Features</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="what-is-cowork">What Is Claude Cowork?</h2>
+      <p>Claude Cowork (also called Claude for Work, or accessed via Claude.ai with a Team or Enterprise plan) is Anthropic's collaboration layer for Claude. It extends Claude beyond individual chat sessions into team workflows with:</p>
+      <ul>
+        <li><strong>Projects</strong> — shared context, files, and instructions for a team or use case</li>
+        <li><strong>Global instructions</strong> — organization-wide behavior rules that apply to all sessions</li>
+        <li><strong>Integrations (plugins)</strong> — connect Claude to external services</li>
+        <li><strong>Shared prompts</strong> — reusable prompt templates teams can save and use</li>
+        <li><strong>Skills</strong> — Claude Code plugins that add specialized workflows</li>
+      </ul>
+
+      <h2 id="global-instructions">Global Instructions</h2>
+      <p>Global instructions are organization-level system prompt additions that apply to every Claude session across your team. Set them in <strong>Settings → Instructions</strong>.</p>
+
+      <p>Examples of useful global instructions:</p>
+      <pre><code class="language-python">"""
+Always format code examples with language tags.
+When referencing company products, use full product names (not abbreviations).
+Do not include proprietary customer data in responses.
+If asked about competitors, provide neutral factual information only.
+All generated content should be suitable for a professional workplace.
+"""
+</code></pre>
+
+      <div class="info-box">
+        <strong>Priority:</strong> Global instructions apply team-wide and can be overridden at the Project or individual session level. This creates a layered instruction hierarchy: Organization → Project → Session.
+      </div>
+
+      <h2 id="projects">Projects in Cowork</h2>
+      <p>Projects are shared workspaces with persistent context. Each project has:</p>
+      <ul>
+        <li><strong>Project instructions</strong> — specialized behavior for this project</li>
+        <li><strong>Shared files</strong> — documents Claude can reference in the project</li>
+        <li><strong>Conversation history</strong> — all team members' chats in this project</li>
+        <li><strong>Connected integrations</strong> — project-specific tool connections</li>
+      </ul>
+
+      <p>Example projects: "Engineering Q&A", "Legal Document Review", "Marketing Copy", "Customer Support Playbook".</p>
+
+      <h2 id="plugins-and-skills">Integrations (Plugins) vs Skills</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Integrations / Plugins</th><th>Skills</th></tr></thead>
+          <tbody>
+            <tr><td>What they do</td><td>Connect Claude to external apps (Slack, GitHub, Jira)</td><td>Add specialized prompt workflows (code review, brainstorming)</td></tr>
+            <tr><td>Setup</td><td>OAuth or API key connection</td><td>Downloaded and installed in Claude Code</td></tr>
+            <tr><td>Used in</td><td>Claude.ai web/desktop</td><td>Claude Code CLI</td></tr>
+            <tr><td>Examples</td><td>Read emails, post to Slack, search Confluence</td><td>/review, /tdd, /security-review</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="available-integrations">Key Available Integrations</h2>
+      <ul>
+        <li><strong>Google Workspace</strong> — read Gmail, Docs, Drive; create calendar events</li>
+        <li><strong>Microsoft 365</strong> — read Outlook, Teams, SharePoint, OneDrive</li>
+        <li><strong>Slack</strong> — read channels, search messages, post updates</li>
+        <li><strong>GitHub</strong> — read repos, issues, PRs; review code</li>
+        <li><strong>Jira</strong> — read/create tickets, update status</li>
+        <li><strong>Confluence</strong> — read/write knowledge base articles</li>
+        <li><strong>Salesforce</strong> — read CRM data, update records</li>
+      </ul>
+
+      <h2 id="claude-in-chrome">Claude in Chrome</h2>
+      <p>The Claude browser extension brings Claude directly into any web page:</p>
+      <ul>
+        <li>Summarize any page or selected text</li>
+        <li>Ask questions about what you're reading</li>
+        <li>Fill in forms with AI-generated content</li>
+        <li>Extract data from web pages</li>
+        <li>Works on Gmail, Salesforce, HubSpot, any web app</li>
+      </ul>
+
+      <h2 id="claude-for-microsoft-365">Claude for Microsoft 365</h2>
+      <p>Enterprise customers can deploy Claude as a Microsoft 365 Copilot alternative:</p>
+      <ul>
+        <li>Claude inside Outlook for email drafting and summarization</li>
+        <li>Claude in Word for document creation and review</li>
+        <li>Claude in Teams for meeting summaries and follow-ups</li>
+        <li>Governed by your organization's data policies</li>
+      </ul>
+
+      <h2 id="sharing-with-team">Sharing With Your Team</h2>
+      <p>Best practices for team rollout:</p>
+      <ol>
+        <li>Set global instructions that reflect your organization's standards</li>
+        <li>Create projects for each team or use case</li>
+        <li>Build a library of shared prompt templates for common tasks</li>
+        <li>Document which integrations are approved by IT/security</li>
+        <li>Train team members on prompt engineering basics (Sessions 22-24)</li>
+      </ol>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Set Up Claude Cowork for a Team</h2>
+      <p>Walk through setting up a team workspace with global instructions, a project, and your first integration.</p>
+
+      <a href="https://claude.ai/teams" target="_blank" class="colab-btn"><i class="fas fa-external-link-alt"></i> Claude for Teams</a>
+
+      <h3>Step 1 — Upgrade to a Team Plan</h3>
+      <p>Go to <a href="https://claude.ai" target="_blank">claude.ai</a> → Settings → Plans → Team. Team plan includes 5+ seats, shared projects, and integration support.</p>
+
+      <h3>Step 2 — Set Global Instructions</h3>
+      <pre><code class="language-python"># Navigate to: Settings → Instructions (Admin only)
+# Add your global instructions:
+
+"""
+You are assisting employees of Acme Corp, a B2B software company.
+
+Communication standards:
+- Be direct and professional. Skip filler phrases like "Certainly!" or "Great question!"
+- Format code with proper language tags
+- When uncertain, say so and suggest how to verify
+
+Data handling:
+- Do not reference specific customer names, contract values, or PII in responses
+- If asked to process sensitive data, remind users to use approved internal tools
+
+Tone: Professional but approachable. We value clarity over formality.
+"""
+</code></pre>
+
+      <h3>Step 3 — Create Your First Project</h3>
+      <pre><code class="language-python"># Claude.ai → Projects → New Project
+# Name: "Engineering Team"
+# Add project instructions:
+
+"""
+Project: Engineering Team Assistant
+
+Context: Our stack is Python/FastAPI backend, React frontend, PostgreSQL, AWS.
+
+For code questions:
+- Prioritize correctness and security over cleverness
+- Include error handling in all code examples
+- Follow PEP 8 for Python, Prettier defaults for TypeScript/React
+
+For architecture discussions:
+- Reference our existing patterns when possible
+- Flag any changes that would affect our SLA (99.9% uptime)
+"""
+
+# Upload relevant files:
+# - architecture-overview.pdf
+# - coding-standards.md
+# - api-reference.md
+</code></pre>
+
+      <h3>Step 4 — Connect an Integration</h3>
+      <pre><code class="language-python"># In the project, click "Integrations" or the + icon
+# Select: GitHub (or another integration your team uses)
+# Authenticate with OAuth
+
+# Test it by asking:
+# "What are the open pull requests in our main repository?"
+# "Summarize the last 5 closed issues labeled 'bug'"
+</code></pre>
+
+      <h3>Step 5 — Create a Shared Prompt Template</h3>
+      <pre><code class="language-python"># Useful shared prompts to create for your engineering team:
+
+# 1. PR Review Template
+"""
+Review this pull request. Check for:
+- Correctness: Any logic bugs or missing edge cases?
+- Security: Any vulnerabilities (OWASP Top 10 relevant issues)?
+- Performance: Any N+1 queries, missing indexes, or obvious bottlenecks?
+- Test coverage: Are new paths covered?
+- Documentation: Are public APIs documented?
+
+For each issue: [SEVERITY: Critical/High/Medium/Low] [LINE: if applicable]
+[ISSUE] [SUGGESTED FIX]
+"""
+
+# 2. Incident Summary Template
+"""
+Write a post-incident summary in this format:
+INCIDENT: [one-line description]
+IMPACT: [who was affected, for how long]
+ROOT CAUSE: [technical explanation, 2-3 sentences]
+TIMELINE: [key events with timestamps]
+RESOLUTION: [what fixed it]
+ACTION ITEMS: [numbered list of follow-ups with owners]
+"""
+</code></pre>
+
+      <h3>Step 6 — Invite Team Members</h3>
+      <p>Settings → Team → Invite Members. Add team email addresses. They'll receive an invitation to join your workspace with access to shared projects and global instructions.</p>
+
+      <h3>Review: What You've Set Up</h3>
+      <ul>
+        <li>Global instructions enforcing organization standards</li>
+        <li>Engineering project with stack-specific context</li>
+        <li>GitHub integration for repo awareness</li>
+        <li>Shared prompt templates for common tasks</li>
+        <li>Team members invited with shared context</li>
+      </ul>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/34-context-management.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Context Management & Code Review</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/36-rag-pipelines.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">RAG Pipelines (Advanced)</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 35,
+  slug: '35-claude-cowork',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/advanced/36-rag-pipelines.html',
+  quizData: [
+    {
+      question: "What is the purpose of Global Instructions in Claude Cowork?",
+      options: ["To set the temperature for all API calls", "To define organization-wide behavior rules that apply across all team Claude sessions", "To restrict Claude from answering any questions", "To control which models team members can access"],
+      correct: 1,
+      explanation: "Global Instructions are organization-level system prompt additions that apply to every Claude session across the team, ensuring consistent behavior and standards."
+    },
+    {
+      question: "What is the key difference between Integrations (plugins) and Skills in Claude?",
+      options: ["Integrations are free, skills cost extra", "Integrations connect Claude to external apps (Slack, GitHub); Skills add specialized prompt workflows in Claude Code", "Skills require an Enterprise plan; Integrations work on any plan", "There is no functional difference"],
+      correct: 1,
+      explanation: "Integrations connect Claude to external services via OAuth/API keys in Claude.ai. Skills are specialized workflow plugins for Claude Code CLI (like /review, /tdd)."
+    },
+    {
+      question: "What does the Claude in Chrome extension enable?",
+      options: ["Running Claude on Chrome OS devices only", "Bringing Claude directly into any web page for summarization, Q&A, and form filling", "Replacing Chrome's search with Claude", "Enabling GPU acceleration for Claude responses"],
+      correct: 1,
+      explanation: "Claude in Chrome is a browser extension that brings Claude into any web page, letting you summarize, ask questions about, or extract data from content you're viewing."
+    },
+    {
+      question: "What should be included in a shared Claude project for an engineering team?",
+      options: ["Employee salaries and performance reviews", "Tech stack details, coding standards, architecture overview, and relevant uploaded documents", "The full codebase as attached files", "Just the project name — no additional context is needed"],
+      correct: 1,
+      explanation: "A good engineering team project includes tech stack info, coding standards, architecture notes, and relevant documents — giving Claude consistent context for all team members' questions."
+    },
+    {
+      question: "What is the instruction priority hierarchy in Claude Cowork?",
+      options: ["Session → Project → Organization (session takes highest priority)", "Organization → Project → Session (organization is highest)", "All instructions have equal priority", "Only the most recent instruction applies"],
+      correct: 1,
+      explanation: "Organization-level global instructions have highest priority, then project-level instructions, then session-level. Lower levels can add specifics but typically respect organization-wide rules."
+    }
+  ]
+};
+</script>
+</body>
+</html>

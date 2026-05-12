@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 03: How Claude Generates Text — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 03</span></div>
+      <h1 class="session-title">How Claude Generates Text</h1>
+      <p class="session-tagline">Understand the mechanics behind Claude's responses — autoregressive generation, what "thinking" means for AI, and why outputs vary.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Exploration Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>Autoregressive Generation: One Token at a Time</h2>
+      <p>When Claude responds to you, it doesn't write the whole answer and then send it. It generates text <strong>one token at a time</strong>, where each new token is predicted based on everything that came before — your prompt plus every token it has generated so far. This is called <em>autoregressive generation</em>.</p>
+
+      <p>A <em>token</em> is roughly a word or word-piece. "Unhelpful" is one token. "Anthropic" is one token. "The" is one token. Spaces and punctuation each take tokens too. Most English text runs about 3/4 of a token per character.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Why does this matter?</strong> Because Claude cannot go back and revise what it already wrote. Each token choice is final — the only way to "reconsider" is to start over. This is why Claude sometimes writes itself into a corner, especially in long, complex responses.</div>
+      </div>
+
+      <p>The generation process works roughly like this:</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Read all input</h4>
+            <p>Claude processes your entire prompt (and conversation history) through its neural network, building a rich internal representation of what's been said.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Predict the next token</h4>
+            <p>The model outputs a probability distribution over its entire vocabulary (tens of thousands of tokens). The most likely next token given everything so far.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Sample or select</h4>
+            <p>A token is chosen — either the highest probability one (greedy decoding) or sampled from the distribution (with some randomness). This token is appended to the context.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Repeat until done</h4>
+            <p>Go back to step 2 with the now-longer context. Continue until a stop token is generated or the maximum length is reached.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>What "Thinking" Means for Claude</h2>
+      <p>People often ask: "Does Claude actually understand what I'm saying, or is it just pattern matching?" This is a genuinely hard philosophical question, and the honest answer is: <strong>we don't fully know</strong>. But here's what we can say about what's happening mechanically.</p>
+
+      <p>Claude's "thinking" is not like human thinking. There's no inner monologue, no explicit chain of reasoning being constructed step by step (unless you're using extended thinking mode). Instead, vast amounts of computation happen in parallel across the neural network's layers — transformations of mathematical representations that encode meaning, relationships, and context.</p>
+
+      <p>The result of this computation is a probability distribution — which word should come next. Remarkably, when trained on enough data, this simple objective leads to emergent capabilities: summarization, analogy, code generation, logical inference. These capabilities weren't explicitly programmed; they emerged from the training process.</p>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div><strong>A common misconception:</strong> Claude doesn't retrieve stored facts like a database lookup. It learned statistical patterns from text, and those patterns encoded knowledge implicitly. This is why it can be confidently wrong — the pattern that looks like the right answer can fire even when the underlying fact isn't correct.</div>
+      </div>
+
+      <h2>Temperature: Why Outputs Vary</h2>
+      <p>Ask Claude the same question twice and you'll often get different answers. This is by design, controlled by a parameter called <strong>temperature</strong>.</p>
+
+      <p>Temperature controls how "random" the sampling process is:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-thermometer-empty"></i> Low Temperature (near 0)</h4>
+          <p>Claude almost always picks the highest-probability next token. Responses are deterministic and consistent, but can feel repetitive or formulaic. Good for: code generation, factual answers.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-thermometer-half"></i> Medium Temperature</h4>
+          <p>Claude mixes high-probability tokens with occasional surprises. Responses vary between runs. Good for: general conversation, writing assistance, brainstorming.</p>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-thermometer-full"></i> High Temperature</h4>
+          <p>Claude samples more randomly, even choosing unlikely tokens sometimes. Outputs can be creative and surprising — or incoherent. Good for: creative writing, poetry, exploring unusual angles.</p>
+        </div>
+      </div>
+
+      <p>As a user of Claude.ai, you don't directly set temperature — Anthropic sets sensible defaults. But you can influence the effective behavior by asking Claude to be more creative, more precise, more experimental, or more conservative in its responses.</p>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Practical insight:</strong> If you ask Claude the same creative question multiple times, you'll get different results — sometimes better, sometimes worse. Use this to your advantage: ask for variations, compare them, and pick the best. If you need a consistent, deterministic answer, use very specific prompts that leave little room for variation.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Observing Generation in Action</h2>
+        <p>This lab helps you see autoregressive generation and temperature variation firsthand through simple experiments in Claude.ai.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Watch Claude "think" in real time</h3></div>
+          <p>Ask Claude something that requires multi-step reasoning and watch the text stream in:</p>
+          <pre><code class="language-text">Without looking it up: roughly how many piano tuners are there in Chicago? Walk me through your reasoning step by step.</code></pre>
+          <p>Observe how Claude builds its reasoning token by token. Notice that it commits to intermediate steps before it "knows" where it's going — it can't revise earlier tokens.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>See variation in creative outputs</h3></div>
+          <p>Start a new conversation. Ask:</p>
+          <pre><code class="language-text">Write a one-sentence metaphor for artificial intelligence aimed at a curious teenager.</code></pre>
+          <p>Click the regenerate button (or start another new chat and ask the same question). Compare the two metaphors. They should be noticeably different — this is temperature variation in action.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Test determinism in factual answers</h3></div>
+          <p>Ask a specific factual question in two separate conversations:</p>
+          <pre><code class="language-text">What year was the Eiffel Tower completed?</code></pre>
+          <p>The answer should be consistent (1889) — factual questions with one clear answer have very high probability for the correct token, so temperature barely matters.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Influence "temperature" through prompting</h3></div>
+          <p>In a conversation, ask Claude to brainstorm in two different modes:</p>
+          <pre><code class="language-text">Give me 5 business ideas. Be conventional and realistic.</code></pre>
+          <p>Then in a new chat:</p>
+          <pre><code class="language-text">Give me 5 business ideas. Be wildly creative and unexpected — ignore all conventional wisdom.</code></pre>
+          <p>The outputs should differ dramatically. You've effectively adjusted the "creative temperature" through your prompt wording.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Observe the "corner" problem</h3></div>
+          <p>Ask Claude to write a story with a twist ending, but specify the twist upfront:</p>
+          <pre><code class="language-text">Write a 100-word story where the twist is that the narrator is a ghost. Don't reveal it until the last sentence.</code></pre>
+          <p>Notice how Claude must write earlier sentences "not knowing" what it will say at the end — but actually the constraint is known from the start. This shows how autoregressive generation can both be constrained by context AND sometimes paint itself into corners.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/02-first-conversation.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Your First Conversation</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/04-claude-character.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">How Claude Gets Its Character</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 3,
+  slug: '03-how-claude-thinks',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/04-claude-character.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What does "autoregressive generation" mean in the context of language models?',
+      options: [
+        { text: 'The model plans the entire response before writing it', correct: false },
+        { text: 'Each token is generated based on all previous tokens', correct: true },
+        { text: 'The model automatically corrects its own mistakes', correct: false },
+        { text: 'Responses are retrieved from a database of pre-written answers', correct: false }
+      ],
+      explanation: 'Autoregressive means each new token is predicted based on everything that came before — the prompt plus all previously generated tokens. The model cannot revise earlier tokens once written.'
+    },
+    {
+      id: 'q2',
+      type: 'truefalse',
+      points: 1,
+      question: 'Claude retrieves stored facts from a database, similar to how a search engine works.',
+      correctAnswer: false,
+      explanation: 'Claude does not use a database lookup. Knowledge is encoded implicitly in the weights of the neural network as statistical patterns learned during training. This is why it can be confidently wrong.'
+    },
+    {
+      id: 'q3',
+      type: 'mcq',
+      points: 1,
+      question: 'What does higher "temperature" in language model generation produce?',
+      options: [
+        { text: 'Faster response times', correct: false },
+        { text: 'More deterministic, consistent answers', correct: false },
+        { text: 'More varied, creative, and sometimes unexpected outputs', correct: true },
+        { text: 'Longer responses', correct: false }
+      ],
+      explanation: 'Higher temperature means more randomness in token sampling, producing more varied and creative outputs. Lower temperature produces more deterministic, consistent responses.'
+    },
+    {
+      id: 'q4',
+      type: 'truefalse',
+      points: 1,
+      question: 'Asking Claude the same creative question twice should produce identical responses.',
+      correctAnswer: false,
+      explanation: 'Due to temperature-based sampling, creative responses vary between runs. Factual questions with single clear answers vary less, but creative, open-ended questions produce different outputs each time.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 2,
+      question: 'Why can Claude sometimes be "confidently wrong" about a fact?',
+      options: [
+        { text: 'Because Anthropic doesn\'t update its training data', correct: false },
+        { text: 'Because the statistical pattern that looks like the right answer can fire even when the underlying fact isn\'t correct', correct: true },
+        { text: 'Because Claude deliberately lies sometimes', correct: false },
+        { text: 'Because high temperature causes factual errors', correct: false }
+      ],
+      explanation: 'Claude learned statistical patterns from text, not explicit facts. A pattern that resembles the correct answer can activate and produce fluent, confident-sounding text even when the specific fact is wrong — this is the root cause of hallucination.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

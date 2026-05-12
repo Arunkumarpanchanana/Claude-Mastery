@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 32: Claude Code — Install & First Prompt — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 32</span></div>
+      <h1 class="session-title">Claude Code — Install & First Prompt</h1>
+      <p class="session-tagline">Claude Code is an agentic coding assistant that lives in your terminal — it reads your codebase, writes code, runs tests, and commits changes.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="what-is-claude-code">What Is Claude Code?</h2>
+      <p>Claude Code is a CLI-based agentic coding assistant. Unlike chat-based coding tools, Claude Code:</p>
+      <ul>
+        <li>Runs directly in your terminal alongside your code</li>
+        <li>Reads and modifies actual files in your project</li>
+        <li>Runs shell commands, tests, and builds</li>
+        <li>Uses git — creates commits, reads history, understands diffs</li>
+        <li>Operates autonomously across multi-step tasks</li>
+      </ul>
+
+      <h2 id="installation">Installation</h2>
+      <pre><code class="language-python"># Install via npm (recommended)
+npm install -g @anthropic-ai/claude-code
+
+# Or via Homebrew (macOS)
+brew install claude-code
+
+# Verify installation
+claude --version
+</code></pre>
+
+      <h2 id="authentication">Authentication</h2>
+      <pre><code class="language-python"># First-time setup
+claude
+
+# Authenticate with:
+# Option 1: Anthropic account (api.anthropic.com)
+# Option 2: Claude.ai Pro/Team account
+# Option 3: Set ANTHROPIC_API_KEY environment variable
+
+export ANTHROPIC_API_KEY="sk-ant-..."
+</code></pre>
+
+      <h2 id="project-setup">Project Setup</h2>
+      <p>Navigate to your project directory and launch Claude Code:</p>
+
+      <pre><code class="language-python">cd /path/to/your-project
+claude
+
+# Claude Code reads your project structure automatically:
+# - Directory tree
+# - README.md and CLAUDE.md if present
+# - git history
+# - File contents as needed
+</code></pre>
+
+      <h2 id="how-claude-code-reads-context">How Claude Code Reads Context</h2>
+      <p>Claude Code doesn't read every file upfront — it reads strategically:</p>
+      <ol>
+        <li>Starts with the directory tree to understand structure</li>
+        <li>Reads <code>CLAUDE.md</code> for project-specific instructions</li>
+        <li>Reads <code>README.md</code> for project overview</li>
+        <li>Reads specific files as needed based on your request</li>
+        <li>Uses git log to understand recent changes</li>
+      </ol>
+
+      <h2 id="your-first-prompt">Your First Prompt</h2>
+      <p>Good first prompts are specific and include the desired outcome:</p>
+
+      <pre><code class="language-python"># In the Claude Code terminal prompt:
+
+# Exploration
+> What does this codebase do? Summarize the architecture.
+
+# Creating files
+> Create a Python script called hello.py that prints 'Hello, World!' and run it.
+
+# Bug fixing
+> The function in utils.py line 42 raises a KeyError when the input dict is empty. Fix it and add a test.
+
+# Feature addition
+> Add a /health endpoint to the FastAPI app in main.py that returns {"status": "ok", "version": "1.0"}
+</code></pre>
+
+      <h2 id="interactive-vs-non-interactive">Interactive vs Non-Interactive Mode</h2>
+      <pre><code class="language-python"># Interactive (default) — opens a REPL session
+claude
+
+# Non-interactive — run a single task and exit
+claude "Create a Python script that downloads the top 10 HN stories"
+
+# Print mode — output to stdout (useful in scripts)
+claude --print "Explain this error: NameError: name 'x' is not defined"
+
+# With a specific file as context
+claude --file app.py "Add docstrings to all functions in this file"
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Keyboard shortcuts in Claude Code:</strong><br>
+        <code>Ctrl+C</code> — interrupt current operation<br>
+        <code>Esc</code> — cancel pending tool use<br>
+        <code>/help</code> — show available slash commands<br>
+        <code>/clear</code> — clear context and start fresh<br>
+        <code>/quit</code> — exit Claude Code
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Install Claude Code and Run Your First Task</h2>
+      <p>Complete these steps in order. By the end you'll have Claude Code installed, authenticated, and have run a real coding task.</p>
+
+      <a href="https://claude.ai/code" target="_blank" class="colab-btn"><i class="fas fa-external-link-alt"></i> Claude Code Docs</a>
+
+      <pre><code class="language-python"># ── STEP 1: Install ──────────────────────────────────────────────────────────
+npm install -g @anthropic-ai/claude-code
+claude --version  # Should output version number
+
+
+# ── STEP 2: Create a test project ────────────────────────────────────────────
+mkdir claude-code-lab && cd claude-code-lab
+git init
+echo "# Claude Code Lab" > README.md
+git add README.md && git commit -m "Initial commit"
+
+
+# ── STEP 3: Launch Claude Code ────────────────────────────────────────────────
+claude
+
+
+# ── STEP 4: Run these prompts in sequence ─────────────────────────────────────
+# Prompt 1 — Create a script
+> Create a Python script called calculator.py with functions for add, subtract, multiply, and divide. Include type hints and docstrings. Handle division by zero.
+
+# Prompt 2 — Add tests
+> Create a pytest test file tests/test_calculator.py that tests all 4 functions including the edge cases.
+
+# Prompt 3 — Run the tests
+> Run the tests and show me the output.
+
+# Prompt 4 — Check git status
+> Show me what files changed and commit everything with a descriptive message.
+
+# Prompt 5 — Add a feature
+> Add a 'power' function to calculator.py and corresponding tests.
+</code></pre>
+
+      <h3>What to observe</h3>
+      <ul>
+        <li>Claude Code reads the directory structure before responding</li>
+        <li>It creates and modifies real files on disk</li>
+        <li>It runs shell commands (pytest) and shows you the output</li>
+        <li>It generates appropriate commit messages</li>
+        <li>It asks for permission before destructive operations</li>
+      </ul>
+
+      <h3>Expected calculator.py output from Claude Code</h3>
+      <pre><code class="language-python">"""
+Calculator module with basic arithmetic operations.
+"""
+
+def add(a: float, b: float) -> float:
+    """Return the sum of a and b."""
+    return a + b
+
+def subtract(a: float, b: float) -> float:
+    """Return the difference of a and b."""
+    return a - b
+
+def multiply(a: float, b: float) -> float:
+    """Return the product of a and b."""
+    return a * b
+
+def divide(a: float, b: float) -> float:
+    """Return the quotient of a divided by b.
+
+    Raises:
+        ZeroDivisionError: If b is zero.
+    """
+    if b == 0:
+        raise ZeroDivisionError("Cannot divide by zero")
+    return a / b
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/31-mcp-tools-resources.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Defining MCP Tools, Resources & Prompts</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/33-explore-plan-code.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">The Explore → Plan → Code → Commit Flow</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 32,
+  slug: '32-claude-code-intro',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/33-explore-plan-code.html',
+  quizData: [
+    {
+      question: "How is Claude Code fundamentally different from chat-based AI coding assistants?",
+      options: ["It uses a more capable model", "It runs in your terminal and can read/modify real files, run commands, and use git", "It's free to use", "It only works with Python projects"],
+      correct: 1,
+      explanation: "Claude Code is an agentic CLI tool that operates on real files, runs shell commands, executes tests, and integrates with git — unlike chat tools that only provide text responses."
+    },
+    {
+      question: "What file does Claude Code prioritize reading for project-specific instructions?",
+      options: ["README.md", ".env", "CLAUDE.md", "settings.json"],
+      correct: 2,
+      explanation: "CLAUDE.md is a special file Claude Code reads first for project-specific instructions, coding standards, and context about the project."
+    },
+    {
+      question: "Which command runs Claude Code non-interactively for a single task?",
+      options: ["claude --run 'task'", "claude --single 'task'", "claude 'task'", "claude --execute 'task'"],
+      correct: 2,
+      explanation: "Running claude followed by a quoted prompt (e.g., claude 'Create a hello world script') runs Claude Code non-interactively for a single task."
+    },
+    {
+      question: "What does the /clear slash command do in Claude Code?",
+      options: ["Deletes all files in the project", "Clears the terminal screen", "Clears the context window and starts fresh", "Removes git history"],
+      correct: 2,
+      explanation: "/clear resets Claude Code's context window, letting you start a fresh conversation without the accumulated history of previous messages."
+    },
+    {
+      question: "How does Claude Code read your project's context?",
+      options: ["It reads every file upfront before responding", "It reads the directory tree, CLAUDE.md, README.md, then reads specific files as needed", "It relies on you to paste code directly in chat", "It only reads files you explicitly reference"],
+      correct: 1,
+      explanation: "Claude Code reads context strategically: directory tree first, then CLAUDE.md and README.md, then reads specific files as needed based on your request."
+    }
+  ]
+};
+</script>
+</body>
+</html>

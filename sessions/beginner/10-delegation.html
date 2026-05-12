@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 10: Delegation — Handing Tasks to Claude — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 10</span></div>
+      <h1 class="session-title">Delegation — Handing Tasks to Claude</h1>
+      <p class="session-tagline">Master the art of knowing what to delegate to Claude, how to decompose complex projects, and how to build a reliable delegation-diligence loop.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Task Delegation Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What Makes a Good Delegation Candidate?</h2>
+      <p>Not every task benefits from AI delegation. The best delegation candidates share certain characteristics — understanding these prevents wasted effort and over-reliance on AI where human judgment is irreplaceable.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Strong Delegation Candidates</h4>
+          <ul>
+            <li><strong>Information-dense drafting</strong> — first drafts of documents, emails, reports</li>
+            <li><strong>Pattern recognition at scale</strong> — analyzing many items, spotting common themes</li>
+            <li><strong>Structured thinking tasks</strong> — frameworks, outlines, checklists, plans</li>
+            <li><strong>Expertise translation</strong> — turning complex content into accessible explanations</li>
+            <li><strong>Research synthesis</strong> — combining information from multiple inputs you provide</li>
+            <li><strong>Repetitive writing</strong> — templates, standardized responses, similar documents</li>
+          </ul>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-user"></i> Keep Human-Driven</h4>
+          <ul>
+            <li><strong>Decisions with accountability</strong> — hiring, firing, large purchases</li>
+            <li><strong>Relationship management</strong> — difficult conversations, negotiations</li>
+            <li><strong>Novel judgment calls</strong> — unprecedented situations with no clear right answer</li>
+            <li><strong>Creative vision</strong> — the artistic or strategic choices, not the execution</li>
+            <li><strong>Ethical determinations</strong> — what's right vs. wrong in complex situations</li>
+            <li><strong>Tasks with real-time data</strong> — anything needing current information</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>The delegation spectrum:</strong> Most tasks aren't fully delegate-able OR fully human-only. They're mixtures. The skill is identifying which components of a task are good delegation candidates and which components need human judgment — then structuring the work accordingly.</div>
+      </div>
+
+      <h2>Task Decomposition for AI Delegation</h2>
+      <p>Complex projects can feel impossible to delegate to Claude — until you break them down. Task decomposition is the process of splitting a large, complex goal into smaller components, each of which can be handled more effectively by Claude or by you.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Identify the end goal</h4>
+            <p>What does "done" look like? Be specific. "Write a business plan" is too vague. "Produce a 10-page plan including executive summary, market analysis, financial projections, and go-to-market strategy" is concrete.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>List the components</h4>
+            <p>Break the goal into distinct deliverables or phases. Ask Claude to help: "What are the main components of a business plan?" Now you have a list of smaller tasks.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Classify each component</h4>
+            <p>For each piece: Is this execution (Claude can draft) or judgment (I decide)? The market analysis section is mostly execution — Claude can draft it from information you provide. The strategic direction is judgment — you decide, Claude helps you articulate it.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Sequence and batch</h4>
+            <p>Some components depend on others. Draft the executive summary last, after the other sections exist. Group related sub-tasks. This gives you a roadmap for using Claude across many sessions.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>Project Planning with Claude</h2>
+      <p>Claude is excellent at helping you plan projects — not by making the decisions, but by scaffolding your thinking. Use Claude as a thinking partner at the project level, then as an executor at the task level.</p>
+
+      <p><strong>The planning prompt pattern:</strong></p>
+      <pre style="background:#1c1917;color:#e7e5e4;padding:1rem;border-radius:0.5rem;overflow-x:auto;font-size:0.875rem;"><code>I'm planning to [project description]. My goal is [outcome]. My constraints are [time/resources/skills].
+
+Step 1: Help me identify everything that needs to happen to achieve this.
+Step 2: Identify the critical path — what must happen before what?
+Step 3: Flag where I'll need specialized help or skills I don't have.
+Step 4: Suggest what you can help me with vs. what I need to do myself.</code></pre>
+
+      <p>This pattern leverages Claude's strength at structured thinking while keeping you in control of the actual decisions.</p>
+
+      <h2>The Delegation-Diligence Loop</h2>
+      <p>Delegation doesn't end when Claude produces output. It closes when you apply Diligence — reviewing, verifying, and integrating that output responsibly. The loop:</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">→</div>
+          <div class="step-content">
+            <h4>Delegate → Review → Integrate → Iterate</h4>
+            <p>You delegate a task, Claude produces output, you review it (Discernment), integrate it into your work (with modifications), and delegate the next task. Good delegation is iterative, not one-shot.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>The time math:</strong> If Claude saves you 2 hours of drafting but you spend 30 minutes reviewing and editing — you're still ahead by 90 minutes and you end up with a better output than Claude's first draft. Good delegation is about net time savings and quality outcomes, not zero-effort.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Delegate a Real Project</h2>
+        <p>Work through a real project or goal from your life using task decomposition and strategic delegation.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Choose a real goal</h3></div>
+          <p>Pick a project you actually need to do in the next month. It could be professional (launch a new process, write a proposal), personal (plan a trip, learn a skill, start a side project), or educational (complete a course, write a paper).</p>
+          <p>Write a one-sentence description of the goal and the outcome you want.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Get Claude to decompose it</h3></div>
+          <p>Ask Claude:</p>
+          <pre><code class="language-text">I'm working toward this goal: [your goal]. My deadline is [date/timeframe] and my main constraints are [time, money, skills, etc.].
+
+Please:
+1. List every component or milestone needed to achieve this
+2. Identify the critical path (what depends on what)
+3. Tell me which parts you can help me with vs. which require my own judgment or action</code></pre>
+          <p>Review what Claude produces. Is anything missing? Is the critical path correct?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Classify the components</h3></div>
+          <p>Take Claude's component list and classify each item:</p>
+          <ul>
+            <li>Green: Claude can do this (drafting, researching, structuring)</li>
+            <li>Yellow: Claude can help but I make the final call (analysis, evaluation)</li>
+            <li>Red: This is mine alone (decisions, relationships, accountability)</li>
+          </ul>
+          <p>What percentage of your project is in each category? Most knowledge work projects are 50-70% green or yellow.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Execute one delegation</h3></div>
+          <p>Pick a green-category task from your list and delegate it to Claude right now. Write a full prompt using Description skills (context, task, format, constraints). Then evaluate the output using Discernment: what's good, what needs work, what will you change?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Reflect on the delegation experience</h3></div>
+          <p>Write down:</p>
+          <ul>
+            <li>How much time did Claude's help save?</li>
+            <li>What would this have looked like if you'd done it alone?</li>
+            <li>What were the limitations of the delegation?</li>
+            <li>What would you do differently next time?</li>
+          </ul>
+          <p>This reflection builds deliberate delegation skill much faster than just using Claude habitually.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/09-4d-framework.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">The 4D Framework</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/11-description-prompts.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Description — Writing Great Prompts</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 10,
+  slug: '10-delegation',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/11-description-prompts.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'Which of these is the STRONGEST candidate for delegating to Claude?',
+      options: [
+        { text: 'Deciding whether to fire an underperforming employee', correct: false },
+        { text: 'Drafting a first version of a project proposal document', correct: true },
+        { text: 'Negotiating a contract with a vendor', correct: false },
+        { text: 'Determining your company\'s strategic direction for the next 3 years', correct: false }
+      ],
+      explanation: 'Drafting documents is an excellent delegation candidate — it\'s information-dense execution that Claude accelerates significantly. Decisions with accountability (firing, negotiations, strategy) require human judgment and should remain human-driven.'
+    },
+    {
+      id: 'q2',
+      type: 'mcq',
+      points: 1,
+      question: 'What is "task decomposition" in the context of delegation?',
+      options: [
+        { text: 'Breaking a project into smaller components to better allocate between Claude and human effort', correct: true },
+        { text: 'Deleting parts of a task that aren\'t important', correct: false },
+        { text: 'Having Claude rewrite a task description to make it clearer', correct: false },
+        { text: 'Splitting a prompt into multiple shorter messages', correct: false }
+      ],
+      explanation: 'Task decomposition means breaking a large, complex project into discrete components — then classifying each as strong delegation candidate, collaborative, or human-only. This makes delegation strategic rather than ad hoc.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'The goal of good delegation is zero effort — Claude does everything and you do nothing.',
+      correctAnswer: false,
+      explanation: 'Good delegation is about net time savings and quality outcomes, not zero effort. Reviewing, editing, and integrating Claude\'s output is expected and appropriate. The value is in acceleration and scaffolding, not replacement of your judgment.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Which tasks are generally POOR delegation candidates? (Select all that apply)',
+      options: [
+        { text: 'Making final hiring decisions', correct: true },
+        { text: 'Writing a first draft of a long report', correct: false },
+        { text: 'Tasks that require real-time current information', correct: true },
+        { text: 'Managing a difficult personal conversation', correct: true },
+        { text: 'Synthesizing research from documents you provide', correct: false }
+      ],
+      explanation: 'Poor delegation candidates include: decisions with accountability (hiring), tasks needing real-time data (Claude\'s knowledge is dated), and relationship-based interactions. Drafting and synthesis from provided information are strong delegation candidates.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What does "the Delegation-Diligence loop" mean?',
+      options: [
+        { text: 'Using Delegation and Diligence from the 4D framework in alternating cycles', correct: false },
+        { text: 'Delegating a task, reviewing Claude\'s output (Diligence), integrating it, and delegating the next component', correct: true },
+        { text: 'A loop where Claude checks its own work automatically', correct: false },
+        { text: 'The cycle of training Claude on new data', correct: false }
+      ],
+      explanation: 'The Delegation-Diligence loop is: delegate → Claude produces → you review (Discernment/Diligence) → integrate → delegate the next piece. Good delegation is iterative — you stay engaged throughout, not just at the end.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

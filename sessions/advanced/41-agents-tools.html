@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 41: Agents with Tools &amp; Environment Inspection — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 41</span></div>
+      <h1 class="session-title">Agents with Tools &amp; Environment Inspection</h1>
+      <p class="session-tagline">Build a fully autonomous agent with the complete observe-plan-act loop, environment inspection, in-context memory, and safe stopping conditions.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 50 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>The Full Agentic Loop</h2>
+      <p>An agent is a loop that runs until a stopping condition is met. Each iteration: Claude observes the current state, decides on an action (or decides to stop), executes the action via a tool, observes the result, and updates its plan.</p>
+
+      <div class="flow-diagram">
+        <div class="flow-step"><div class="flow-icon"><i class="fas fa-eye"></i></div><div class="flow-label">Observe<br/><small>Current state + history</small></div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step"><div class="flow-icon"><i class="fas fa-brain"></i></div><div class="flow-label">Plan<br/><small>Decide next action</small></div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step"><div class="flow-icon"><i class="fas fa-wrench"></i></div><div class="flow-label">Act<br/><small>Call a tool</small></div></div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step"><div class="flow-icon"><i class="fas fa-check-circle"></i></div><div class="flow-label">Done?<br/><small>Check stopping conditions</small></div></div>
+      </div>
+
+      <h2>Environment Inspection Strategy</h2>
+      <p>Before taking action, a well-designed agent inspects its environment to understand the current state. This prevents wasted actions and reduces errors from incorrect assumptions.</p>
+
+      <pre><code class="language-python">import anthropic
+import json
+import os
+
+client = anthropic.Anthropic()
+
+# Define tools with rich descriptions that help Claude use them correctly
+TOOLS = [
+    {
+        "name": "list_files",
+        "description": "List files in a directory. Use this first to understand what's available before reading or writing.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "Directory path to list. Use '.' for current directory."}
+            },
+            "required": ["path"]
+        }
+    },
+    {
+        "name": "read_file",
+        "description": "Read the contents of a specific file.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "File path to read"}
+            },
+            "required": ["path"]
+        }
+    },
+    {
+        "name": "write_file",
+        "description": "Write content to a file. Creates the file if it doesn't exist.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "File path to write"},
+                "content": {"type": "string", "description": "Content to write"}
+            },
+            "required": ["path", "content"]
+        }
+    },
+    {
+        "name": "task_complete",
+        "description": "Signal that the task is complete. Call this when you have finished the task.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string", "description": "Brief summary of what was accomplished"}
+            },
+            "required": ["summary"]
+        }
+    }
+]
+
+def execute_tool(name: str, inputs: dict) -> str:
+    """Execute a tool and return the result as a string."""
+    if name == "list_files":
+        try:
+            files = os.listdir(inputs["path"])
+            return json.dumps({"files": files, "count": len(files)})
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+
+    elif name == "read_file":
+        try:
+            with open(inputs["path"], "r") as f:
+                return f.read()
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+
+    elif name == "write_file":
+        try:
+            with open(inputs["path"], "w") as f:
+                f.write(inputs["content"])
+            return json.dumps({"success": True, "path": inputs["path"]})
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+
+    elif name == "task_complete":
+        return json.dumps({"done": True, "summary": inputs["summary"]})</code></pre>
+
+      <h2>The Agent Loop</h2>
+      <pre><code class="language-python">def run_agent(task: str, max_iterations: int = 10) -> str:
+    """
+    Run the agentic loop until done or max iterations reached.
+
+    Args:
+        task: The task description for the agent
+        max_iterations: Safety limit on number of steps
+
+    Returns:
+        Final summary from task_complete tool
+    """
+    messages = [{"role": "user", "content": task}]
+    iterations = 0
+
+    print(f"\nAgent starting: {task}")
+    print("="*60)
+
+    while iterations < max_iterations:
+        iterations += 1
+        print(f"\n--- Iteration {iterations} ---")
+
+        # Claude observes state and plans next action
+        response = client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=1024,
+            system="""You are an autonomous file agent. Follow this strategy:
+1. ALWAYS start by listing files to understand what exists
+2. Read relevant files before making decisions
+3. Take one action at a time and observe results
+4. When done, call task_complete with a summary""",
+            tools=TOOLS,
+            messages=messages
+        )
+
+        # Handle stop conditions
+        if response.stop_reason == "end_turn":
+            print("Agent: decided to stop (no tool use)")
+            return response.content[0].text if response.content else "Done"
+
+        if response.stop_reason != "tool_use":
+            print(f"Agent: unexpected stop_reason: {response.stop_reason}")
+            break
+
+        # Process tool calls
+        tool_results = []
+        done = False
+
+        for block in response.content:
+            if block.type == "text":
+                print(f"Claude thinks: {block.text}")
+            elif block.type == "tool_use":
+                print(f"Claude uses tool: {block.name}({json.dumps(block.input)[:80]}...)")
+                result = execute_tool(block.name, block.input)
+                print(f"Tool result: {result[:100]}...")
+
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": result
+                })
+
+                if block.name == "task_complete":
+                    done = True
+                    summary = json.loads(result)["summary"]
+
+        # Add assistant response and tool results to conversation
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "user", "content": tool_results})
+
+        if done:
+            print(f"\nAgent completed task: {summary}")
+            return summary
+
+    print(f"\nAgent hit max iterations ({max_iterations})")
+    return "Max iterations reached"
+
+# Run the agent
+result = run_agent("Create a README.md file that summarizes what files exist in the current directory.")
+print(f"\nFinal result: {result}")</code></pre>
+
+      <h2>Memory in Agents</h2>
+      <p>Agents need memory to avoid repeating actions and to maintain context across steps. There are two main approaches:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-comment-dots"></i> In-Context Memory</h4>
+          <ul>
+            <li>The full conversation history IS the memory</li>
+            <li>Claude sees all previous actions and results</li>
+            <li>Simple — no external storage needed</li>
+            <li>Limited by context window size</li>
+            <li>Works for short-to-medium length tasks</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-database"></i> External Memory</h4>
+          <ul>
+            <li>Store summaries or facts in a database</li>
+            <li>Retrieve relevant memories per step</li>
+            <li>Scales to arbitrarily long tasks</li>
+            <li>More complex to implement</li>
+            <li>Use for tasks spanning many sessions</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Stopping Conditions</h2>
+      <p>Without explicit stopping conditions, agents can loop indefinitely. Always implement:</p>
+      <ul>
+        <li><strong>Explicit done signal:</strong> A <code>task_complete</code> tool that the agent calls when finished</li>
+        <li><strong>Max iterations:</strong> A hard limit on loop count (safety net)</li>
+        <li><strong>Error threshold:</strong> Stop if the same tool fails 3+ times</li>
+        <li><strong>Cost limit:</strong> Track token usage and stop when budget exceeded</li>
+        <li><strong>Human checkpoint:</strong> Pause at key decision points for human approval</li>
+      </ul>
+
+    </div><!-- /learn -->
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Build a Research Agent</h2>
+        <p>Build an agent with three tools — search, summarize, and write — that researches a topic and produces a structured report.</p>
+      </div>
+
+      <pre><code class="language-python">import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+# Simulated search tool (in production, use a real search API)
+KNOWLEDGE_BASE = {
+    "claude api": "Claude API supports messages, tools, vision, streaming, and prompt caching. Models: Haiku (fast/cheap), Sonnet (balanced), Opus (most capable).",
+    "rag": "RAG combines retrieval with generation. Documents are chunked, embedded, stored in vector DB, then retrieved at query time.",
+    "prompt engineering": "Key techniques: role prompting, few-shot examples, chain-of-thought, XML tags for structure, explicit formatting instructions.",
+    "function calling": "Tool use lets Claude call external functions. Define tools with JSON schema. Claude returns tool_use blocks, you execute and return tool_result.",
+    "agent memory": "Agents use in-context memory (conversation history) or external memory (databases). In-context is simple but context-limited.",
+}
+
+RESEARCH_TOOLS = [
+    {
+        "name": "search",
+        "description": "Search for information on a topic. Returns relevant information from the knowledge base.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"}
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "summarize",
+        "description": "Summarize a long piece of text into key points.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "text": {"type": "string", "description": "Text to summarize"},
+                "max_points": {"type": "integer", "description": "Maximum number of bullet points", "default": 3}
+            },
+            "required": ["text"]
+        }
+    },
+    {
+        "name": "write_report",
+        "description": "Write the final research report. Call this when you have gathered enough information.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "sections": {
+                    "type": "array",
+                    "items": {"type": "object", "properties": {
+                        "heading": {"type": "string"},
+                        "content": {"type": "string"}
+                    }},
+                    "description": "Report sections"
+                }
+            },
+            "required": ["title", "sections"]
+        }
+    }
+]
+
+def execute_research_tool(name: str, inputs: dict) -> str:
+    if name == "search":
+        query = inputs["query"].lower()
+        # Simple keyword matching against knowledge base
+        results = []
+        for key, value in KNOWLEDGE_BASE.items():
+            if any(word in key for word in query.split()):
+                results.append(f"[{key}]: {value}")
+        return "\n\n".join(results) if results else "No results found for this query."
+
+    elif name == "summarize":
+        # In a real agent, this would call a separate API call
+        # For demo, we call Claude inline
+        r = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=200,
+            messages=[{
+                "role": "user",
+                "content": f"Summarize in {inputs.get('max_points', 3)} bullet points:\n{inputs['text']}"
+            }]
+        )
+        return r.content[0].text
+
+    elif name == "write_report":
+        report = f"# {inputs['title']}\n\n"
+        for section in inputs['sections']:
+            report += f"## {section['heading']}\n{section['content']}\n\n"
+        return report
+
+def run_research_agent(topic: str) -> str:
+    messages = [{"role": "user", "content": f"Research this topic and write a structured report: {topic}"}]
+    report = ""
+
+    for i in range(8):  # Max 8 iterations
+        response = client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=1500,
+            system="""You are a research agent. Strategy:
+1. Search for key aspects of the topic (2-3 searches)
+2. Summarize what you've found
+3. Write a structured report with 3-4 sections
+Be methodical and thorough.""",
+            tools=RESEARCH_TOOLS,
+            messages=messages
+        )
+
+        if response.stop_reason == "end_turn":
+            break
+
+        tool_results = []
+        for block in response.content:
+            if block.type == "tool_use":
+                print(f"[Tool: {block.name}] {str(block.input)[:80]}")
+                result = execute_research_tool(block.name, block.input)
+                if block.name == "write_report":
+                    report = result
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": result
+                })
+
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "user", "content": tool_results})
+
+        if response.stop_reason != "tool_use" or not any(b.type == "tool_use" for b in response.content):
+            break
+
+    return report or "Research complete (see conversation history)"
+
+print(run_research_agent("How to build production-ready RAG systems with Claude"))</code></pre>
+    </div><!-- /lab -->
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/advanced/40-parallelization-chaining.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Parallelization, Chaining &amp; Routing</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/42-subagents-intro.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Introduction to Subagents</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 41,
+  slug: '41-agents-tools',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/42-subagents-intro.html',
+  quizData: [
+    {
+      question: "What is the correct order of the agentic loop?",
+      options: [
+        "Act → Observe → Plan → Done?",
+        "Observe → Plan → Act → Done?",
+        "Plan → Done? → Observe → Act",
+        "Done? → Act → Plan → Observe"
+      ],
+      correct: 1,
+      explanation: "The agent loop: Observe the current state and history → Plan the next action → Act (call a tool) → Check if done. This cycle repeats until a stopping condition is met."
+    },
+    {
+      question: "Why is a 'task_complete' tool better than just checking stop_reason == 'end_turn' as a stopping condition?",
+      options: [
+        "end_turn is deprecated in newer Claude versions",
+        "task_complete forces Claude to explicitly state what it accomplished, making completion deliberate rather than accidental",
+        "task_complete is faster — it skips the last API call",
+        "end_turn only works with streaming responses"
+      ],
+      correct: 1,
+      explanation: "Claude might stop generating (end_turn) because it ran out of ideas, not because the task is done. A task_complete tool requires Claude to explicitly signal completion with a summary, making task termination a deliberate decision."
+    },
+    {
+      question: "What is the 'environment inspection' strategy in agents?",
+      options: [
+        "Monitoring CPU and memory usage during agent execution",
+        "Reading environment variables before the agent starts",
+        "Listing/reading available resources before taking action to avoid incorrect assumptions",
+        "Validating tool JSON schemas at startup"
+      ],
+      correct: 2,
+      explanation: "Before acting, agents should inspect what's available (list files, read config, check state). This prevents errors like trying to write to a non-existent directory or read a file that was already processed."
+    },
+    {
+      question: "What is the main advantage of in-context memory over external memory for agents?",
+      options: [
+        "It scales to infinite history length",
+        "It's simple — the conversation history itself is the memory, no extra storage needed",
+        "It's more accurate for factual recall",
+        "It reduces API costs significantly"
+      ],
+      correct: 1,
+      explanation: "In-context memory is just the message history Claude already receives. No database, no retrieval step, no extra code. The tradeoff is it's bounded by the context window — for long-running agents, external memory is needed."
+    },
+    {
+      question: "An agent has called the same tool 5 times with an error each time. What should happen?",
+      options: [
+        "Continue indefinitely — the 6th attempt might succeed",
+        "Increase max_tokens and retry",
+        "Trigger an error threshold stopping condition",
+        "Switch to a different Claude model automatically"
+      ],
+      correct: 2,
+      explanation: "Repeated failures indicate a fundamental issue (wrong tool, bad inputs, unavailable service). Continuing to retry wastes API calls and money. An error threshold stopping condition (e.g., stop after 3 identical failures) is a critical safety mechanism."
+    }
+  ]
+};
+</script>
+</body>
+</html>

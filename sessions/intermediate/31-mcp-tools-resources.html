@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 31: Defining MCP Tools, Resources & Prompts — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 31</span></div>
+      <h1 class="session-title">Defining MCP Tools, Resources & Prompts</h1>
+      <p class="session-tagline">Write your first MCP server in Python — define tools, expose resources, and build prompts that any MCP client can use.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="mcp-python-sdk">The MCP Python SDK</h2>
+      <p>Anthropic provides an official Python SDK for building MCP servers. Install it with:</p>
+
+      <pre><code class="language-python">pip install mcp
+</code></pre>
+
+      <h2 id="basic-server">Basic MCP Server Structure</h2>
+
+      <pre><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+# Create the server with a name
+mcp = FastMCP("My First MCP Server")
+
+# Run with stdio transport (for Claude Desktop)
+if __name__ == "__main__":
+    mcp.run()
+</code></pre>
+
+      <h2 id="defining-tools">Defining Tools with @mcp.tool()</h2>
+      <p>Use the <code>@mcp.tool()</code> decorator. The function's docstring becomes the tool description that Claude reads:</p>
+
+      <pre><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("Calculator Server")
+
+@mcp.tool()
+def add(a: float, b: float) -> float:
+    """Add two numbers together. Returns the sum."""
+    return a + b
+
+@mcp.tool()
+def get_word_count(text: str) -> dict:
+    """Count the number of words and characters in a text string.
+
+    Returns a dictionary with 'words' and 'characters' counts.
+    """
+    words = len(text.split())
+    chars = len(text)
+    return {"words": words, "characters": chars}
+
+@mcp.tool()
+def reverse_string(text: str) -> str:
+    """Reverse a string. E.g. 'hello' becomes 'olleh'."""
+    return text[::-1]
+</code></pre>
+
+      <h2 id="defining-resources">Defining Resources with @mcp.resource()</h2>
+      <p>Resources are read-only data that Claude can access. They have a URI scheme:</p>
+
+      <pre><code class="language-python">@mcp.resource("config://app-settings")
+def get_app_settings() -> str:
+    """Application configuration settings."""
+    return """
+APP_NAME=MyApp
+VERSION=1.2.0
+MAX_CONNECTIONS=100
+LOG_LEVEL=INFO
+"""
+
+@mcp.resource("data://team-members")
+def get_team_members() -> str:
+    """List of current team members and their roles."""
+    members = [
+        {"name": "Alice Chen", "role": "Engineering Lead"},
+        {"name": "Bob Kumar", "role": "Product Manager"},
+        {"name": "Carol Smith", "role": "Designer"},
+    ]
+    import json
+    return json.dumps(members, indent=2)
+</code></pre>
+
+      <h2 id="defining-prompts">Defining Prompts with @mcp.prompt()</h2>
+      <p>Prompts are reusable message templates that users can invoke by name in MCP clients:</p>
+
+      <pre><code class="language-python">from mcp.types import Message
+
+@mcp.prompt()
+def code_review_prompt(code: str, language: str = "python") -> list[Message]:
+    """Generate a code review prompt for the given code snippet."""
+    return [
+        {
+            "role": "user",
+            "content": f"""Please review this {language} code:
+
+```{language}
+{code}
+```
+
+Check for:
+1. Correctness and edge cases
+2. Performance issues
+3. Security vulnerabilities
+4. Code style and readability
+"""
+        }
+    ]
+</code></pre>
+
+      <h2 id="mcp-inspector">The MCP Inspector</h2>
+      <p>Test your server without Claude Desktop using the MCP Inspector:</p>
+
+      <pre><code class="language-python"># Install and run
+npx @modelcontextprotocol/inspector python your_server.py
+
+# Opens a browser UI where you can:
+# - See all registered tools, resources, and prompts
+# - Call tools with test inputs
+# - Read resources
+# - Invoke prompts
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build an MCP Server with 2 Tools</h2>
+      <p>Build a complete, runnable MCP server with a text analysis tool and a URL info tool.</p>
+
+      <a href="https://modelcontextprotocol.io/quickstart/server" target="_blank" class="colab-btn"><i class="fas fa-external-link-alt"></i> MCP Server Quickstart</a>
+
+      <pre><code class="language-python">"""
+my_mcp_server.py — A simple MCP server with 2 tools and 1 resource
+pip install mcp
+Run: python my_mcp_server.py
+"""
+from mcp.server.fastmcp import FastMCP
+import json
+import re
+from datetime import datetime
+from urllib.parse import urlparse
+
+mcp = FastMCP("Text & URL Toolkit")
+
+
+# ── Tool 1: Text Analysis ─────────────────────────────────────────────────────
+@mcp.tool()
+def analyze_text(text: str) -> dict:
+    """Analyze a text string and return statistics.
+
+    Returns word count, sentence count, average word length,
+    most common words, and readability indicators.
+    """
+    words = text.split()
+    sentences = re.split(r'[.!?]+', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    word_freq: dict[str, int] = {}
+    for word in words:
+        clean = re.sub(r'[^a-zA-Z]', '', word).lower()
+        if clean and len(clean) > 3:
+            word_freq[clean] = word_freq.get(clean, 0) + 1
+
+    top_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:5]
+    avg_word_len = sum(len(w) for w in words) / len(words) if words else 0
+
+    return {
+        "word_count": len(words),
+        "sentence_count": len(sentences),
+        "character_count": len(text),
+        "average_word_length": round(avg_word_len, 1),
+        "top_words": dict(top_words),
+        "estimated_reading_time_seconds": round(len(words) / 238 * 60)
+    }
+
+
+# ── Tool 2: URL Info Extractor ─────────────────────────────────────────────────
+@mcp.tool()
+def extract_url_info(url: str) -> dict:
+    """Extract and parse information from a URL.
+
+    Returns the protocol, domain, path, query parameters, and fragment.
+    Also indicates if the URL appears to be HTTPS-secured.
+    """
+    try:
+        parsed = urlparse(url)
+        query_params = {}
+        if parsed.query:
+            for param in parsed.query.split("&"):
+                if "=" in param:
+                    k, v = param.split("=", 1)
+                    query_params[k] = v
+
+        return {
+            "original_url": url,
+            "protocol": parsed.scheme,
+            "domain": parsed.netloc,
+            "path": parsed.path or "/",
+            "query_parameters": query_params,
+            "fragment": parsed.fragment or None,
+            "is_secure": parsed.scheme == "https",
+            "is_valid": bool(parsed.scheme and parsed.netloc)
+        }
+    except Exception as e:
+        return {"error": str(e), "original_url": url}
+
+
+# ── Resource: Server Status ─────────────────────────────────────────────────────
+@mcp.resource("status://server-info")
+def get_server_info() -> str:
+    """Current server status and capabilities."""
+    return json.dumps({
+        "name": "Text & URL Toolkit",
+        "version": "1.0.0",
+        "started_at": datetime.now().isoformat(),
+        "tools": ["analyze_text", "extract_url_info"],
+        "resources": ["status://server-info"],
+        "description": "Provides text analysis and URL parsing capabilities."
+    }, indent=2)
+
+
+# ── Test the tools locally (not via MCP) ────────────────────────────────────
+def test_locally():
+    """Quick test without MCP client."""
+    print("=== analyze_text ===")
+    result = analyze_text(
+        "The quick brown fox jumps over the lazy dog. "
+        "Python is a great programming language for building tools. "
+        "MCP servers are easy to build with the FastMCP library."
+    )
+    print(json.dumps(result, indent=2))
+
+    print("\n=== extract_url_info ===")
+    for url in [
+        "https://api.example.com/v1/users?page=2&limit=10#results",
+        "http://localhost:8080/health",
+        "not-a-url",
+    ]:
+        result = extract_url_info(url)
+        print(f"\n{url}")
+        print(json.dumps(result, indent=2))
+
+
+if __name__ == "__main__":
+    import sys
+    if "--test" in sys.argv:
+        test_locally()
+    else:
+        # Run as MCP server (stdio transport for Claude Desktop)
+        mcp.run()
+</code></pre>
+
+      <h3>Connect to Claude Desktop</h3>
+      <pre><code class="language-python"># Add to claude_desktop_config.json:
+{
+  "mcpServers": {
+    "text-toolkit": {
+      "command": "python",
+      "args": ["/absolute/path/to/my_mcp_server.py"]
+    }
+  }
+}
+</code></pre>
+
+      <h3>Test Without Claude Desktop</h3>
+      <pre><code class="language-python">python my_mcp_server.py --test
+
+# Or use the MCP Inspector:
+npx @modelcontextprotocol/inspector python my_mcp_server.py
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/30-intro-mcp.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Introduction to MCP</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/32-claude-code-intro.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Claude Code — Install & First Prompt</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 31,
+  slug: '31-mcp-tools-resources',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/32-claude-code-intro.html',
+  quizData: [
+    {
+      question: "What Python decorator is used to define an MCP tool in FastMCP?",
+      options: ["@mcp.function()", "@mcp.tool()", "@mcp.handler()", "@tool.register()"],
+      correct: 1,
+      explanation: "The @mcp.tool() decorator registers a Python function as an MCP tool. The function's docstring becomes the tool description that clients (and Claude) use."
+    },
+    {
+      question: "What is the key difference between MCP Tools and MCP Resources?",
+      options: ["Tools cost more tokens than resources", "Tools are functions Claude can call with arguments; Resources are read-only data with a URI", "Resources can only be text; tools can return any type", "Tools run on the client; resources run on the server"],
+      correct: 1,
+      explanation: "MCP Tools are callable functions that can take arguments and perform actions. MCP Resources are read-only data sources identified by a URI that Claude can read."
+    },
+    {
+      question: "What does the docstring of an @mcp.tool() function become?",
+      options: ["The function's error message", "The tool description Claude reads to understand when and how to use the tool", "The return type annotation", "The function's name in the MCP registry"],
+      correct: 1,
+      explanation: "The docstring is used as the tool's description in the MCP protocol, which Claude reads to understand the tool's purpose and how to use it."
+    },
+    {
+      question: "What tool can you use to test an MCP server without needing Claude Desktop?",
+      options: ["The Anthropic API console", "The MCP Inspector (npx @modelcontextprotocol/inspector)", "Claude.ai chat interface", "The Python unittest module"],
+      correct: 1,
+      explanation: "The MCP Inspector is a browser-based UI you can run with npx that lets you test your MCP server's tools, resources, and prompts without needing a full AI client."
+    },
+    {
+      question: "What transport method does an MCP server use to communicate with Claude Desktop?",
+      options: ["REST API calls", "WebSocket connections", "stdio (standard input/output)", "UDP packets"],
+      correct: 2,
+      explanation: "For local MCP servers connected to Claude Desktop, communication happens via stdio — the server reads from stdin and writes to stdout in JSON-RPC 2.0 format."
+    }
+  ]
+};
+</script>
+</body>
+</html>

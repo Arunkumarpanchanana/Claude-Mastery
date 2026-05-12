@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 28: Tool Use & Function Calling — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 28</span></div>
+      <h1 class="session-title">Tool Use & Function Calling</h1>
+      <p class="session-tagline">Give Claude real capabilities — define tools it can call, execute them yourself, and feed results back. This is how Claude integrates with the real world.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="what-is-tool-use">What Is Tool Use?</h2>
+      <p>Tool use (also called function calling) lets Claude request actions that it cannot perform itself — like looking up live data, querying a database, or running code. The flow is:</p>
+      <ol>
+        <li>You define tools with JSON Schema descriptions</li>
+        <li>Claude decides if it needs a tool and responds with a <code>tool_use</code> block</li>
+        <li>Your code executes the tool with the provided arguments</li>
+        <li>You send the result back as a <code>tool_result</code> message</li>
+        <li>Claude uses the result to formulate its final answer</li>
+      </ol>
+
+      <h2 id="defining-tools">Defining Tool Schemas</h2>
+      <p>Tools are defined using JSON Schema. Be descriptive — Claude reads your descriptions to decide when and how to use the tool.</p>
+
+      <pre><code class="language-python">tools = [
+    {
+        "name": "get_weather",
+        "description": "Get the current weather for a city. Returns temperature (Celsius), conditions, and humidity.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "The city name, e.g. 'San Francisco' or 'Tokyo'"
+                },
+                "units": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "description": "Temperature units. Default: celsius"
+                }
+            },
+            "required": ["city"]
+        }
+    }
+]
+</code></pre>
+
+      <h2 id="sending-tools">Sending Tools to the API</h2>
+
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    tools=tools,
+    messages=[{
+        "role": "user",
+        "content": "What's the weather like in Paris right now?"
+    }]
+)
+
+print(response.stop_reason)  # "tool_use" — Claude wants to call a tool
+</code></pre>
+
+      <h2 id="handling-tool-use">Handling the tool_use Response</h2>
+
+      <pre><code class="language-python"># Claude responded with a tool_use block
+if response.stop_reason == "tool_use":
+    tool_block = next(b for b in response.content if b.type == "tool_use")
+
+    print(f"Tool name : {tool_block.name}")        # "get_weather"
+    print(f"Tool ID   : {tool_block.id}")          # "toolu_01..."
+    print(f"Arguments : {tool_block.input}")       # {"city": "Paris", "units": "celsius"}
+</code></pre>
+
+      <h2 id="executing-and-returning">Executing the Tool and Returning Results</h2>
+
+      <pre><code class="language-python">def get_weather(city: str, units: str = "celsius") -> dict:
+    """Stub — replace with real weather API call."""
+    return {
+        "city": city,
+        "temperature": 18,
+        "units": units,
+        "conditions": "Partly cloudy",
+        "humidity": 72
+    }
+
+# Execute the tool
+tool_result = get_weather(**tool_block.input)
+
+# Send the result back
+final_response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    tools=tools,
+    messages=[
+        # Original user message
+        {"role": "user", "content": "What's the weather like in Paris right now?"},
+        # Claude's tool call (must include ALL content blocks from the response)
+        {"role": "assistant", "content": response.content},
+        # Your tool result
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tool_block.id,
+                    "content": str(tool_result)
+                }
+            ]
+        }
+    ]
+)
+
+print(final_response.content[0].text)
+# "The weather in Paris is currently 18°C and partly cloudy with 72% humidity."
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Key insight:</strong> You execute the tool — not Claude. Claude only decides to call it and provides the arguments. This keeps you in control of what actions are actually taken.
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build a Weather Tool and Calculator Tool</h2>
+      <p>Implement two tools and a complete one-turn tool-use loop.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/tool_use/customer_service_agent.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+tool_use_lab.py — Weather + Calculator tools with full loop
+"""
+import anthropic
+import math
+
+client = anthropic.Anthropic()
+
+# ── Tool definitions ──────────────────────────────────────────────────────────
+TOOLS = [
+    {
+        "name": "get_weather",
+        "description": "Get current weather for a city. Returns temperature, conditions, and wind speed.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "city": {"type": "string", "description": "City name"},
+                "units": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "description": "Temperature units"
+                }
+            },
+            "required": ["city"]
+        }
+    },
+    {
+        "name": "calculate",
+        "description": "Evaluate a mathematical expression. Use Python math syntax.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "Math expression to evaluate, e.g. '2 ** 10', 'math.sqrt(144)'"
+                }
+            },
+            "required": ["expression"]
+        }
+    }
+]
+
+
+# ── Tool implementations ──────────────────────────────────────────────────────
+WEATHER_DATA = {
+    "paris": {"temp_c": 18, "conditions": "Partly cloudy", "wind_kph": 15},
+    "tokyo": {"temp_c": 28, "conditions": "Sunny", "wind_kph": 8},
+    "london": {"temp_c": 12, "conditions": "Overcast", "wind_kph": 22},
+    "new york": {"temp_c": 22, "conditions": "Clear", "wind_kph": 18},
+}
+
+def get_weather(city: str, units: str = "celsius") -> dict:
+    data = WEATHER_DATA.get(city.lower())
+    if not data:
+        return {"error": f"No weather data for {city}"}
+    temp = data["temp_c"] if units == "celsius" else round(data["temp_c"] * 9/5 + 32, 1)
+    return {
+        "city": city,
+        "temperature": temp,
+        "units": units,
+        "conditions": data["conditions"],
+        "wind_kph": data["wind_kph"]
+    }
+
+def calculate(expression: str) -> dict:
+    try:
+        result = eval(expression, {"__builtins__": {}}, {"math": math})
+        return {"expression": expression, "result": result}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def execute_tool(tool_name: str, tool_input: dict) -> str:
+    """Route tool calls to the right implementation."""
+    if tool_name == "get_weather":
+        return str(get_weather(**tool_input))
+    elif tool_name == "calculate":
+        return str(calculate(**tool_input))
+    return f"Unknown tool: {tool_name}"
+
+
+def run_with_tools(user_message: str) -> str:
+    """Run a single-turn conversation with tool use."""
+    messages = [{"role": "user", "content": user_message}]
+
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        tools=TOOLS,
+        messages=messages
+    )
+
+    # Handle tool calls (may have multiple tools in one response)
+    if response.stop_reason == "tool_use":
+        # Append Claude's response (with tool_use blocks) to history
+        messages.append({"role": "assistant", "content": response.content})
+
+        # Execute all requested tools
+        tool_results = []
+        for block in response.content:
+            if block.type == "tool_use":
+                print(f"  [Tool call] {block.name}({block.input})")
+                result = execute_tool(block.name, block.input)
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": result
+                })
+
+        # Send results back
+        messages.append({"role": "user", "content": tool_results})
+
+        # Get final response
+        final = client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=1024,
+            tools=TOOLS,
+            messages=messages
+        )
+        return final.content[0].text
+
+    return response.content[0].text
+
+
+# ── Test the tools ────────────────────────────────────────────────────────────
+queries = [
+    "What's the weather in Tokyo?",
+    "What is the square root of 1764?",
+    "If it's 28 degrees Celsius in Tokyo, what is that in Fahrenheit?",
+]
+
+for query in queries:
+    print(f"\nUser: {query}")
+    answer = run_with_tools(query)
+    print(f"Claude: {answer}")
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/27-prompt-caching.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Prompt Caching — Rules & Implementation</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/29-multi-turn-tools.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Multi-Turn Tool Conversations</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 28,
+  slug: '28-tool-use',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/29-multi-turn-tools.html',
+  quizData: [
+    {
+      question: "In tool use, who actually executes the tool function?",
+      options: ["Anthropic's servers execute it automatically", "Claude executes it internally", "Your application code executes it and returns the result", "A separate tool execution service"],
+      correct: 2,
+      explanation: "Claude only decides to call a tool and specifies the arguments. Your application code is responsible for executing the tool and sending the result back to Claude."
+    },
+    {
+      question: "What stop_reason indicates that Claude wants to call a tool?",
+      options: ["end_turn", "tool_required", "tool_use", "function_call"],
+      correct: 2,
+      explanation: "When Claude wants to call a tool, the response's stop_reason is 'tool_use', and the content array contains a tool_use block with the tool name and input arguments."
+    },
+    {
+      question: "What message role do you use to send a tool's result back to Claude?",
+      options: ["tool", "system", "user (with content type 'tool_result')", "assistant"],
+      correct: 2,
+      explanation: "Tool results are sent as user messages with a content array containing type='tool_result' blocks, referencing the tool_use_id from Claude's request."
+    },
+    {
+      question: "Why should tool descriptions be detailed and accurate?",
+      options: ["For API validation purposes", "Because Claude reads them to decide when and how to call the tool", "To reduce token usage", "For display in the UI"],
+      correct: 1,
+      explanation: "Claude uses the tool name, description, and parameter descriptions to determine when to invoke a tool and what arguments to pass. Poor descriptions lead to incorrect or missed tool calls."
+    },
+    {
+      question: "When Claude calls a tool, what must you include when appending Claude's response to the message history?",
+      options: ["Only the text content", "All content blocks from the response, including the tool_use blocks", "Only the tool_use blocks", "Just the tool name and arguments"],
+      correct: 1,
+      explanation: "You must append the complete response.content (all blocks) to the message history as the assistant's message. This includes any text blocks along with the tool_use blocks."
+    }
+  ]
+};
+</script>
+</body>
+</html>

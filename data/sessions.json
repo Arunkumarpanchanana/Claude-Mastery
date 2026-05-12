@@ -1,0 +1,73 @@
+{
+  "sections": [
+    {
+      "id": "beginner",
+      "label": "🌱 Beginner",
+      "sessions": [
+        { "id": 1,  "title": "What is Claude?",                        "path": "/Claude-Mastery/sessions/beginner/01-what-is-claude.html",           "duration": "30 min" },
+        { "id": 2,  "title": "Your First Conversation",                "path": "/Claude-Mastery/sessions/beginner/02-first-conversation.html",        "duration": "25 min" },
+        { "id": 3,  "title": "How Claude Generates Text",              "path": "/Claude-Mastery/sessions/beginner/03-how-claude-thinks.html",         "duration": "30 min" },
+        { "id": 4,  "title": "How Claude Gets Its Character",          "path": "/Claude-Mastery/sessions/beginner/04-claude-character.html",          "duration": "25 min" },
+        { "id": 5,  "title": "Next Token Prediction",                  "path": "/Claude-Mastery/sessions/beginner/05-next-token-prediction.html",     "duration": "30 min" },
+        { "id": 6,  "title": "Claude's Knowledge & Limitations",       "path": "/Claude-Mastery/sessions/beginner/06-knowledge-limitations.html",     "duration": "30 min" },
+        { "id": 7,  "title": "Working Memory & Context Windows",       "path": "/Claude-Mastery/sessions/beginner/07-working-memory.html",            "duration": "25 min" },
+        { "id": 8,  "title": "Steerability — Guiding Claude",          "path": "/Claude-Mastery/sessions/beginner/08-steerability.html",             "duration": "25 min" },
+        { "id": 9,  "title": "The 4D AI Fluency Framework",            "path": "/Claude-Mastery/sessions/beginner/09-4d-framework.html",             "duration": "35 min" },
+        { "id": 10, "title": "Delegation — Handing Tasks to Claude",   "path": "/Claude-Mastery/sessions/beginner/10-delegation.html",               "duration": "30 min" },
+        { "id": 11, "title": "Description — Writing Great Prompts",    "path": "/Claude-Mastery/sessions/beginner/11-description-prompts.html",      "duration": "35 min" },
+        { "id": 12, "title": "Discernment — Evaluating Outputs",       "path": "/Claude-Mastery/sessions/beginner/12-discernment.html",              "duration": "30 min" },
+        { "id": 13, "title": "Diligence & Responsible AI Use",         "path": "/Claude-Mastery/sessions/beginner/13-diligence.html",                "duration": "25 min" },
+        { "id": 14, "title": "Projects, Artifacts & Organization",     "path": "/Claude-Mastery/sessions/beginner/14-projects-artifacts.html",       "duration": "30 min" },
+        { "id": 15, "title": "Claude Desktop App Deep Dive",           "path": "/Claude-Mastery/sessions/beginner/15-desktop-app.html",              "duration": "25 min" },
+        { "id": 16, "title": "AI as a Learning & Career Partner",      "path": "/Claude-Mastery/sessions/beginner/16-learning-career-partner.html",  "duration": "30 min" },
+        { "id": 17, "title": "Research Mode & Deep Dives",             "path": "/Claude-Mastery/sessions/beginner/17-research-mode.html",            "duration": "30 min" }
+      ]
+    },
+    {
+      "id": "intermediate",
+      "label": "💻 Intermediate",
+      "sessions": [
+        { "id": 18, "title": "Claude Model Family Overview",           "path": "/Claude-Mastery/sessions/intermediate/18-model-family.html",          "duration": "30 min" },
+        { "id": 19, "title": "API Keys & Your First API Request",      "path": "/Claude-Mastery/sessions/intermediate/19-api-first-request.html",     "duration": "40 min" },
+        { "id": 20, "title": "Multi-Turn Conversations & System Prompts", "path": "/Claude-Mastery/sessions/intermediate/20-multi-turn-system.html", "duration": "40 min" },
+        { "id": 21, "title": "Temperature, Streaming & Output Control","path": "/Claude-Mastery/sessions/intermediate/21-temperature-streaming.html", "duration": "35 min" },
+        { "id": 22, "title": "Structured Data & JSON Outputs",         "path": "/Claude-Mastery/sessions/intermediate/22-structured-data.html",       "duration": "35 min" },
+        { "id": 23, "title": "Prompt Engineering — Clear & Direct",    "path": "/Claude-Mastery/sessions/intermediate/23-prompt-engineering.html",    "duration": "40 min" },
+        { "id": 24, "title": "XML Tags, Examples & Prompt Structure",  "path": "/Claude-Mastery/sessions/intermediate/24-xml-tags-examples.html",    "duration": "35 min" },
+        { "id": 25, "title": "Prompt Evaluation & Eval Workflows",     "path": "/Claude-Mastery/sessions/intermediate/25-prompt-evaluation.html",    "duration": "45 min" },
+        { "id": 26, "title": "Extended Thinking, Vision & PDF Support","path": "/Claude-Mastery/sessions/intermediate/26-extended-thinking.html",    "duration": "40 min" },
+        { "id": 27, "title": "Prompt Caching — Rules & Implementation","path": "/Claude-Mastery/sessions/intermediate/27-prompt-caching.html",       "duration": "35 min" },
+        { "id": 28, "title": "Tool Use & Function Calling",            "path": "/Claude-Mastery/sessions/intermediate/28-tool-use.html",              "duration": "45 min" },
+        { "id": 29, "title": "Multi-Turn Tool Conversations",          "path": "/Claude-Mastery/sessions/intermediate/29-multi-turn-tools.html",      "duration": "45 min" },
+        { "id": 30, "title": "Introduction to MCP",                    "path": "/Claude-Mastery/sessions/intermediate/30-intro-mcp.html",             "duration": "40 min" },
+        { "id": 31, "title": "Defining MCP Tools, Resources & Prompts","path": "/Claude-Mastery/sessions/intermediate/31-mcp-tools-resources.html", "duration": "45 min" },
+        { "id": 32, "title": "Claude Code — Install & First Prompt",   "path": "/Claude-Mastery/sessions/intermediate/32-claude-code-intro.html",    "duration": "40 min" },
+        { "id": 33, "title": "The Explore → Plan → Code → Commit Flow","path": "/Claude-Mastery/sessions/intermediate/33-explore-plan-code.html",   "duration": "45 min" },
+        { "id": 34, "title": "Context Management & Code Review",       "path": "/Claude-Mastery/sessions/intermediate/34-context-management.html",   "duration": "35 min" },
+        { "id": 35, "title": "Claude Cowork — Setup, Plugins & Teams", "path": "/Claude-Mastery/sessions/intermediate/35-claude-cowork.html",        "duration": "35 min" }
+      ]
+    },
+    {
+      "id": "advanced",
+      "label": "🚀 Advanced",
+      "sessions": [
+        { "id": 36, "title": "RAG Pipelines — Chunking & Embeddings",  "path": "/Claude-Mastery/sessions/advanced/36-rag-pipelines.html",            "duration": "50 min" },
+        { "id": 37, "title": "BM25 Search & Multi-Index RAG",          "path": "/Claude-Mastery/sessions/advanced/37-bm25-multi-index.html",          "duration": "45 min" },
+        { "id": 38, "title": "Reranking & Contextual Retrieval",       "path": "/Claude-Mastery/sessions/advanced/38-reranking-retrieval.html",       "duration": "45 min" },
+        { "id": 39, "title": "Agents & Workflows — When to Use Each",  "path": "/Claude-Mastery/sessions/advanced/39-agents-workflows.html",          "duration": "45 min" },
+        { "id": 40, "title": "Parallelization, Chaining & Routing",    "path": "/Claude-Mastery/sessions/advanced/40-parallelization-chaining.html",  "duration": "50 min" },
+        { "id": 41, "title": "Agents with Tools & Environment Inspection", "path": "/Claude-Mastery/sessions/advanced/41-agents-tools.html",          "duration": "50 min" },
+        { "id": 42, "title": "Introduction to Subagents",              "path": "/Claude-Mastery/sessions/advanced/42-subagents-intro.html",           "duration": "40 min" },
+        { "id": 43, "title": "Designing Effective Subagents",          "path": "/Claude-Mastery/sessions/advanced/43-designing-subagents.html",       "duration": "45 min" },
+        { "id": 44, "title": "Claude Code Hooks — Define & Implement", "path": "/Claude-Mastery/sessions/advanced/44-claude-code-hooks.html",         "duration": "45 min" },
+        { "id": 45, "title": "The Claude Code SDK",                    "path": "/Claude-Mastery/sessions/advanced/45-claude-code-sdk.html",           "duration": "50 min" },
+        { "id": 46, "title": "Agent Skills — Create, Configure & Share","path": "/Claude-Mastery/sessions/advanced/46-agent-skills.html",             "duration": "45 min" },
+        { "id": 47, "title": "MCP Advanced — Sampling & Notifications","path": "/Claude-Mastery/sessions/advanced/47-mcp-advanced.html",             "duration": "50 min" },
+        { "id": 48, "title": "MCP Transports — STDIO & StreamableHTTP","path": "/Claude-Mastery/sessions/advanced/48-mcp-transports.html",           "duration": "50 min" },
+        { "id": 49, "title": "Claude on Amazon Bedrock",               "path": "/Claude-Mastery/sessions/advanced/49-amazon-bedrock.html",            "duration": "45 min" },
+        { "id": 50, "title": "Claude on Google Vertex AI",             "path": "/Claude-Mastery/sessions/advanced/50-google-vertex.html",             "duration": "45 min" },
+        { "id": 51, "title": "Capstone — Ship a Claude-Powered App",   "path": "/Claude-Mastery/sessions/advanced/51-capstone.html",                 "duration": "90 min" }
+      ]
+    }
+  ]
+}

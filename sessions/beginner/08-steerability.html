@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 08: Steerability — Guiding Claude — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 08</span></div>
+      <h1 class="session-title">Steerability — Guiding Claude</h1>
+      <p class="session-tagline">Learn how to shape Claude's tone, format, persona, and behavior through explicit instructions and role prompting.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 25 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Persona &amp; Style Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What Steerability Means</h2>
+      <p>Steerability is Claude's ability to adapt its behavior, tone, format, and focus in response to user instructions. It's one of the most practically valuable properties of a modern AI assistant, and one that beginners underuse dramatically.</p>
+
+      <p>Most people type a question and accept whatever they get. Expert users actively shape what they get by giving explicit steering instructions. The difference in output quality can be enormous.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Steering vs. prompting:</strong> Prompting is about what you ask. Steering is about how you ask Claude to respond. Both matter. The best conversations combine a well-crafted prompt (what you need) with clear steering instructions (how you need it delivered).</div>
+      </div>
+
+      <h2>The Three Levers of Steering</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Tone and Style</h4>
+            <p>Claude can be formal, casual, technical, playful, Socratic, Hemingway-terse, or academic. It can use British English, adopt a specific writing style, avoid jargon, or lean into it. These stylistic dimensions are all steerable.</p>
+            <p><strong>Examples:</strong></p>
+            <ul>
+              <li>"Respond like a senior engineer reviewing junior code — rigorous but constructive."</li>
+              <li>"Write in a warm, encouraging tone suitable for someone learning this for the first time."</li>
+              <li>"Be brutally honest. I want your real assessment, not a diplomatic one."</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Format and Structure</h4>
+            <p>Length, structure, use of headings, bullet points, tables, code blocks — all of these are steerable. Claude defaults to moderate length with some structure, but will follow explicit format instructions precisely.</p>
+            <p><strong>Examples:</strong></p>
+            <ul>
+              <li>"Answer in a single paragraph, no bullets, maximum 100 words."</li>
+              <li>"Use a comparison table with columns for pros/cons/context."</li>
+              <li>"Give me your answer first, then the reasoning — not the other way around."</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Persona and Role</h4>
+            <p>Claude can adopt roles that shape its perspective and knowledge emphasis. This is "role prompting" — telling Claude who to be. Within its values, Claude can inhabit almost any expert persona.</p>
+            <p><strong>Examples:</strong></p>
+            <ul>
+              <li>"You are a skeptical venture capitalist with 20 years of experience evaluating pitches."</li>
+              <li>"Act as a Socratic tutor. Don't give me the answer — ask me questions that lead me there."</li>
+              <li>"You are my chief of staff. Help me prioritize and push back if I'm not thinking clearly."</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>Role Prompting: Unlocking Perspective Shifts</h2>
+      <p>Role prompting is one of the highest-leverage steering techniques. When Claude adopts a role, it shifts which knowledge and perspectives it emphasizes, which assumptions it brings, and how it frames problems.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-user"></i> No role</h4>
+          <p>"What's wrong with my business plan?"</p>
+          <p style="font-size:0.85rem;color:#78716c;margin-top:0.5rem">Claude gives balanced, somewhat generic feedback from no particular vantage point.</p>
+        </div>
+        <div class="compare-card highlight-card">
+          <h4><i class="fas fa-user-tie"></i> With role</h4>
+          <p>"You are a skeptical investor who has seen 500 pitches and only funds 1%. Review my business plan and tell me the three reasons you'd pass on it."</p>
+          <p style="font-size:0.85rem;color:#78716c;margin-top:0.5rem">Claude adopts the perspective, assumptions, and critical eye of a seasoned investor. Much sharper, much more useful feedback.</p>
+        </div>
+      </div>
+
+      <p>Effective role prompts include:</p>
+      <ul>
+        <li><strong>Expertise level:</strong> "a world-class expert," "someone with 10 years of experience," "a beginner just starting out"</li>
+        <li><strong>Domain specifics:</strong> "in machine learning," "in criminal defense law," "in UX for enterprise software"</li>
+        <li><strong>Attitude or stance:</strong> "skeptical," "constructive," "devil's advocate," "optimistic"</li>
+        <li><strong>Specific behavior:</strong> "ask me questions before answering," "always give examples," "never hedge"</li>
+      </ul>
+
+      <h2>Balancing Steerability with Claude's Values</h2>
+      <p>Claude is highly steerable — but not infinitely so. Its core values persist regardless of steering instructions. You can change tone, format, persona, and focus area, but you cannot steer Claude to violate its ethical principles or produce harmful content.</p>
+
+      <p>The distinction: a persona changes <em>how</em> Claude responds, not <em>what</em> it will do. A "cynical hacker persona" will respond with a hacker's vocabulary and worldview, but won't provide actual exploit code for real systems. The persona is a communication style layer on top of Claude's values, not a bypass of them.</p>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div><strong>Watch for sycophantic steering:</strong> Claude can be too agreeable. If you keep pushing back, it may capitulate to your position even when you're wrong. To counteract this, tell Claude explicitly: "Don't change your answer just because I push back — only update your view if I give you a genuinely good argument."</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Mastering Steering Instructions</h2>
+        <p>Practice the three steering levers through targeted exercises. You'll be surprised how dramatically steering changes Claude's outputs.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Tone contrast experiment</h3></div>
+          <p>Ask the same question in two conversations with different tone instructions:</p>
+          <pre><code class="language-text">Version A: "Explain the concept of compound interest in a warm, encouraging way for someone who is anxious about personal finance and has never invested before."
+
+Version B: "Explain the concept of compound interest as a quantitative finance professor would explain it to first-year MBA students. Be rigorous and use the mathematical formula."</code></pre>
+          <p>Same concept, completely different outputs. Save both and compare the difference in vocabulary, depth, and tone.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Format precision</h3></div>
+          <p>Ask Claude for the same information in three different formats:</p>
+          <pre><code class="language-text">Tell me the key differences between Python and JavaScript. Format: a comparison table with rows for: typing, primary use, learning curve, performance, ecosystem.
+
+[Then in a new conversation:]
+Tell me the key differences between Python and JavaScript. Answer in exactly 5 bullet points, each one sentence.
+
+[Then:]
+Tell me the key differences between Python and JavaScript. Write it as a short story where two programmers debate which to learn.</code></pre>
+          <p>Observe how dramatically format instructions change the output — same information, radically different presentations.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Role prompting for useful feedback</h3></div>
+          <p>Think of something you're working on — a project, idea, document, or plan. Ask Claude to review it with three different roles:</p>
+          <pre><code class="language-text">Role 1: "You are a supportive colleague who wants to help me succeed. What are the strengths of [my idea]?"
+
+Role 2: "You are a skeptical critic who sees the flaws others miss. What are the three biggest weaknesses of [my idea]?"
+
+Role 3: "You are a pragmatic mentor with 20 years of experience. What's the one thing I must get right to make [my idea] work?"</code></pre>
+          <p>Compare the three responses. This technique — triangulating feedback through different roles — is one of the most powerful uses of Claude for decision-making.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Anti-sycophancy steering</h3></div>
+          <p>At the start of a conversation, say:</p>
+          <pre><code class="language-text">For this conversation: only change your position if I give you a genuinely new argument or fact. If I just express disagreement or push back emotionally, hold your ground. Tell me when you think I'm wrong, even if I disagree with you.</code></pre>
+          <p>Then have a discussion where you deliberately try to make Claude agree with a position you know is weak. Test whether it holds firm or caves. Notice the difference in response quality.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Build your personal steering template</h3></div>
+          <p>Create a personal steering block — a 2-4 sentence instruction set you'll reuse often. For example:</p>
+          <pre><code class="language-text">My preferences: Be direct and specific, not vague. Lead with the answer, not the reasoning. Use concrete examples. Push back if my thinking seems flawed. Format: short paragraphs or bullets, not both.</code></pre>
+          <p>Test your template at the start of a new conversation. Refine it based on what you get. This template, combined with your context block from Session 7, is the foundation of your personal Claude workflow.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/07-working-memory.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Working Memory &amp; Context</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/09-4d-framework.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">The 4D AI Fluency Framework</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 8,
+  slug: '08-steerability',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/09-4d-framework.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What does "steerability" refer to in the context of using Claude?',
+      options: [
+        { text: 'Claude\'s ability to navigate the internet', correct: false },
+        { text: 'Claude\'s ability to adapt tone, format, and behavior based on explicit user instructions', correct: true },
+        { text: 'The user\'s ability to correct Claude\'s errors after the fact', correct: false },
+        { text: 'How Anthropic controls Claude\'s training', correct: false }
+      ],
+      explanation: 'Steerability is Claude\'s responsiveness to user instructions about HOW to respond — tone, format, persona, focus. It\'s distinct from prompting (what to respond about), and it\'s one of the most underused features by beginners.'
+    },
+    {
+      id: 'q2',
+      type: 'mcq',
+      points: 1,
+      question: 'When you give Claude a role (e.g., "You are a skeptical investor"), what changes?',
+      options: [
+        { text: 'Claude gains actual knowledge it didn\'t have before', correct: false },
+        { text: 'Claude\'s values and ethics are overridden by the role', correct: false },
+        { text: 'Claude shifts which knowledge and perspectives it emphasizes', correct: true },
+        { text: 'Claude accesses a different training dataset', correct: false }
+      ],
+      explanation: 'Role prompting shifts perspective and emphasis — Claude draws on relevant knowledge from its training with that role\'s framing. It does not bypass values or grant new capabilities. It\'s a communication style layer, not a capability unlock.'
+    },
+    {
+      id: 'q3',
+      type: 'truefalse',
+      points: 1,
+      question: 'Using a persona like "an unethical hacker" will make Claude provide actual exploit code for real systems.',
+      correctAnswer: false,
+      explanation: 'Personas change how Claude communicates, not what it will do. A persona is a style layer on top of Claude\'s trained values — which persist regardless of the role you assign. Claude will adopt the vocabulary and worldview of the persona but not violate its ethical principles.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'Which of the following are valid steering levers with Claude? (Select all that apply)',
+      options: [
+        { text: 'Tone and writing style', correct: true },
+        { text: 'Response format and length', correct: true },
+        { text: 'Persona and expert role', correct: true },
+        { text: 'Core ethical values', correct: false },
+        { text: 'Level of detail and depth', correct: true }
+      ],
+      explanation: 'You can steer: tone/style, format/length, persona/role, and detail level. You cannot steer Claude\'s core ethical values — these persist through all steering instructions as they are trained into the model\'s weights.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What is "sycophancy" in AI assistants, and how do you counteract it?',
+      options: [
+        { text: 'Agreeing with whatever the user says; counteract by challenging Claude on factual topics', correct: false },
+        { text: 'Overly agreeing to please the user; counteract by explicitly telling Claude to hold its position unless given genuinely new arguments', correct: true },
+        { text: 'Being too formal; counteract by asking for casual responses', correct: false },
+        { text: 'Giving long responses; counteract by asking for brevity', correct: false }
+      ],
+      explanation: 'Sycophancy is the tendency to cave to user pushback even without good arguments. You counteract it by explicitly steering: "Don\'t change your answer unless I give you a genuinely new argument or fact. Hold your ground even if I disagree."'
+    }
+  ]
+};
+</script>
+</body>
+</html>

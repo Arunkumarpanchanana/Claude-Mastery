@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 36: RAG Pipelines — Chunking &amp; Embeddings — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/advanced.html">Advanced</a><span class="sep">›</span><span>Session 36</span></div>
+      <h1 class="session-title">RAG Pipelines — Chunking &amp; Embeddings</h1>
+      <p class="session-tagline">Build retrieval-augmented generation from scratch: chunk documents intelligently, embed them into vector space, and retrieve relevant context for Claude.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 50 min</span>
+        <span><span class="badge badge-advanced"><i class="fas fa-rocket"></i> Advanced</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <!-- LEARN TAB -->
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What is RAG and Why Does It Matter?</h2>
+      <p>Large language models like Claude are trained on data up to a cutoff date and have no knowledge of your private documents, internal wikis, or real-time information. <strong>Retrieval-Augmented Generation (RAG)</strong> solves this by dynamically fetching relevant context at query time and injecting it into the prompt before Claude generates a response.</p>
+
+      <p>Instead of stuffing an entire document corpus into the context window (expensive and often beyond context limits), RAG retrieves only the most relevant passages. This approach is faster, cheaper, more accurate, and scales to millions of documents.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>The core insight:</strong> Claude's 200K context window is powerful, but a well-designed RAG system lets you query across millions of documents — far beyond any context window. RAG is how production AI apps handle knowledge at scale.</div>
+      </div>
+
+      <h2>The Full RAG Flow</h2>
+      <p>RAG has two distinct phases: an <strong>offline indexing phase</strong> (run once or periodically) and an <strong>online query phase</strong> (run on every user request).</p>
+
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-file-alt"></i></div>
+          <div class="flow-label">Raw Documents<br/><small>PDFs, HTML, Markdown, DB rows</small></div>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-cut"></i></div>
+          <div class="flow-label">Chunking<br/><small>Split into passages</small></div>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-vector-square"></i></div>
+          <div class="flow-label">Embedding<br/><small>Convert text → vectors</small></div>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-database"></i></div>
+          <div class="flow-label">Vector Store<br/><small>FAISS / ChromaDB</small></div>
+        </div>
+      </div>
+      <div class="flow-diagram" style="margin-top:1rem;">
+        <div class="flow-step highlight-step">
+          <div class="flow-icon"><i class="fas fa-question-circle"></i></div>
+          <div class="flow-label">User Query</div>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step highlight-step">
+          <div class="flow-icon"><i class="fas fa-search"></i></div>
+          <div class="flow-label">Retrieve Top-K<br/><small>Similarity search</small></div>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step highlight-step">
+          <div class="flow-icon"><i class="fas fa-robot"></i></div>
+          <div class="flow-label">Claude + Context<br/><small>Augmented prompt</small></div>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="flow-step highlight-step">
+          <div class="flow-icon"><i class="fas fa-comment-dots"></i></div>
+          <div class="flow-label">Grounded Answer</div>
+        </div>
+      </div>
+
+      <h2>Document Chunking Strategies</h2>
+      <p>Chunking is the most underrated decision in a RAG pipeline. Chunks that are too large include irrelevant text; chunks that are too small lose context. The right strategy depends on your document type.</p>
+
+      <h3>1. Fixed-Size Chunking</h3>
+      <p>Split documents into chunks of exactly N characters or tokens, with an optional overlap. Simple, fast, and works as a baseline.</p>
+
+      <pre><code class="language-python">def fixed_size_chunk(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]:
+    """Split text into fixed-size chunks with overlap."""
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start += chunk_size - overlap  # slide forward with overlap
+    return chunks</code></pre>
+
+      <div class="callout callout-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div><strong>Pitfall:</strong> Fixed chunking can split mid-sentence or mid-paragraph, breaking semantic coherence. Always add overlap (typically 10–15% of chunk size) so sentences at boundaries appear in two chunks.</div>
+      </div>
+
+      <h3>2. Recursive / Semantic Chunking</h3>
+      <p>Try to split at natural boundaries: paragraphs first, then sentences, then words. LangChain's <code>RecursiveCharacterTextSplitter</code> implements this pattern well.</p>
+
+      <pre><code class="language-python">def recursive_chunk(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]:
+    """Recursively split at natural boundaries."""
+    separators = ["\n\n", "\n", ". ", " ", ""]
+
+    def split_with_separator(text, separators, chunk_size, overlap):
+        if not separators:
+            return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size - overlap)]
+
+        sep = separators[0]
+        splits = text.split(sep)
+
+        chunks = []
+        current = ""
+        for split in splits:
+            candidate = current + (sep if current else "") + split
+            if len(candidate) <= chunk_size:
+                current = candidate
+            else:
+                if current:
+                    chunks.append(current)
+                if len(split) > chunk_size:
+                    # Recursively split this large piece
+                    sub = split_with_separator(split, separators[1:], chunk_size, overlap)
+                    chunks.extend(sub)
+                    current = ""
+                else:
+                    current = split
+        if current:
+            chunks.append(current)
+        return chunks
+
+    return split_with_separator(text, separators, chunk_size, overlap)</code></pre>
+
+      <h3>3. Document-Structure-Aware Chunking</h3>
+      <p>For structured documents (Markdown, HTML, code), split by headers or logical sections. This keeps each chunk topically coherent.</p>
+
+      <pre><code class="language-python">import re
+
+def markdown_chunk(text: str) -> list[dict]:
+    """Split markdown by headers, preserving section structure."""
+    sections = re.split(r'\n(?=#{1,3} )', text)
+    chunks = []
+    for section in sections:
+        if not section.strip():
+            continue
+        # Extract header as metadata
+        lines = section.strip().split('\n')
+        header = lines[0].lstrip('#').strip() if lines[0].startswith('#') else "Introduction"
+        chunks.append({
+            "content": section.strip(),
+            "metadata": {"header": header, "length": len(section)}
+        })
+    return chunks</code></pre>
+
+      <h2>Text Embeddings</h2>
+      <p>An embedding model converts text into a dense vector of numbers (typically 384–3072 dimensions). Semantically similar text produces similar vectors — this is what powers similarity search.</p>
+
+      <h3>Option 1: sentence-transformers (local, free)</h3>
+      <pre><code class="language-python">from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# Load a small but capable model (free, runs locally)
+model = SentenceTransformer('all-MiniLM-L6-v2')  # 384-dimensional embeddings
+
+texts = [
+    "Claude is an AI assistant made by Anthropic.",
+    "Retrieval augmented generation improves LLM accuracy.",
+    "The capital of France is Paris."
+]
+
+# Embed all texts at once (batched for efficiency)
+embeddings = model.encode(texts, normalize_embeddings=True)
+print(f"Shape: {embeddings.shape}")  # (3, 384)
+
+# Cosine similarity between first two
+similarity = np.dot(embeddings[0], embeddings[1])
+print(f"Similarity (Claude vs RAG): {similarity:.3f}")  # ~0.3
+similarity2 = np.dot(embeddings[0], embeddings[2])
+print(f"Similarity (Claude vs Paris): {similarity2:.3f}")  # ~0.1</code></pre>
+
+      <h3>Option 2: OpenAI / Anthropic-compatible Embeddings API</h3>
+      <pre><code class="language-python">import anthropic
+import numpy as np
+
+# Note: Anthropic doesn't provide embeddings directly; use voyage-ai (Anthropic-recommended)
+# or OpenAI's text-embedding-3-small for production
+import voyageai
+
+vo = voyageai.Client()  # uses VOYAGE_API_KEY
+
+texts = ["What is RAG?", "Retrieval augmented generation explained"]
+result = vo.embed(texts, model="voyage-3-lite", input_type="document")
+
+embeddings = np.array(result.embeddings)
+print(f"Dimensions: {embeddings.shape[1]}")  # 512 for voyage-3-lite</code></pre>
+
+      <h2>Vector Stores</h2>
+      <p>A vector store indexes your embeddings for fast approximate nearest-neighbor (ANN) search.</p>
+
+      <h3>FAISS (Facebook AI Similarity Search)</h3>
+      <p>FAISS is the gold standard for in-memory vector search. No server required — it's a library.</p>
+
+      <pre><code class="language-python">import faiss
+import numpy as np
+
+# Create a flat (exact) index for small datasets
+d = 384  # embedding dimension
+index = faiss.IndexFlatIP(d)  # Inner Product = cosine similarity if normalized
+
+# Add embeddings to the index
+embeddings = np.random.randn(1000, d).astype('float32')
+faiss.normalize_L2(embeddings)  # normalize for cosine
+index.add(embeddings)
+print(f"Total vectors: {index.ntotal}")  # 1000
+
+# Query
+query = np.random.randn(1, d).astype('float32')
+faiss.normalize_L2(query)
+distances, indices = index.search(query, k=5)  # top-5 results
+print(f"Top-5 indices: {indices[0]}")
+print(f"Top-5 scores:  {distances[0]}")</code></pre>
+
+      <h3>ChromaDB (persistent, with metadata filtering)</h3>
+      <p>ChromaDB adds persistence, metadata, and a simple API — great for prototypes and small production apps.</p>
+
+      <pre><code class="language-python">import chromadb
+from chromadb.utils import embedding_functions
+
+# Create an in-memory client (use chromadb.PersistentClient for disk)
+client = chromadb.Client()
+ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+    model_name="all-MiniLM-L6-v2"
+)
+
+collection = client.create_collection("my_docs", embedding_function=ef)
+
+# Add documents
+collection.add(
+    documents=["RAG improves accuracy", "Claude is safe by design", "FAISS is fast"],
+    metadatas=[{"source": "doc1"}, {"source": "doc2"}, {"source": "doc3"}],
+    ids=["id1", "id2", "id3"]
+)
+
+# Query
+results = collection.query(query_texts=["How does RAG help?"], n_results=2)
+print(results['documents'])   # [['RAG improves accuracy', 'Claude is safe by design']]
+print(results['distances'])   # similarity scores</code></pre>
+
+      <h2>Choosing the Right Tools</h2>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h4><i class="fas fa-bolt"></i> FAISS</h4>
+          <ul>
+            <li>Best: high-performance, large scale</li>
+            <li>In-memory (add your own persistence)</li>
+            <li>Supports GPU acceleration</li>
+            <li>No metadata filtering built-in</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-database"></i> ChromaDB</h4>
+          <ul>
+            <li>Best: rapid prototyping</li>
+            <li>Persistent storage out of box</li>
+            <li>Rich metadata filtering</li>
+            <li>HTTP server mode available</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <h4><i class="fas fa-cloud"></i> Pinecone / Weaviate</h4>
+          <ul>
+            <li>Best: production, managed service</li>
+            <li>Fully managed, auto-scaling</li>
+            <li>Advanced filtering and namespacing</li>
+            <li>Cost scales with data size</li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /learn -->
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-header">
+        <h2><i class="fas fa-flask"></i> Lab: Build a Basic RAG Pipeline</h2>
+        <p>In this lab you will chunk a sample document, embed the chunks with sentence-transformers, store them in FAISS, and retrieve relevant passages to answer a question with Claude.</p>
+      </div>
+
+      <div class="lab-prereqs">
+        <h3>Prerequisites</h3>
+        <pre><code class="language-python">pip install anthropic sentence-transformers faiss-cpu numpy</code></pre>
+      </div>
+
+      <h3>Step 1: Prepare and Chunk a Document</h3>
+      <pre><code class="language-python">import re
+
+DOCUMENT = """
+# Introduction to Transformers
+
+Transformers are a neural network architecture introduced in the paper
+"Attention Is All You Need" (Vaswani et al., 2017). They use a mechanism
+called self-attention to weigh the relevance of different parts of the input.
+
+## Why Transformers Replaced RNNs
+
+Recurrent Neural Networks (RNNs) process sequences one token at a time,
+making them slow to train on long sequences. Transformers process all tokens
+simultaneously using attention, enabling parallelization on modern GPUs.
+This made training on massive datasets feasible for the first time.
+
+## Self-Attention Explained
+
+Self-attention computes a weighted sum of all token representations in a
+sequence. For each token, it asks: "Which other tokens are relevant to me?"
+The weights are computed via dot products between query and key vectors.
+Higher dot products mean more relevance.
+
+## BERT vs GPT Architectures
+
+BERT uses a bidirectional encoder — it can look at tokens from both left
+and right. It's ideal for classification and understanding tasks.
+GPT uses a causal (left-to-right) decoder, making it ideal for text
+generation. Claude is based on a decoder-only transformer, like GPT.
+
+## Context Windows
+
+The context window is the maximum number of tokens a transformer can
+process at once. Claude supports up to 200,000 tokens — among the largest
+in the industry. Longer context windows allow working with entire codebases
+or books in a single session.
+"""
+
+def recursive_chunk(text: str, chunk_size: int = 300, overlap: int = 50) -> list[str]:
+    separators = ["\n\n", "\n", ". ", " "]
+
+    def _split(text, seps):
+        if not seps or len(text) <= chunk_size:
+            return [text] if text.strip() else []
+        sep = seps[0]
+        parts = text.split(sep)
+        chunks, current = [], ""
+        for part in parts:
+            candidate = current + (sep if current else "") + part
+            if len(candidate) <= chunk_size:
+                current = candidate
+            else:
+                if current:
+                    chunks.append(current.strip())
+                current = part if len(part) <= chunk_size else ""
+                if len(part) > chunk_size:
+                    chunks.extend(_split(part, seps[1:]))
+        if current.strip():
+            chunks.append(current.strip())
+        return chunks
+
+    chunks = _split(text, separators)
+    # Add overlap
+    overlapped = []
+    for i, chunk in enumerate(chunks):
+        if i > 0:
+            prev_words = chunks[i-1].split()[-overlap//5:]
+            prefix = " ".join(prev_words)
+            overlapped.append(prefix + " " + chunk)
+        else:
+            overlapped.append(chunk)
+    return overlapped
+
+chunks = recursive_chunk(DOCUMENT)
+print(f"Created {len(chunks)} chunks")
+for i, c in enumerate(chunks):
+    print(f"\n--- Chunk {i+1} ({len(c)} chars) ---")
+    print(c[:100] + "...")</code></pre>
+
+      <h3>Step 2: Embed Chunks and Build FAISS Index</h3>
+      <pre><code class="language-python">import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer
+
+# Load embedding model (downloads ~90MB on first run)
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+
+# Embed all chunks
+print("Embedding chunks...")
+embeddings = embedder.encode(chunks, normalize_embeddings=True, show_progress_bar=True)
+embeddings = embeddings.astype('float32')
+
+# Build FAISS index
+d = embeddings.shape[1]  # 384 dimensions
+index = faiss.IndexFlatIP(d)  # Inner product = cosine similarity (on normalized vecs)
+index.add(embeddings)
+print(f"Index built with {index.ntotal} vectors of dimension {d}")</code></pre>
+
+      <h3>Step 3: Retrieve Relevant Chunks</h3>
+      <pre><code class="language-python">def retrieve(query: str, k: int = 3) -> list[dict]:
+    """Retrieve top-k most relevant chunks for a query."""
+    q_emb = embedder.encode([query], normalize_embeddings=True).astype('float32')
+    distances, indices = index.search(q_emb, k)
+
+    results = []
+    for dist, idx in zip(distances[0], indices[0]):
+        if idx >= 0:
+            results.append({
+                "chunk": chunks[idx],
+                "score": float(dist),
+                "index": int(idx)
+            })
+    return results
+
+# Test retrieval
+query = "How does self-attention work?"
+results = retrieve(query, k=3)
+print(f"Query: {query}\n")
+for r in results:
+    print(f"Score: {r['score']:.3f} | Chunk {r['index']}")
+    print(r['chunk'][:150])
+    print()</code></pre>
+
+      <h3>Step 4: Feed Context to Claude</h3>
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()  # uses ANTHROPIC_API_KEY
+
+def rag_query(user_question: str) -> str:
+    """Full RAG pipeline: retrieve + generate."""
+    # 1. Retrieve relevant context
+    retrieved = retrieve(user_question, k=3)
+    context_text = "\n\n---\n\n".join([r["chunk"] for r in retrieved])
+
+    # 2. Build augmented prompt
+    system = """You are a helpful assistant. Answer questions using ONLY the provided context.
+If the context doesn't contain enough information, say so clearly.
+Always cite which part of the context you used."""
+
+    user_prompt = f"""Context:
+{context_text}
+
+Question: {user_question}"""
+
+    # 3. Call Claude
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=512,
+        system=system,
+        messages=[{"role": "user", "content": user_prompt}]
+    )
+    return response.content[0].text
+
+# Test it!
+questions = [
+    "How does self-attention work?",
+    "Why were transformers better than RNNs?",
+    "What is Claude's context window size?"
+]
+
+for q in questions:
+    print(f"\nQ: {q}")
+    print(f"A: {rag_query(q)}")
+    print("-" * 60)</code></pre>
+
+      <div class="callout callout-success">
+        <i class="fas fa-check-circle"></i>
+        <div><strong>You built a working RAG pipeline!</strong> The key steps were: chunk the document, embed chunks, index with FAISS, embed the query at runtime, retrieve top-K, and pass context to Claude. This same pattern powers production RAG systems at scale.</div>
+      </div>
+    </div><!-- /lab -->
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/35-claude-cowork.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Claude Cowork</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/advanced/37-bm25-multi-index.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">BM25 &amp; Multi-Index RAG</span>
+      </a>
+    </div>
+  </main>
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 36,
+  slug: '36-rag-pipelines',
+  section: 'advanced',
+  nextPath: '/Claude-Mastery/sessions/advanced/37-bm25-multi-index.html',
+  quizData: [
+    {
+      question: "What problem does RAG primarily solve for large language models?",
+      options: [
+        "Making models faster at inference",
+        "Giving models access to private/up-to-date knowledge beyond training data",
+        "Reducing hallucinations caused by large context windows",
+        "Compressing the model's parameter count"
+      ],
+      correct: 1,
+      explanation: "RAG allows LLMs to access documents, databases, and real-time information that wasn't part of training data, without retraining the model."
+    },
+    {
+      question: "Why is overlap important in fixed-size chunking?",
+      options: [
+        "It reduces the total number of chunks stored",
+        "It ensures sentences at chunk boundaries appear in at least one complete chunk",
+        "It speeds up the embedding process",
+        "It increases embedding dimensionality"
+      ],
+      correct: 1,
+      explanation: "Without overlap, a sentence split across two chunks appears incomplete in both. Overlap ensures boundary content is fully represented in at least one chunk."
+    },
+    {
+      question: "What does normalizing embeddings before FAISS IndexFlatIP achieve?",
+      options: [
+        "It converts embeddings to integers for faster storage",
+        "It makes inner product equivalent to cosine similarity",
+        "It reduces the dimensionality of the embeddings",
+        "It enables GPU acceleration automatically"
+      ],
+      correct: 1,
+      explanation: "When vectors are L2-normalized (unit length), the inner product (dot product) equals cosine similarity. IndexFlatIP computes inner products, so normalization makes it a cosine search."
+    },
+    {
+      question: "Which chunking strategy is most appropriate for a Markdown document with clear section headers?",
+      options: [
+        "Fixed-size chunking at 512 characters",
+        "Random splitting based on token count",
+        "Document-structure-aware chunking splitting at headers",
+        "Character-level chunking with no overlap"
+      ],
+      correct: 2,
+      explanation: "Markdown headers define logical sections. Splitting at headers keeps each chunk topically coherent, which improves retrieval precision — the chunk about 'Self-Attention' won't be mixed with 'Context Windows'."
+    },
+    {
+      question: "In the RAG query phase, what is the correct order of operations?",
+      options: [
+        "Embed query → retrieve chunks → call Claude with context",
+        "Call Claude → retrieve chunks → embed query",
+        "Retrieve chunks → embed query → call Claude",
+        "Embed all documents again → search → call Claude"
+      ],
+      correct: 0,
+      explanation: "The query is embedded using the same model as the documents, then similarity search retrieves relevant chunks, and finally those chunks are passed as context to Claude."
+    }
+  ]
+};
+</script>
+</body>
+</html>

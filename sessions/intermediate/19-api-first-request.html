@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 19: API Keys & Your First API Request — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 19</span></div>
+      <h1 class="session-title">API Keys & Your First API Request</h1>
+      <p class="session-tagline">From zero to a working Claude API call in under 10 minutes — keys, SDK install, first response, error handling.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="get-your-api-key">Step 1 — Get Your API Key</h2>
+      <p>Navigate to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>, sign up or log in, and go to <strong>API Keys</strong> in the left sidebar. Click <strong>Create Key</strong>, give it a descriptive name (e.g., "local-dev"), and copy it immediately — it won't be shown again.</p>
+
+      <div class="warning-box">
+        <strong>Security:</strong> Never hardcode an API key in source code. Store it as an environment variable. Use a <code>.env</code> file locally (and add it to <code>.gitignore</code>), or use your deployment platform's secrets manager in production.
+      </div>
+
+      <p>Set the environment variable in your shell:</p>
+      <pre><code class="language-python"># In your terminal (bash/zsh)
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Or add to ~/.zshrc / ~/.bashrc so it persists
+echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.zshrc
+</code></pre>
+
+      <h2 id="install-the-sdk">Step 2 — Install the Python SDK</h2>
+      <pre><code class="language-python">pip install anthropic
+
+# With a virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate
+pip install anthropic
+</code></pre>
+
+      <h2 id="first-api-call">Step 3 — Your First messages.create() Call</h2>
+      <p>The core API method is <code>client.messages.create()</code>. It takes three required parameters: <code>model</code>, <code>max_tokens</code>, and <code>messages</code>.</p>
+
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+# The SDK auto-reads ANTHROPIC_API_KEY from the environment.
+# You can also pass it explicitly: anthropic.Anthropic(api_key="sk-ant-...")
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "What is the capital of France?"}
+    ]
+)
+
+print(response.content[0].text)
+# Output: The capital of France is Paris.
+</code></pre>
+
+      <h2 id="understanding-the-response">Step 4 — Understanding the Response Object</h2>
+      <p>The response is a <code>Message</code> object with several key fields:</p>
+
+      <pre><code class="language-python">print(response.id)            # msg_01XFDUDYJgAACzvnptvVoYEL
+print(response.type)          # "message"
+print(response.role)          # "assistant"
+print(response.model)         # "claude-sonnet-4-5"
+print(response.stop_reason)   # "end_turn" | "max_tokens" | "stop_sequence" | "tool_use"
+
+# Content is a list — usually one TextBlock for simple responses
+print(response.content)       # [TextBlock(text="...", type="text")]
+print(response.content[0].text)  # The actual text string
+
+# Token usage
+print(response.usage.input_tokens)   # tokens in your prompt
+print(response.usage.output_tokens)  # tokens in the response
+</code></pre>
+
+      <h2 id="error-handling">Step 5 — Error Handling Basics</h2>
+      <p>The SDK raises typed exceptions so you can handle specific cases:</p>
+
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+try:
+    response = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    print(response.content[0].text)
+
+except anthropic.AuthenticationError:
+    print("Invalid API key — check ANTHROPIC_API_KEY")
+
+except anthropic.RateLimitError:
+    print("Rate limit hit — add exponential backoff")
+
+except anthropic.APIConnectionError:
+    print("Network error — check your connection")
+
+except anthropic.APIStatusError as e:
+    print(f"API error {e.status_code}: {e.message}")
+</code></pre>
+
+      <h2 id="stop-reason-check">Always Check stop_reason</h2>
+      <p>If <code>stop_reason</code> is <code>"max_tokens"</code>, the response was cut off. Increase <code>max_tokens</code> or restructure your request.</p>
+
+      <pre><code class="language-python">if response.stop_reason == "max_tokens":
+    print("Warning: response was truncated. Increase max_tokens.")
+elif response.stop_reason == "end_turn":
+    print("Complete response received.")
+</code></pre>
+
+      <div class="tip-box">
+        <strong>max_tokens guidance:</strong> Set it generously for the expected output length, but not excessively — you're charged for output tokens generated, not for the max you set. Setting max_tokens=8192 for a one-sentence answer doesn't cost extra; it just caps the maximum.
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Build Your First API Script</h2>
+      <p>This lab walks you through a complete, production-ready first script with proper environment variable handling, error handling, and response inspection.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+first_api_call.py — Your first Anthropic API script
+Run: python first_api_call.py
+"""
+import os
+import anthropic
+
+# Check key is set before making any call
+if not os.environ.get("ANTHROPIC_API_KEY"):
+    raise EnvironmentError(
+        "ANTHROPIC_API_KEY not set.\n"
+        "Run: export ANTHROPIC_API_KEY='sk-ant-...'"
+    )
+
+client = anthropic.Anthropic()
+
+def ask_claude(question: str, model: str = "claude-haiku-4-5") -> str:
+    """Send a single question to Claude and return the text response."""
+    response = client.messages.create(
+        model=model,
+        max_tokens=512,
+        messages=[{"role": "user", "content": question}]
+    )
+
+    if response.stop_reason == "max_tokens":
+        print("[Warning] Response was truncated — consider increasing max_tokens")
+
+    return response.content[0].text
+
+
+def inspect_response(question: str) -> None:
+    """Make an API call and print a detailed inspection of the response."""
+    print(f"\nQuestion: {question}")
+    print("-" * 50)
+
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        messages=[{"role": "user", "content": question}]
+    )
+
+    print(f"Response ID  : {response.id}")
+    print(f"Model        : {response.model}")
+    print(f"Stop reason  : {response.stop_reason}")
+    print(f"Input tokens : {response.usage.input_tokens}")
+    print(f"Output tokens: {response.usage.output_tokens}")
+    print(f"Content type : {response.content[0].type}")
+    print(f"\nText:\n{response.content[0].text}")
+
+
+# --- Run the examples ---
+if __name__ == "__main__":
+    # Simple call
+    answer = ask_claude("Name three programming languages invented before 1990.")
+    print("Simple call result:")
+    print(answer)
+
+    # Detailed inspection
+    inspect_response("What is recursion in programming?")
+
+    # Error handling demo
+    try:
+        bad_client = anthropic.Anthropic(api_key="invalid-key")
+        bad_client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=10,
+            messages=[{"role": "user", "content": "test"}]
+        )
+    except anthropic.AuthenticationError as e:
+        print(f"\nCaught expected auth error: {e}")
+</code></pre>
+
+      <h3>Expected output</h3>
+      <pre><code class="language-python">Simple call result:
+Three programming languages invented before 1990:
+1. C (1972)
+2. Pascal (1970)
+3. Ada (1980)
+
+Question: What is recursion in programming?
+--------------------------------------------------
+Response ID  : msg_01...
+Model        : claude-haiku-4-5
+Stop reason  : end_turn
+Input tokens : 14
+Output tokens: 87
+Content type : text
+
+Text:
+Recursion is a programming technique where a function calls itself...
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/18-model-family.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Claude Model Family Overview</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/20-multi-turn-system.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Multi-Turn Conversations & System Prompts</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 19,
+  slug: '19-api-first-request',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/20-multi-turn-system.html',
+  quizData: [
+    {
+      question: "Which Python SDK method is used to send a message to Claude?",
+      options: ["client.chat.completions.create()", "client.messages.create()", "client.claude.send()", "client.generate()"],
+      correct: 1,
+      explanation: "The Anthropic Python SDK uses client.messages.create() to send messages and receive responses from Claude."
+    },
+    {
+      question: "What does a stop_reason of 'max_tokens' indicate?",
+      options: ["The request succeeded fully", "The response was cut off due to the token limit", "Claude refused to answer", "A network error occurred"],
+      correct: 1,
+      explanation: "stop_reason='max_tokens' means Claude was still generating when it hit the max_tokens limit — the response is incomplete."
+    },
+    {
+      question: "How should you store your Anthropic API key in a Python project?",
+      options: ["Hardcode it in the source file for simplicity", "Store it as an environment variable", "Put it in a public config.json file", "Commit it to your Git repository"],
+      correct: 1,
+      explanation: "API keys must be stored as environment variables, never hardcoded in source code or committed to version control."
+    },
+    {
+      question: "What Python exception should you catch when you provide an invalid API key?",
+      options: ["anthropic.RateLimitError", "anthropic.APIConnectionError", "anthropic.AuthenticationError", "anthropic.InvalidRequestError"],
+      correct: 2,
+      explanation: "anthropic.AuthenticationError is raised when the API key is invalid or missing."
+    },
+    {
+      question: "Where in the response object is the text of Claude's reply?",
+      options: ["response.text", "response.message", "response.content[0].text", "response.choices[0].message.content"],
+      correct: 2,
+      explanation: "The Anthropic SDK returns content as a list of blocks. For a standard text response, response.content[0].text contains the string."
+    }
+  ]
+};
+</script>
+</body>
+</html>

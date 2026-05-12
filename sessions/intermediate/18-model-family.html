@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 18: Claude Model Family Overview — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 18</span></div>
+      <h1 class="session-title">Claude Model Family Overview</h1>
+      <p class="session-tagline">Haiku, Sonnet, Opus — pick the right model for every job and stop overpaying for capability you don't need.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 30 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-chart-bar"></i> Model Comparison</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="the-model-tiers">The Three Model Tiers</h2>
+      <p>Anthropic ships Claude models in three performance tiers — Haiku, Sonnet, and Opus — optimized for different positions on the speed/cost/capability curve. Choosing the right tier is your first API decision and directly impacts user experience and your bill.</p>
+
+      <div class="info-box">
+        <strong>Mental model:</strong> Think of Haiku as a sports car (fast, efficient, not the most powerful), Sonnet as an SUV (balanced, does almost everything well), and Opus as a heavy-duty truck (maximum capability, higher cost, use when nothing else will do).
+      </div>
+
+      <h2 id="haiku-speed-and-cost">Haiku — Speed and Cost</h2>
+      <p>Haiku is Claude's fastest and most affordable model. It excels at:</p>
+      <ul>
+        <li><strong>Real-time applications</strong> — chatbots, autocomplete, instant classification</li>
+        <li><strong>High-volume pipelines</strong> — processing thousands of documents per hour</li>
+        <li><strong>Simple extraction tasks</strong> — pulling entities, categorizing sentiment, formatting data</li>
+        <li><strong>User-facing latency-sensitive features</strong> — anywhere sub-second response matters</li>
+      </ul>
+      <p>Haiku won't win on complex reasoning, nuanced writing, or ambiguous multi-step tasks — but for clear, well-specified work it performs remarkably well at a fraction of the cost.</p>
+
+      <h2 id="sonnet-the-workhorse">Sonnet — The Daily Driver</h2>
+      <p>Sonnet is the model most developers reach for first. It offers a strong balance of intelligence, speed, and cost. Use Sonnet for:</p>
+      <ul>
+        <li>Code generation and review</li>
+        <li>Summarization of moderate-length documents</li>
+        <li>Customer support with nuance</li>
+        <li>Agentic tasks that require some reasoning</li>
+        <li>Most production API use cases</li>
+      </ul>
+      <p>Claude 3.5 Sonnet and Claude 3.7 Sonnet represent major leaps in coding ability. If you're building a coding assistant, start with the latest Sonnet.</p>
+
+      <h2 id="opus-maximum-intelligence">Opus — Maximum Intelligence</h2>
+      <p>Opus is reserved for tasks that require the deepest reasoning, longest context retention, and highest accuracy. Deploy Opus when:</p>
+      <ul>
+        <li>Accuracy is more important than cost</li>
+        <li>Tasks require multi-step logical reasoning over long documents</li>
+        <li>You need research synthesis across complex material</li>
+        <li>Failures are expensive (legal, medical, financial analysis)</li>
+      </ul>
+
+      <h2 id="model-generations">Model Generations — Claude 3 vs 3.5 vs 4</h2>
+      <p>Within each tier, generations represent capability jumps:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Generation</th><th>Models</th><th>Key Improvement</th></tr></thead>
+          <tbody>
+            <tr><td>Claude 3</td><td>Haiku, Sonnet, Opus</td><td>First strong multimodal generation</td></tr>
+            <tr><td>Claude 3.5</td><td>Haiku, Sonnet</td><td>Major coding jump; computer use</td></tr>
+            <tr><td>Claude 3.7</td><td>Sonnet</td><td>Extended thinking; deeper reasoning</td></tr>
+            <tr><td>Claude 4</td><td>Sonnet, Opus</td><td>Frontier reasoning; best overall</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tip-box">
+        <strong>Tip:</strong> Always use the latest model in a tier unless you have a reason (cost budget, specific benchmark, existing evals). Anthropic maintains backwards-compatible aliases like <code>claude-sonnet-4-5</code> so pinning by full model ID gives you stability.
+      </div>
+
+      <h2 id="model-selection-strategy">Model Selection Strategy</h2>
+      <p>Follow this decision tree when selecting a model:</p>
+      <ol>
+        <li><strong>Start with Sonnet.</strong> It handles 80% of tasks well.</li>
+        <li><strong>Switch to Haiku</strong> if latency or cost is the bottleneck and task quality meets the bar.</li>
+        <li><strong>Upgrade to Opus</strong> only when Sonnet's accuracy is measurably insufficient. Run evals to prove this.</li>
+        <li><strong>Use routing</strong> — send simple queries to Haiku, complex to Sonnet/Opus — for the best cost/quality ratio at scale.</li>
+      </ol>
+
+      <h2 id="pricing-mental-model">Pricing Mental Model</h2>
+      <p>Prices shift with each generation release, but the relative ratios stay roughly stable. As a rule of thumb:</p>
+      <ul>
+        <li>Haiku costs ~10-20x less than Opus per token</li>
+        <li>Sonnet sits in between, often 3-5x less than Opus</li>
+        <li>For a million-token workload, this difference is meaningful budget</li>
+      </ul>
+      <p>Always check the <a href="https://anthropic.com/pricing" target="_blank">official pricing page</a> for current rates before committing to a production architecture.</p>
+
+      <h2 id="context-windows">Context Windows</h2>
+      <p>All modern Claude models support a 200K token context window — roughly 150,000 words or a full novel. This means you rarely hit context limits in practice. The main constraint is cost: longer prompts cost more, so trimming context still matters at scale.</p>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Compare Models Side by Side</h2>
+      <p>Run the same prompt through Haiku and Sonnet, then measure the latency and token usage difference yourself.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">import anthropic
+import time
+
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
+
+PROMPT = "Explain the tradeoffs between SQL and NoSQL databases in 3 bullet points."
+
+models = [
+    "claude-haiku-4-5",
+    "claude-sonnet-4-5",
+]
+
+for model in models:
+    start = time.time()
+    response = client.messages.create(
+        model=model,
+        max_tokens=256,
+        messages=[{"role": "user", "content": PROMPT}]
+    )
+    elapsed = time.time() - start
+
+    print(f"\n=== {model} ===")
+    print(f"Latency  : {elapsed:.2f}s")
+    print(f"In tokens: {response.usage.input_tokens}")
+    print(f"Out tokens: {response.usage.output_tokens}")
+    print("Response:")
+    print(response.content[0].text)
+</code></pre>
+
+      <h3>What to observe</h3>
+      <ul>
+        <li>Wall-clock latency difference (Haiku is typically 2-4x faster for short outputs)</li>
+        <li>Quality difference — does Sonnet add more nuance?</li>
+        <li>Token counts are identical for the same input; output length may differ</li>
+      </ul>
+
+      <h3>Extend the lab</h3>
+      <pre><code class="language-python"># Try a harder task — does the gap widen?
+HARD_PROMPT = """
+You are reviewing a distributed system design.
+Identify 5 potential single points of failure in:
+- A microservices architecture
+- With an API gateway
+- Redis cache
+- Postgres primary + replica
+- Async message queue (SQS)
+"""
+
+for model in models:
+    response = client.messages.create(
+        model=model,
+        max_tokens=512,
+        messages=[{"role": "user", "content": HARD_PROMPT}]
+    )
+    print(f"\n=== {model} ===")
+    print(response.content[0].text)
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/17-research-mode.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Research Mode</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/19-api-first-request.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">API Keys & Your First Request</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 18,
+  slug: '18-model-family',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/19-api-first-request.html',
+  quizData: [
+    {
+      question: "Which Claude model tier is best suited for a real-time chatbot where response latency is critical?",
+      options: ["Opus", "Sonnet", "Haiku", "All perform equally"],
+      correct: 2,
+      explanation: "Haiku is Claude's fastest model and is optimized for latency-sensitive, high-volume use cases like real-time chat."
+    },
+    {
+      question: "What is the recommended starting point when selecting a Claude model for a new project?",
+      options: ["Always start with Opus for best quality", "Start with Haiku and upgrade if needed", "Start with Sonnet and adjust based on evals", "Use all three models and pick the cheapest"],
+      correct: 2,
+      explanation: "Sonnet handles the majority of tasks well and is the recommended default starting point before optimizing up or down."
+    },
+    {
+      question: "What context window size do modern Claude models support?",
+      options: ["8K tokens", "32K tokens", "100K tokens", "200K tokens"],
+      correct: 3,
+      explanation: "Modern Claude models support a 200K token context window, equivalent to roughly 150,000 words."
+    },
+    {
+      question: "Claude 3.5 and 3.7 Sonnet models are particularly notable for improvements in which area?",
+      options: ["Image generation", "Coding ability and reasoning", "Speech recognition", "Database query optimization"],
+      correct: 1,
+      explanation: "Claude 3.5 Sonnet marked a major leap in coding performance, and 3.7 Sonnet added extended thinking for deeper reasoning."
+    },
+    {
+      question: "What is the primary reason to use model routing (sending some requests to Haiku, others to Sonnet)?",
+      options: ["To avoid API rate limits", "To optimize the cost/quality ratio at scale", "Because Sonnet can't handle simple tasks", "To comply with data residency requirements"],
+      correct: 1,
+      explanation: "Model routing sends simple queries to cheaper/faster models and complex ones to more capable models, optimizing the overall cost-to-quality ratio."
+    }
+  ]
+};
+</script>
+</body>
+</html>

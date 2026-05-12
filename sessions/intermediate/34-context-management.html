@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 34: Context Management & Code Review — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 34</span></div>
+      <h1 class="session-title">Context Management & Code Review</h1>
+      <p class="session-tagline">Keep Claude Code effective across long sessions with CLAUDE.md, smart context hygiene, and targeted code review prompts.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 35 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="claude-md">The CLAUDE.md File</h2>
+      <p>CLAUDE.md is a special file in your project root that Claude Code reads automatically at the start of every session. It's the single best way to give Claude persistent project-specific context without using up tokens on every prompt.</p>
+
+      <p>What to put in CLAUDE.md:</p>
+      <ul>
+        <li><strong>Project overview</strong> — what it does, who uses it, key goals</li>
+        <li><strong>Tech stack</strong> — language versions, frameworks, databases</li>
+        <li><strong>Architecture notes</strong> — key design decisions, module structure</li>
+        <li><strong>Coding standards</strong> — style guide, naming conventions, patterns to follow</li>
+        <li><strong>Common commands</strong> — how to run tests, build, deploy</li>
+        <li><strong>Key files</strong> — where important things live</li>
+        <li><strong>What to avoid</strong> — patterns, packages, or approaches not to use</li>
+      </ul>
+
+      <h2 id="claude-md-example">CLAUDE.md Example</h2>
+      <pre><code class="language-python"># Project: OrderFlow API
+
+## Overview
+B2B order management API for e-commerce. Powers order intake, fulfillment routing, and status tracking.
+
+## Stack
+- Python 3.12 + FastAPI
+- PostgreSQL 16 (SQLAlchemy 2.0 async)
+- Redis 7 (caching + job queue)
+- Docker + Kubernetes (GKE)
+
+## Architecture
+- src/api/ — route handlers (thin, no business logic)
+- src/services/ — business logic layer
+- src/models/ — SQLAlchemy ORM models
+- src/repositories/ — DB query layer
+- tests/ — pytest with async fixtures
+
+## Coding Standards
+- All functions have type hints and docstrings
+- No raw SQL — use SQLAlchemy ORM only
+- Async-first: all I/O must be async/await
+- Error handling: raise domain exceptions, catch at route level
+- No print() — use logging module with structured JSON logs
+
+## Common Commands
+```
+make test          # Run pytest suite
+make lint          # ruff + mypy
+make run           # docker compose up
+make migrate       # run alembic upgrade head
+```
+
+## Do NOT
+- Add new dependencies without checking existing package list
+- Use synchronous DB calls (breaks connection pool)
+- Hardcode configuration (use environment variables via pydantic-settings)
+</code></pre>
+
+      <h2 id="managing-context-window">Managing the Context Window</h2>
+      <p>Claude Code sessions accumulate context over time. Signs the context is getting unwieldy:</p>
+      <ul>
+        <li>Claude starts repeating itself or forgetting recent decisions</li>
+        <li>Responses become slower</li>
+        <li>Claude refers to files it read 20 messages ago as if current</li>
+      </ul>
+
+      <p>Strategies to manage this:</p>
+
+      <pre><code class="language-python"># Option 1: Use /clear to start fresh
+/clear
+# Then give Claude a quick summary of where you are
+
+# Option 2: Use compact mode (summarizes context automatically)
+claude --compact
+
+# Option 3: Task-scoped sessions
+# Start a new claude session for each distinct task
+# rather than one long session for everything
+</code></pre>
+
+      <h2 id="code-review">Using Claude for Code Review</h2>
+      <p>Claude Code is excellent as a code reviewer. Effective review prompts:</p>
+
+      <pre><code class="language-python"># Review a specific function
+> Review the calculate_discount() function in src/services/pricing.py
+  Check for:
+  1. Correctness — any logic bugs or edge cases?
+  2. Performance — any obvious bottlenecks?
+  3. Security — any injection or overflow risks?
+  4. Style — consistent with the rest of the codebase?
+  Be specific, cite line numbers.
+
+# Review a PR diff
+> Run 'git diff main...HEAD' and review all changes.
+  Flag any issues that should block merging.
+  Rate overall code quality: Ready / Needs Work / Major Issues.
+
+# Security-focused review
+> Read src/api/auth.py and check for common authentication vulnerabilities:
+  OWASP Top 10 relevant to auth, timing attacks, token handling.
+</code></pre>
+
+      <div class="tip-box">
+        <strong>Best practice:</strong> Ask Claude to cite specific line numbers and explain why something is an issue, not just flag it. "Line 42: the password comparison uses == instead of hmac.compare_digest(), making it vulnerable to timing attacks" is far more useful than "security issue in auth."
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Create CLAUDE.md and Use Claude to Review a Function</h2>
+
+      <a href="https://claude.ai/code" target="_blank" class="colab-btn"><i class="fas fa-external-link-alt"></i> Claude Code Docs</a>
+
+      <h3>Part 1 — Create CLAUDE.md for a Sample Project</h3>
+      <pre><code class="language-python"># Set up a sample project
+mkdir review-lab && cd review-lab
+git init
+
+# Create a sample Python file with intentional issues
+cat > app.py &lt;&lt; 'EOF'
+import sqlite3
+import hashlib
+
+def get_user(username):
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    # Fetch user from database
+    result = cursor.execute(
+        "SELECT * FROM users WHERE username = '" + username + "'"
+    )
+    return result.fetchone()
+
+def check_password(stored_hash, provided_password):
+    provided_hash = hashlib.md5(provided_password.encode()).hexdigest()
+    if stored_hash == provided_hash:
+        return True
+    return False
+
+def process_order(items):
+    total = 0
+    for item in items:
+        price = item['price']
+        qty = item['quantity']
+        discount = item.get('discount', 0)
+        total = total + (price * qty) - discount
+    print("Order total:", total)
+    return total
+
+def validate_email(email):
+    if "@" in email:
+        return True
+EOF
+
+git add app.py && git commit -m "Initial app"
+claude
+</code></pre>
+
+      <h3>Part 2 — Ask Claude to Create CLAUDE.md</h3>
+      <pre><code class="language-python">> Look at this project and create a CLAUDE.md file appropriate for it.
+  Include sections for: project overview, tech stack, coding standards,
+  and any red flags you see in the current code that should be documented
+  as patterns to avoid.
+</code></pre>
+
+      <h3>Part 3 — Code Review</h3>
+      <pre><code class="language-python">> Review app.py completely. For each function:
+  1. Rate severity of any issues: Critical / High / Medium / Low
+  2. Explain what the issue is
+  3. Show the corrected code inline
+
+  Be exhaustive — this is a security review.
+</code></pre>
+
+      <h3>Expected findings Claude should catch</h3>
+      <ul>
+        <li><strong>Critical:</strong> SQL injection in get_user() — string concatenation in query</li>
+        <li><strong>Critical:</strong> MD5 for password hashing — use bcrypt/argon2 instead</li>
+        <li><strong>High:</strong> == for password comparison — use hmac.compare_digest()</li>
+        <li><strong>Medium:</strong> No type hints on any function</li>
+        <li><strong>Medium:</strong> print() instead of logging</li>
+        <li><strong>Low:</strong> Email validation too naive — only checks for "@"</li>
+      </ul>
+
+      <h3>Part 4 — Fix and Verify</h3>
+      <pre><code class="language-python">> Fix all Critical and High severity issues. Show me the diff when done.
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/33-explore-plan-code.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">The Explore → Plan → Code → Commit Flow</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/35-claude-cowork.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Claude Cowork — Setup, Plugins & Teams</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 34,
+  slug: '34-context-management',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/35-claude-cowork.html',
+  quizData: [
+    {
+      question: "What is CLAUDE.md and when is it read?",
+      options: ["A configuration file read only when you run claude --init", "A markdown file Claude Code reads automatically at the start of every session", "A file where Claude saves its notes", "The changelog for Claude Code updates"],
+      correct: 1,
+      explanation: "CLAUDE.md is a project-specific file that Claude Code reads automatically at session start, providing persistent context like project architecture, coding standards, and commands."
+    },
+    {
+      question: "Which Claude Code command resets the context window for a fresh start?",
+      options: ["/reset", "/new", "/clear", "/flush"],
+      correct: 2,
+      explanation: "/clear clears the accumulated context window, letting you start fresh without the history of the current session."
+    },
+    {
+      question: "What is the most useful information to include in CLAUDE.md?",
+      options: ["Your API key and billing information", "Project overview, stack, architecture, coding standards, and common commands", "The full source code of every file", "Just the README.md contents"],
+      correct: 1,
+      explanation: "CLAUDE.md should contain project context that helps Claude understand the codebase and make consistent decisions: stack, architecture, standards, commands, and things to avoid."
+    },
+    {
+      question: "What makes a code review prompt effective when using Claude Code?",
+      options: ["Asking for a general 'code quality' assessment", "Specifying what to check, asking for severity ratings and line number citations", "Using as few words as possible", "Only asking Claude to check for typos"],
+      correct: 1,
+      explanation: "Effective code review prompts specify what categories to check (security, performance, style), ask for severity ratings, and request specific line number citations for actionable feedback."
+    },
+    {
+      question: "What is a sign that the Claude Code context window is becoming unwieldy?",
+      options: ["Claude writes shorter responses", "Claude starts repeating itself or forgetting recent decisions from earlier in the session", "The CLI becomes slower to start up", "Claude stops reading new files"],
+      correct: 1,
+      explanation: "When Claude starts repeating decisions it already made, forgetting context from earlier in the session, or giving inconsistent answers, it's a sign the context window has accumulated too much."
+    }
+  ]
+};
+</script>
+</body>
+</html>

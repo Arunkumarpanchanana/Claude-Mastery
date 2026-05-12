@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 23: Prompt Engineering — Clear & Direct — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 23</span></div>
+      <h1 class="session-title">Prompt Engineering — Clear & Direct</h1>
+      <p class="session-tagline">The difference between a mediocre and excellent Claude response is usually the prompt — learn the techniques that actually move the needle.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 40 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="be-specific">1. Be Specific — Eliminate Ambiguity</h2>
+      <p>Vague prompts produce vague responses. Every word of ambiguity in your prompt is a decision you're outsourcing to Claude. Be explicit about what you want.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vague</th><th>Specific</th></tr></thead>
+          <tbody>
+            <tr><td>"Summarize this article."</td><td>"Summarize this article in exactly 3 bullet points. Each point max 20 words. Focus on business impact."</td></tr>
+            <tr><td>"Write some code."</td><td>"Write a Python function that takes a list of integers and returns the top 3 values sorted descending. Include type hints and a docstring."</td></tr>
+            <tr><td>"Make this better."</td><td>"Rewrite this paragraph to be more concise. Remove filler words. Target: under 50 words. Keep all factual claims."</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="task-decomposition">2. Task Decomposition</h2>
+      <p>Complex requests broken into steps get better results. Instead of one massive prompt, guide Claude step by step within the prompt:</p>
+
+      <pre><code class="language-python">DECOMPOSED_PROMPT = """
+Analyze the following customer review. Complete each step in order:
+
+Step 1: Identify the main product mentioned.
+Step 2: List all positive aspects mentioned (bullet points).
+Step 3: List all negative aspects mentioned (bullet points).
+Step 4: Rate the overall sentiment: Positive / Neutral / Negative.
+Step 5: Suggest one product improvement based on the feedback.
+
+Review: {review_text}
+"""
+</code></pre>
+
+      <h2 id="role-assignment">3. Role Assignment</h2>
+      <p>Assigning Claude a specific expert role improves answer quality for domain tasks. The role sets implicit context about vocabulary, depth, and assumptions.</p>
+
+      <pre><code class="language-python">system = """You are a senior backend engineer with 10 years of experience
+in distributed systems. You give direct, technical answers. You do not explain
+basics unless asked. When reviewing code, you focus on correctness, performance,
+and security — in that order."""
+</code></pre>
+
+      <div class="info-box">
+        <strong>Role tip:</strong> Be specific about the expertise level and priorities. "You are a helpful assistant" is weak. "You are a tax attorney specializing in US small business law" sets real constraints Claude will follow.
+      </div>
+
+      <h2 id="output-format-instructions">4. Output Format Instructions</h2>
+      <p>Tell Claude exactly what format you expect for the response:</p>
+
+      <pre><code class="language-python">format_instructions = """
+Respond using this exact structure:
+HEADLINE: [one sentence summary]
+DETAILS: [2-3 sentence explanation]
+ACTION: [one specific next step for the user]
+
+Do not use markdown. Do not add any text outside this structure.
+"""
+</code></pre>
+
+      <h2 id="chain-of-thought">5. Chain-of-Thought Prompting</h2>
+      <p>For reasoning tasks, asking Claude to "think step by step" improves accuracy by making it work through the problem before committing to an answer:</p>
+
+      <pre><code class="language-python">cot_prompt = """
+A train leaves City A at 9:00 AM traveling at 60 mph.
+A second train leaves City B (300 miles away) at 10:00 AM traveling at 90 mph toward City A.
+At what time do they meet?
+
+Think through this step by step before giving your final answer.
+"""
+</code></pre>
+
+      <h2 id="avoid-negations">6. Use Positive Instructions</h2>
+      <p>Tell Claude what TO do, not just what NOT to do. Negative instructions (don't, never, avoid) are harder to follow reliably:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Negative (avoid)</th><th>Positive (prefer)</th></tr></thead>
+          <tbody>
+            <tr><td>"Don't use jargon."</td><td>"Use plain English understandable by a non-technical reader."</td></tr>
+            <tr><td>"Don't be too long."</td><td>"Limit your response to 100 words."</td></tr>
+            <tr><td>"Don't give generic advice."</td><td>"Give advice specific to Python web APIs built with FastAPI."</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="context-first">7. Context Before Task</h2>
+      <p>Place background information and context before the task instruction. Claude reads top-to-bottom and context at the end is often processed less reliably:</p>
+
+      <pre><code class="language-python"># Good: Context then task
+prompt = """
+Context: We are building a B2B SaaS product for accounting firms.
+Our users are CPAs with 5-15 years experience. They are comfortable with Excel.
+The product must comply with SOC 2 Type II.
+
+Task: Write a one-paragraph product description for our homepage hero section.
+"""
+
+# Worse: Task then context
+prompt = """
+Write a one-paragraph product description.
+Context: B2B SaaS for accountants, SOC 2, Excel users...
+"""
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Rewrite Bad Prompts and Compare Outputs</h2>
+      <p>See the measurable difference that good prompting makes by running weak and strong versions of the same request side-by-side.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/misc/how_to_use_system_prompts.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+prompt_comparison.py — Compare weak vs. strong prompts
+"""
+import anthropic
+
+client = anthropic.Anthropic()
+
+def compare(weak_prompt: str, strong_prompt: str, label: str) -> None:
+    """Run both prompts and print outputs for comparison."""
+    print(f"\n{'='*60}")
+    print(f"TEST: {label}")
+
+    for title, prompt in [("WEAK", weak_prompt), ("STRONG", strong_prompt)]:
+        response = client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=256,
+            temperature=0.3,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        text = response.content[0].text.strip()
+        print(f"\n--- {title} PROMPT ---")
+        print(f"Prompt: {prompt[:80]}...")
+        print(f"Output ({len(text)} chars):\n{text}")
+
+
+# Test 1: Summarization
+compare(
+    weak_prompt="Summarize this: Python is a high-level, interpreted programming language known for its simple syntax, readability, and versatility. It supports multiple programming paradigms including procedural, object-oriented, and functional programming.",
+    strong_prompt="Summarize the following text in exactly 2 bullet points. Each bullet max 15 words. Focus on what makes Python distinctive:\n\nPython is a high-level, interpreted programming language known for its simple syntax, readability, and versatility. It supports multiple programming paradigms including procedural, object-oriented, and functional programming.",
+    label="Summarization specificity"
+)
+
+# Test 2: Code generation
+compare(
+    weak_prompt="Write a function to check if a number is prime.",
+    strong_prompt="Write a Python function is_prime(n: int) -> bool. Requirements: handle edge cases (n < 2 returns False), use trial division up to sqrt(n), include type hints, and add a 1-line docstring. No imports needed.",
+    label="Code generation precision"
+)
+
+# Test 3: Chain of thought
+compare(
+    weak_prompt="If I have 3 apples and give away 2, then buy 4, then eat 1, how many do I have?",
+    strong_prompt="Solve this step by step, showing your work at each stage:\nI start with 3 apples. I give away 2. I buy 4 more. I eat 1. How many do I have at the end?",
+    label="Chain-of-thought reasoning"
+)
+
+# Test 4: Role + format
+compare(
+    weak_prompt="What's wrong with this SQL: SELECT * FROM users WHERE id = '" + "1 OR '1'='1" + "'",
+    strong_prompt="""You are a database security expert. Analyze this SQL for security vulnerabilities.
+
+Format your response as:
+VULNERABILITY: [name of the issue]
+SEVERITY: [Critical/High/Medium/Low]
+EXPLANATION: [1 sentence]
+FIX: [corrected SQL]
+
+SQL: SELECT * FROM users WHERE id = '1 OR '1'='1'""",
+    label="Role + structured output"
+)
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/22-structured-data.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Structured Data & JSON Outputs</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/24-xml-tags-examples.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">XML Tags, Examples & Prompt Structure</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 23,
+  slug: '23-prompt-engineering',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/24-xml-tags-examples.html',
+  quizData: [
+    {
+      question: "What does 'chain-of-thought prompting' mean?",
+      options: ["Chaining multiple API calls together", "Asking Claude to think through a problem step by step before answering", "Using multiple system prompts in one request", "Breaking a prompt into separate API calls"],
+      correct: 1,
+      explanation: "Chain-of-thought prompting asks Claude to show its reasoning process step by step, which improves accuracy on math, logic, and multi-step reasoning tasks."
+    },
+    {
+      question: "Which approach to instructions generally works better?",
+      options: ["Negative: 'Don't use jargon'", "Positive: 'Use plain English understandable by a non-technical reader'", "Both work equally well", "Negative instructions are more reliable"],
+      correct: 1,
+      explanation: "Positive instructions are more reliable because they tell Claude exactly what to do rather than just what to avoid, leaving no ambiguity."
+    },
+    {
+      question: "Where should background context be placed in a prompt?",
+      options: ["At the end, after the task instruction", "Before the task instruction", "In a separate API call", "In the stop_sequences parameter"],
+      correct: 1,
+      explanation: "Context should come before the task. Claude processes top-to-bottom and having context first helps it properly frame the task before attempting it."
+    },
+    {
+      question: "What is role assignment in prompt engineering?",
+      options: ["Setting Claude's role in the messages array", "Assigning a specific expert persona to Claude via the system prompt", "Defining user roles for access control", "Setting the temperature for role-play scenarios"],
+      correct: 1,
+      explanation: "Role assignment means telling Claude it is a specific expert (e.g., 'You are a senior security engineer') which sets implicit context about depth, vocabulary, and priorities."
+    },
+    {
+      question: "Why is task decomposition effective in prompting?",
+      options: ["It reduces the number of tokens used", "It forces Claude to approach complex tasks step by step, improving quality", "It bypasses safety filters", "It makes prompts easier to cache"],
+      correct: 1,
+      explanation: "Breaking complex tasks into explicit steps guides Claude's reasoning process, leading to more thorough and accurate responses than a single undifferentiated instruction."
+    }
+  ]
+};
+</script>
+</body>
+</html>

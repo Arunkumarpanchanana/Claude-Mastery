@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 07: Working Memory &amp; Context Windows — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/beginner.html">Beginner</a><span class="sep">›</span><span>Session 07</span></div>
+      <h1 class="session-title">Working Memory &amp; Context Windows</h1>
+      <p class="session-tagline">Master how Claude's context window works so you can manage long conversations, pass in the right information, and never lose important context.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 25 min</span>
+        <span><span class="badge badge-beginner"><i class="fas fa-seedling"></i> Beginner</span></span>
+        <span><i class="fas fa-flask"></i> Context Management Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+
+      <h2>What Is the Context Window?</h2>
+      <p>Claude doesn't have memory in the way humans do. Instead, it has a <em>context window</em> — a fixed-size buffer of tokens that it can "see" at once. Everything in the context window is equally available to Claude when generating each response: your original prompt, every message you've sent, every response Claude has given.</p>
+
+      <p>Think of the context window as Claude's working desk. Anything on the desk it can use. Anything not on the desk doesn't exist for it. When you start a new conversation, you clear the desk. The current conversation fills it up progressively.</p>
+
+      <div class="callout callout-info">
+        <i class="fas fa-lightbulb"></i>
+        <div><strong>Claude's context window size:</strong> Claude 3 models have context windows up to 200,000 tokens — roughly 150,000 words or about 500 pages. This is very large compared to earlier models, but it's still finite. Long enough to hold a full novel, but not every document you've ever written.</div>
+      </div>
+
+      <p>What goes into the context window:</p>
+      <ul>
+        <li>The system prompt (if any) — instructions from the operator/platform</li>
+        <li>Every message in the current conversation (both yours and Claude's)</li>
+        <li>Any documents or files you've attached to the conversation</li>
+        <li>Tool outputs (search results, code execution results, etc.)</li>
+      </ul>
+
+      <h2>Why Claude "Forgets" Across Conversations</h2>
+      <p>Starting a new chat with Claude is like talking to someone who has amnesia about all your previous sessions. Claude doesn't remember that you told it last week that you prefer short answers, or that you work as a nurse, or that you're working on a specific project.</p>
+
+      <p>This is not a bug — it's a design decision with real tradeoffs:</p>
+
+      <div class="compare-grid">
+        <div class="compare-card success-card">
+          <h4><i class="fas fa-check"></i> Why no persistent memory is good</h4>
+          <ul>
+            <li>Privacy: your conversations aren't accumulated into a dossier</li>
+            <li>Clean slate: each task starts without assumptions</li>
+            <li>No cascading errors: old mistakes don't compound into new ones</li>
+            <li>Security: compromising one conversation doesn't expose all others</li>
+          </ul>
+        </div>
+        <div class="compare-card warning-card">
+          <h4><i class="fas fa-minus"></i> The downside</h4>
+          <ul>
+            <li>You must re-establish context each conversation</li>
+            <li>Personal preferences must be restated</li>
+            <li>Ongoing projects require context-sharing each session</li>
+            <li>Building on previous work requires explicit bridging</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>Claude's <strong>Projects</strong> feature (in Claude.ai) partially addresses this by letting you attach persistent context documents and instructions that load at the start of every conversation in that project. We'll cover this in Session 14.</p>
+
+      <h2>Managing Long Conversations Effectively</h2>
+      <p>As conversations grow long, two things can happen: the context window fills up (forcing older content to be dropped or summarized), and Claude's attention becomes more diffuse (earlier details get "diluted" by later content).</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Start fresh for new topics</h4>
+            <p>Don't try to do everything in one mega-conversation. A new task that's unrelated to your current conversation is better started fresh. Context from irrelevant past exchanges can confuse or anchor Claude unhelpfully.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Summarize periodically</h4>
+            <p>For very long working sessions, ask Claude to summarize the key decisions and context from the conversation so far. Then start a new conversation and paste that summary as your first message.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Front-load important context</h4>
+            <p>Put the most important information near the beginning of your conversation (and near the beginning of each message). Claude attends somewhat more reliably to content at the start and end of its context.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h4>Use explicit anchoring</h4>
+            <p>If a key constraint or decision was made early in a long conversation, restate it explicitly when it becomes relevant again: "As we established earlier, we're targeting non-technical users..."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-success">
+        <i class="fas fa-star"></i>
+        <div><strong>Pro tip: Context priming.</strong> Starting a conversation with a brief "context block" dramatically improves Claude's performance: "Context: I'm a product manager at a B2B SaaS company. I prefer direct, bulleted answers. I'm working on our Q3 roadmap." This front-loads crucial context so it's available for every response in the session.</div>
+      </div>
+
+    </div>
+
+    <!-- LAB TAB -->
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <div class="lab-intro">
+        <h2><i class="fas fa-flask"></i> Lab: Context Window in Practice</h2>
+        <p>Practice managing context, priming conversations, and handling the memory limitations of Claude.</p>
+      </div>
+
+      <div class="lab-steps">
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">1</span><h3>Write your personal context block</h3></div>
+          <p>Write a 3-5 sentence context block about yourself for use with Claude. Include:</p>
+          <ul>
+            <li>Your professional role or area of interest</li>
+            <li>Your preferred response style (concise/detailed, bullets/prose)</li>
+            <li>Any relevant background Claude should know</li>
+            <li>The type of tasks you use Claude for most</li>
+          </ul>
+          <p>Test it by starting a new conversation with this context block and asking Claude something relevant to your work. Compare to asking without the context block.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">2</span><h3>Test cross-conversation memory</h3></div>
+          <p>In one conversation, tell Claude:</p>
+          <pre><code class="language-text">My name is [your name] and I work as a [your job]. Remember this for our conversation.</code></pre>
+          <p>Then start a brand new conversation and ask: "What's my name and what do I do?" Claude will have no memory of the previous conversation. This makes the amnesia tangible.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">3</span><h3>Practice conversation summarization</h3></div>
+          <p>Have a 5-10 turn conversation with Claude about any complex topic — planning a project, exploring a technical concept, working through a decision. Then ask:</p>
+          <pre><code class="language-text">Please summarize the key points, decisions, and context from our conversation so far in a way that I could paste into a new conversation to continue where we left off.</code></pre>
+          <p>Then start a new conversation, paste the summary, and continue the work. How well does the bridging work?</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">4</span><h3>Paste a large document and query it</h3></div>
+          <p>Find any long document (a long article, a report, or paste several pages of text) and give it to Claude with a specific task:</p>
+          <pre><code class="language-text">Here is [document]. Please [specific question about it].</code></pre>
+          <p>Notice how Claude can reason about the entire document at once — this is the large context window in action. With 200K tokens, you can pass in entire codebases, books, or research papers and have a conversation about them.</p>
+        </div>
+
+        <div class="lab-step">
+          <div class="lab-step-header"><span class="lab-step-num">5</span><h3>Explore Projects (if you have Claude.ai access)</h3></div>
+          <p>If you have access to Claude.ai, create a new Project and add a project instruction like:</p>
+          <pre><code class="language-text">I am a [role]. Always respond in [style]. Key context: [your context]. This project is about: [project topic].</code></pre>
+          <p>Then start multiple conversations within that project and notice how the context persists. This is the solution to cross-conversation memory for ongoing work.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ TAB -->
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/beginner/06-knowledge-limitations.html" class="session-nav-btn" id="prev-session"><span class="nav-label">← Previous</span><span class="nav-title">Knowledge &amp; Limitations</span></a>
+      <a href="/Claude-Mastery/sessions/beginner/08-steerability.html" class="session-nav-btn next" id="next-session"><span class="nav-label">Next →</span><span class="nav-title">Steerability — Guiding Claude</span></a>
+    </div>
+  </main>
+  <aside id="toc-sidebar"><p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p><nav id="toc"></nav></aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 7,
+  slug: '07-working-memory',
+  section: 'beginner',
+  nextPath: '/Claude-Mastery/sessions/beginner/08-steerability.html',
+  quizData: [
+    {
+      id: 'q1',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the "context window"?',
+      options: [
+        { text: 'The browser window where you access Claude.ai', correct: false },
+        { text: 'The fixed-size buffer of tokens Claude can see and use when generating each response', correct: true },
+        { text: 'The time period during which Claude was trained', correct: false },
+        { text: 'The list of topics Claude is allowed to discuss', correct: false }
+      ],
+      explanation: 'The context window is Claude\'s "working desk" — the fixed amount of text (in tokens) that Claude can see at once. Everything in the current conversation is in the context window; anything outside it doesn\'t exist for Claude.'
+    },
+    {
+      id: 'q2',
+      type: 'truefalse',
+      points: 1,
+      question: 'Claude automatically remembers information from your previous conversations by default.',
+      correctAnswer: false,
+      explanation: 'Claude has no persistent memory across conversations by default. Each new conversation starts with a clean context window. Claude\'s Projects feature provides a workaround, but it requires explicit setup.'
+    },
+    {
+      id: 'q3',
+      type: 'mcq',
+      points: 1,
+      question: 'What does "context priming" mean?',
+      options: [
+        { text: 'Increasing the size of Claude\'s context window', correct: false },
+        { text: 'Starting a conversation with a brief background block about yourself and your preferences', correct: true },
+        { text: 'Using a system prompt via the API', correct: false },
+        { text: 'Clearing old messages from the conversation', correct: false }
+      ],
+      explanation: 'Context priming means starting conversations with a brief block of background information — your role, preferences, current project — so Claude has this context available for every response in the session without you repeating it.'
+    },
+    {
+      id: 'q4',
+      type: 'multi',
+      points: 2,
+      question: 'What goes into Claude\'s context window? (Select all that apply)',
+      options: [
+        { text: 'Every message in the current conversation', correct: true },
+        { text: 'Documents and files you attach', correct: true },
+        { text: 'Your previous conversations from last week', correct: false },
+        { text: 'System prompt instructions (if any)', correct: true },
+        { text: 'Tool outputs like search results', correct: true }
+      ],
+      explanation: 'The context window includes: the current conversation (all turns), attached documents, the system prompt, and any tool outputs. It does NOT include previous conversations — those are cleared when a new conversation starts.'
+    },
+    {
+      id: 'q5',
+      type: 'mcq',
+      points: 1,
+      question: 'What is the best strategy for very long working sessions with Claude?',
+      options: [
+        { text: 'Keep everything in one conversation no matter how long', correct: false },
+        { text: 'Ask Claude to summarize key decisions, then start a new conversation with that summary', correct: true },
+        { text: 'Repeat important points in every single message', correct: false },
+        { text: 'Use a different AI for long tasks', correct: false }
+      ],
+      explanation: 'For very long sessions, ask Claude to generate a summary of key context and decisions, then start a fresh conversation with that summary. This prevents context window issues and keeps Claude focused on what\'s actually relevant.'
+    }
+  ]
+};
+</script>
+</body>
+</html>

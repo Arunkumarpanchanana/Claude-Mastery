@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session 29: Multi-Turn Tool Conversations — Claude Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/main.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/session.css"/>
+  <link rel="stylesheet" href="/Claude-Mastery/assets/css/quiz.css"/>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div class="session-page-wrapper">
+  <aside id="session-sidebar"></aside>
+  <main>
+    <header class="session-header">
+      <div class="session-breadcrumb"><a href="/Claude-Mastery/">Home</a><span class="sep">›</span><a href="/Claude-Mastery/sections/intermediate.html">Intermediate</a><span class="sep">›</span><span>Session 29</span></div>
+      <h1 class="session-title">Multi-Turn Tool Conversations</h1>
+      <p class="session-tagline">Build the agentic loop — the core pattern for autonomous Claude agents that use tools over multiple turns to complete complex tasks.</p>
+      <div class="session-meta">
+        <span><i class="fas fa-clock"></i> 45 min</span>
+        <span><span class="badge badge-intermediate"><i class="fas fa-laptop-code"></i> Intermediate</span></span>
+        <span><i class="fas fa-flask"></i> Code Lab</span>
+        <span><i class="fas fa-check-circle"></i> 5 Quiz Questions</span>
+      </div>
+    </header>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="learn"><i class="fas fa-book-open"></i> Learn</button>
+      <button class="tab-btn" data-tab="lab"><i class="fas fa-flask"></i> Lab</button>
+      <button class="tab-btn" data-tab="quiz"><i class="fas fa-check-circle"></i> Quiz</button>
+    </div>
+
+    <div class="tab-panel learn-content" data-panel="learn">
+      <h2 id="agentic-loop">The Agentic Loop Pattern</h2>
+      <p>An agentic loop is a while loop that keeps calling Claude until <code>stop_reason == "end_turn"</code>. Each iteration:</p>
+      <ol>
+        <li>Call Claude with current message history</li>
+        <li>If <code>stop_reason == "tool_use"</code>: execute all requested tools, append results, continue loop</li>
+        <li>If <code>stop_reason == "end_turn"</code>: Claude is done — return the final text</li>
+        <li>Safety: track iteration count and break if max iterations exceeded</li>
+      </ol>
+
+      <pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+
+def run_agent(user_message: str, tools: list, max_iterations: int = 10) -> str:
+    """Core agentic loop — runs until Claude stops or max iterations."""
+    messages = [{"role": "user", "content": user_message}]
+
+    for iteration in range(max_iterations):
+        response = client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=4096,
+            tools=tools,
+            messages=messages
+        )
+
+        # Always append Claude's full response to history
+        messages.append({"role": "assistant", "content": response.content})
+
+        if response.stop_reason == "end_turn":
+            # Extract the text response
+            for block in response.content:
+                if hasattr(block, "text"):
+                    return block.text
+            return ""
+
+        elif response.stop_reason == "tool_use":
+            # Execute all tool calls in this response
+            tool_results = []
+            for block in response.content:
+                if block.type == "tool_use":
+                    result = execute_tool(block.name, block.input)
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": str(result)
+                    })
+            messages.append({"role": "user", "content": tool_results})
+
+    return "Max iterations reached without a final answer."
+</code></pre>
+
+      <h2 id="multiple-tools-per-turn">Multiple Tool Calls Per Turn</h2>
+      <p>Claude can request multiple tools in a single response — always process all of them before the next API call:</p>
+
+      <pre><code class="language-python"># Claude's response might contain:
+# [TextBlock("Let me check both cities..."), ToolUseBlock(name="get_weather", city="Paris"), ToolUseBlock(name="get_weather", city="Tokyo")]
+
+tool_results = []
+for block in response.content:
+    if block.type == "tool_use":
+        result = execute_tool(block.name, block.input)
+        tool_results.append({
+            "type": "tool_result",
+            "tool_use_id": block.id,
+            "content": str(result)
+        })
+# Send ALL results in one user message
+messages.append({"role": "user", "content": tool_results})
+</code></pre>
+
+      <h2 id="combining-tools">Using Multiple Different Tools Together</h2>
+      <p>The real power of agentic loops is chaining different tools. Claude might:</p>
+      <ol>
+        <li>Search for information (search tool)</li>
+        <li>Do math on the results (calculator tool)</li>
+        <li>Write the answer to a file (filesystem tool)</li>
+      </ol>
+
+      <h2 id="stop-reasons">stop_reason: tool_use vs end_turn</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>stop_reason</th><th>Meaning</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>tool_use</td><td>Claude wants to call one or more tools</td><td>Execute tools, send results, loop again</td></tr>
+            <tr><td>end_turn</td><td>Claude has completed its response</td><td>Extract text and return to user</td></tr>
+            <tr><td>max_tokens</td><td>Response was cut off</td><td>Handle as error or increase max_tokens</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="warning-box">
+        <strong>Safety:</strong> Always implement a maximum iteration limit. Bugs in tool implementations can cause Claude to loop indefinitely. 10-20 iterations is a reasonable cap for most agentic tasks.
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="lab" style="display:none">
+      <h2>Lab: Agent Using 3 Tools in an Agentic Loop</h2>
+      <p>Build an agent with search, calculator, and note-taking tools that works through multi-step problems.</p>
+
+      <a href="https://colab.research.google.com/github/anthropics/anthropic-cookbook/blob/main/tool_use/customer_service_agent.ipynb" target="_blank" class="colab-btn"><i class="fab fa-google"></i> Open in Colab</a>
+
+      <pre><code class="language-python">"""
+agentic_loop_lab.py — Agent with 3 tools running an agentic loop
+"""
+import anthropic
+import math
+import json
+
+client = anthropic.Anthropic()
+
+# ── Simulated knowledge base ───────────────────────────────────────────────────
+KNOWLEDGE_BASE = {
+    "python speed": "Python runs at roughly 10-100 million operations per second on modern hardware.",
+    "earth radius": "Earth's mean radius is 6,371 kilometers (3,959 miles).",
+    "speed of light": "The speed of light in vacuum is 299,792,458 meters per second.",
+    "population usa": "The US population is approximately 335 million people (2024 estimate).",
+    "mount everest": "Mount Everest is 8,848.86 meters (29,031.7 feet) above sea level.",
+}
+
+NOTES = {}  # Simulated persistent notes store
+
+# ── Tool definitions ───────────────────────────────────────────────────────────
+TOOLS = [
+    {
+        "name": "search_knowledge",
+        "description": "Search for factual information on a topic. Returns relevant data if found.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query keyword(s)"}
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "calculate",
+        "description": "Evaluate a mathematical expression. Use Python math syntax. Import math is available.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {"type": "string", "description": "Expression to evaluate, e.g. '6371 * 2 * math.pi'"}
+            },
+            "required": ["expression"]
+        }
+    },
+    {
+        "name": "save_note",
+        "description": "Save a key finding or intermediate result for later reference.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "key": {"type": "string", "description": "Short identifier for the note"},
+                "value": {"type": "string", "description": "The content to save"}
+            },
+            "required": ["key", "value"]
+        }
+    }
+]
+
+
+# ── Tool implementations ───────────────────────────────────────────────────────
+def search_knowledge(query: str) -> str:
+    query_lower = query.lower()
+    for k, v in KNOWLEDGE_BASE.items():
+        if any(word in query_lower for word in k.split()):
+            return v
+    return f"No data found for: {query}"
+
+def calculate(expression: str) -> dict:
+    try:
+        result = eval(expression, {"__builtins__": {}}, {"math": math})
+        return {"expression": expression, "result": round(result, 4)}
+    except Exception as e:
+        return {"error": str(e)}
+
+def save_note(key: str, value: str) -> str:
+    NOTES[key] = value
+    return f"Saved note '{key}'"
+
+def execute_tool(name: str, args: dict) -> str:
+    if name == "search_knowledge":
+        return search_knowledge(**args)
+    elif name == "calculate":
+        return str(calculate(**args))
+    elif name == "save_note":
+        return save_note(**args)
+    return f"Unknown tool: {name}"
+
+
+# ── Agentic loop ───────────────────────────────────────────────────────────────
+def run_agent(task: str, verbose: bool = True) -> str:
+    messages = [{"role": "user", "content": task}]
+    iteration = 0
+    max_iter = 10
+
+    while iteration < max_iter:
+        iteration += 1
+        if verbose:
+            print(f"\n[Iteration {iteration}] Calling Claude...")
+
+        response = client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=2048,
+            tools=TOOLS,
+            messages=messages
+        )
+
+        messages.append({"role": "assistant", "content": response.content})
+
+        if verbose:
+            print(f"  stop_reason: {response.stop_reason}")
+
+        if response.stop_reason == "end_turn":
+            for block in response.content:
+                if hasattr(block, "text"):
+                    return block.text
+            return ""
+
+        elif response.stop_reason == "tool_use":
+            tool_results = []
+            for block in response.content:
+                if block.type == "tool_use":
+                    if verbose:
+                        print(f"  Tool: {block.name}({json.dumps(block.input)[:60]})")
+                    result = execute_tool(block.name, block.input)
+                    if verbose:
+                        print(f"  Result: {str(result)[:80]}")
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result
+                    })
+            messages.append({"role": "user", "content": tool_results})
+
+    return "Max iterations reached."
+
+
+# ── Test with multi-step tasks ─────────────────────────────────────────────────
+tasks = [
+    "What is the circumference of the Earth in kilometers? Show your calculation.",
+    "How long would it take light to travel around the Earth? Use c = 299,792,458 m/s and Earth's circumference.",
+]
+
+for task in tasks:
+    print(f"\n{'='*60}")
+    print(f"TASK: {task}")
+    print('='*60)
+    answer = run_agent(task)
+    print(f"\nFINAL ANSWER:\n{answer}")
+    if NOTES:
+        print(f"\nNotes saved: {NOTES}")
+</code></pre>
+    </div>
+
+    <div class="tab-panel" data-panel="quiz" style="display:none">
+      <div id="quiz-container"></div>
+    </div>
+
+    <div class="session-nav-buttons">
+      <a href="/Claude-Mastery/sessions/intermediate/28-tool-use.html" class="session-nav-btn" id="prev-session">
+        <span class="nav-label">← Previous</span>
+        <span class="nav-title">Tool Use & Function Calling</span>
+      </a>
+      <a href="/Claude-Mastery/sessions/intermediate/30-intro-mcp.html" class="session-nav-btn next" id="next-session">
+        <span class="nav-label">Next →</span>
+        <span class="nav-title">Introduction to MCP</span>
+      </a>
+    </div>
+  </main>
+
+  <aside id="toc-sidebar">
+    <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#57534e;margin-bottom:0.75rem;font-weight:600;">On This Page</p>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+<div id="footer-placeholder"></div>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script src="/Claude-Mastery/assets/js/progress.js"></script>
+<script src="/Claude-Mastery/assets/js/quiz.js"></script>
+<script src="/Claude-Mastery/assets/js/lab.js"></script>
+<script src="/Claude-Mastery/assets/js/session.js"></script>
+<script src="/Claude-Mastery/assets/js/main.js"></script>
+<script>
+window.SESSION_META = {
+  id: 29,
+  slug: '29-multi-turn-tools',
+  section: 'intermediate',
+  nextPath: '/Claude-Mastery/sessions/intermediate/30-intro-mcp.html',
+  quizData: [
+    {
+      question: "What is the agentic loop pattern?",
+      options: ["Sending multiple messages in a single API call", "Repeatedly calling Claude until stop_reason is 'end_turn', executing tools in between", "Running Claude in a background thread", "Using Claude to monitor itself"],
+      correct: 1,
+      explanation: "The agentic loop calls Claude, checks the stop_reason, executes tools if needed, feeds results back, and loops until stop_reason is 'end_turn' — the core pattern for autonomous agents."
+    },
+    {
+      question: "What should you do if Claude requests multiple tools in a single response?",
+      options: ["Process them one at a time, making a separate API call after each", "Execute all of them and send all results in a single user message", "Only execute the first tool and ignore the rest", "Ask Claude which tool to execute first"],
+      correct: 1,
+      explanation: "Always execute all requested tools and include all tool_result blocks in a single user message before the next API call."
+    },
+    {
+      question: "Why is a maximum iteration limit essential in an agentic loop?",
+      options: ["To save money on API calls", "To prevent infinite loops caused by tool bugs or unexpected Claude behavior", "Because Claude can only call 10 tools total", "To comply with the Anthropic Terms of Service"],
+      correct: 1,
+      explanation: "Bugs in tool implementations or unexpected edge cases can cause Claude to loop indefinitely. A max iteration limit is a critical safety mechanism."
+    },
+    {
+      question: "What stop_reason means Claude has finished and you can return the answer to the user?",
+      options: ["tool_use", "stop_sequence", "end_turn", "max_tokens"],
+      correct: 2,
+      explanation: "stop_reason='end_turn' means Claude has completed its response naturally and no more tool calls are needed. This is when you extract the text and return it to the user."
+    },
+    {
+      question: "What happens if you forget to append Claude's tool_use response to the message history before sending tool results?",
+      options: ["The API rejects the request with an error about missing context", "Claude correctly infers what happened from the tool results", "The conversation works normally", "The cache is invalidated"],
+      correct: 0,
+      explanation: "The API requires a well-formed conversation history: user → assistant (with tool_use) → user (with tool_result). Missing the assistant message causes an API validation error."
+    }
+  ]
+};
+</script>
+</body>
+</html>
