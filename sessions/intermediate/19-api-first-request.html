@@ -36,19 +36,47 @@
 
     <div class="tab-panel learn-content" data-panel="learn">
       <h2 id="get-your-api-key">Step 1 — Get Your API Key</h2>
-      <p>Navigate to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>, sign up or log in, and go to <strong>API Keys</strong> in the left sidebar. Click <strong>Create Key</strong>, give it a descriptive name (e.g., "local-dev"), and copy it immediately — it won't be shown again.</p>
+      <p>Navigate to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>, sign up or log in, and go to <strong>API Keys</strong> in the left sidebar. Click <strong>Create Key</strong>, give it a descriptive name (e.g., "claude-mastery"), and copy it immediately — it won't be shown again.</p>
 
       <div class="warning-box">
-        <strong>Security:</strong> Never hardcode an API key in source code. Store it as an environment variable. Use a <code>.env</code> file locally (and add it to <code>.gitignore</code>), or use your deployment platform's secrets manager in production.
+        <i class="fas fa-exclamation-triangle"></i> <strong>Never hardcode your API key in source code.</strong> Store it as an environment variable. Use a <code>.env</code> file locally (add it to <code>.gitignore</code>), or your platform's secrets manager in production. Bots scan GitHub for exposed keys — a leaked key can be exploited within minutes.
       </div>
 
+      <h2 id="colab-secrets">Using API Keys in Google Colab</h2>
+      <p>The safest way in Colab is the built-in <strong>Secrets</strong> manager — your key is encrypted and never appears in notebook code.</p>
+      <ol style="padding-left:1.5rem;line-height:2.2;margin-bottom:1.25rem;">
+        <li>In Colab, click the <strong>🔑 key icon</strong> in the left sidebar</li>
+        <li>Click <strong>Add new secret</strong></li>
+        <li>Name: <code>ANTHROPIC_API_KEY</code> &nbsp;·&nbsp; Value: paste your key (starts with <code>sk-ant-</code>)</li>
+        <li>Toggle <strong>Notebook access</strong> to ON</li>
+      </ol>
+      <pre><code class="language-python"># In your Colab notebook cell:
+from google.colab import userdata
+import anthropic
+
+client = anthropic.Anthropic(api_key=userdata.get("ANTHROPIC_API_KEY"))
+print("Client ready!")</code></pre>
+
+      <h2 id="local-setup">Using API Keys Locally</h2>
       <p>Set the environment variable in your shell:</p>
-      <pre><code class="language-python"># In your terminal (bash/zsh)
+      <pre><code class="language-python"># Option A: set for current session
 export ANTHROPIC_API_KEY="sk-ant-..."
 
-# Or add to ~/.zshrc / ~/.bashrc so it persists
+# Option B: add to ~/.zshrc or ~/.bashrc so it persists across sessions
 echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.zshrc
-</code></pre>
+source ~/.zshrc</code></pre>
+
+      <p>Or use <strong>python-dotenv</strong> for project-level keys:</p>
+      <pre><code class="language-python">pip install python-dotenv
+
+# Create a .env file (add .env to your .gitignore!)
+# ANTHROPIC_API_KEY=sk-ant-...
+
+# In your Python script:
+from dotenv import load_dotenv
+import os
+load_dotenv()
+key = os.environ["ANTHROPIC_API_KEY"]</code></pre>
 
       <h2 id="install-the-sdk">Step 2 — Install the Python SDK</h2>
       <pre><code class="language-python">pip install anthropic

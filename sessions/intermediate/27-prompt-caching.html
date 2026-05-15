@@ -35,6 +35,8 @@
     </div>
 
     <div class="tab-panel learn-content" data-panel="learn">
+      <div class="tip-box"><i class="fas fa-key"></i><div><strong>Need an API key?</strong> Go to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key. See <a href="/Claude-Mastery/sessions/intermediate/19-api-first-request.html">Session 19</a> for the full setup guide including environment variables and Colab Secrets.</div></div>
+
       <h2 id="what-is-caching">What Is Prompt Caching?</h2>
       <p>Prompt caching lets you mark part of your prompt as "cacheable". The first time that content is processed, Anthropic stores the KV cache for those tokens server-side. Subsequent requests that begin with the same cached prefix get a cache hit — those tokens are processed at a significantly lower cost (typically ~90% discount) and with lower latency.</p>
 
